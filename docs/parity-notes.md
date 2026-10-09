@@ -224,6 +224,63 @@ What we build from G2: the first group as captured; "Languages & currency" and "
 
 Property-type names on cards across all captures: "Flat" (170 cards), "Apartment" (82), "Home" (57), "Villa" (24), "Tiny home" (22), "Loft" (3); "Room" is out of scope. Ours: house is "Home", apartment is "Flat"; "Villa" and "Tiny home" as captured; Guesthouse, Cabin, Cottage and Treehouse do not appear in any capture and keep their names. B7 shows the "Property type" section of the filters closed, so the option labels inside it are not known; the card names are used there too.
 
+## Phase 7: listing page
+
+### Capture check
+
+| Capture | Intended state | Found | OK |
+|---|---|---|---|
+| C1 | Listing, top of page | Title with Share and Save, five-photo gallery, overview, booking card; the whole page is in the measurement file | Yes |
+| C2 | Booking card with dates chosen | Card with CHECK-IN, CHECKOUT, GUESTS, "Reserve", "You won't be charged yet" | Yes |
+| C3 | Guest picker open in the card | Four rows and the capacity note | Yes |
+| C4 | Date picker open | Panel over the card: nights and range, two months, struck-through days, "Clear dates", "Close" | Yes |
+| C5 | Photo tour | White page, back arrow, "Photo tour", thumbnails by room, photos in a column | Yes |
+| C6 | Single photo | **Not this state**: the file and screenshot show the photo tour scrolled down | Pending |
+| C7 | Amenities in full | Modal "What this place offers", grouped | Yes |
+| C8 | Reviews in full | Modal with the rating, categories and reviews | Yes |
+| C9 | Sticky bar | "Photos, Amenities, Reviews, Location" bar at the top | Yes |
+| C10 | Share | "Share this place" with nine targets | Yes |
+| C11 | Price breakdown | "Price details" popover: nights x price, a discount, the total | Yes |
+
+### Questions of plan §6.14 settled here
+
+| Question | Answer | Read from |
+|---|---|---|
+| Lines and wording of the price breakdown | A heading "Price details"; "2 nights x ₹20,000.00" with the amount at the right; further lines; a rule; the total in medium weight. The original shows it in a popover and with two decimals; ours is in the card, in whole rupees like every other price | C11 |
+| Listing URL names | `check_in`, `check_out`, `adults`, `guests`; `modal` while the photo tour is open; amenities and reviews at `/rooms/{id}/amenities` and `/rooms/{id}/reviews` | C2, C5, C7, C8 |
+
+### Measured layout
+
+| Element | Values | Capture |
+|---|---|---|
+| Page | 1120 px wide, centred; header 80 px with the compact pill, scrolling away with the page | C1 |
+| Title row | 26/30/500; "Share" and "Save" 14/18/500 underlined with 16 px icons | C1 |
+| Gallery | 1120 x 353; a 560 px photo at the left, four 272 px photos at the right, 8 px apart, outer corners rounded; "Show all photos" 12/16/500 in a white bordered button 24 px from the corner | C1 |
+| Columns | Left 653 px, booking card 372 px, the rest between them | C1 |
+| Section headings | 22/26/500 at -0.44 px; sections split by `line` rules | C1 |
+| Overview | "Entire home in Chandigarh, India" as the heading; rooms line 16/20; rating line 16/500 | C1, C2 |
+| Host row | 40 px portrait, "Hosted by …" 16/20/500, a 14 px `muted` line under it | C2 |
+| Booking card | 12 px corners, 24 px padding, `0 6px 16px rgba(0,0,0,.12)`; fields box with 10 px bold upper-case labels over 14 px values; "Reserve" 48 px tall, fully rounded, primary gradient, 16/500; "You won't be charged yet" 14/18 centred | C2 |
+| Date panel | 661 px wide over the card; nights 22 px, range 14 px `muted`; 44 px days; days that cannot be chosen `faint` and struck through; "Clear dates" underlined, "Close" dark | C4 |
+| Guest panel | Under the "Guests" field at its width; names 16/500, age text 14 px ("Age 13+", "Ages 2–12", "Under 2"); 32 px steppers; a 12 px capacity note | C3 |
+| Amenities | Two columns, 16 px text beside 24 px icons; grey "Show all N amenities" button 16/500 | C9, C7 |
+| Calendar section | Heading "2 nights in Chandigarh", the range under it, two months of 44 px days (month 308 px wide) | C1 |
+| Reviews | Two columns; 48 px portrait, name 14/18/500, small stars and a date, 16/24 text | C8 |
+| Sticky bar | 80 px, white with a hairline; section links 14/500; price and a fully rounded "Reserve" at the right once the card is out of view | C8, C9 |
+| Photo tour | White page; a round back button at the top left; photos in a column 741 px wide, one full width then two side by side | C5, C6 |
+| Share | 568 px modal; 26 px heading; a 64 px thumbnail beside one line about the place; bordered 50 px buttons | C10 |
+
+### Built without a capture, or different by decision
+
+- **The single-photo view**: pending capture (C6 shows the photo tour). Built as a black page with "Close", a counter and round arrows.
+- **Amenities and reviews** are views over the page (`modal=…`), not sub-paths.
+- **Reviews**: the heading is "★ 4.58 · 26 reviews"; the original's large number with laurels, the rating bars, the categories and "Guests mention" need data we do not have. A review shows the month it was written, not "2 weeks ago" (plan §10.7).
+- **Not built** (no data, or out of scope): "Guest favourite" panel (bonus B3), highlights other than pets, "Where you'll sleep", "Report this listing", "Free cancellation" tags, the discount line, the nine share targets other than "Copy Link" (plan §6.6), "Explore other options".
+- **Host**: "Hosting since May 2022" where the original says "3 years hosting"; the card shows name and "Host" without review counts.
+- **Things to know**: headings "House rules", "Safety", "Cancellation policy" (REF-B2, REF-X1); the lines under them are ours.
+- **Before dates are chosen** the card's button reads "Check availability" and the calendar heading "Select check-in date": no capture shows a listing without dates.
+- **The amenities icons** are Lucide's where one fits and a tick otherwise.
+
 ## Parity backlog
 
 Every known visual difference from a capture that is not a decision of the plan. To be closed, or accepted by the product owner, in Phase 10.
@@ -251,4 +308,13 @@ Every known visual difference from a capture that is not a decision of the plan.
 | 19 | Footer | A1 | Our own drawings of the three social marks | By plan §5.2 |
 | 20 | Home card | A1 | No "Guest favourite" badge (bonus B3); a second line with the listing title, which the original does not have | Title by the assignment (R-HS-1) |
 | 21 | Login modal | A7 | The accounts sit in a list that can scroll at this window height; the original's body is a single field | By plan D4 |
-
+| 22 | Listing: reviews | C1, C8 | No large rating with laurels, rating bars, category scores or "Guests mention"; dates as month and year | No data; partly by plan §10.7 |
+| 23 | Listing: booking card | C2, C11 | Nightly price at the top where the original shows the stay total; breakdown inline, not in a popover; no "Free cancellation before …" strip | By the assignment (O1, O4); no data |
+| 24 | Listing: date fields | C4 | The two date fields at the top right of the date panel are not repeated inside it; no keyboard-entry icon | Fixable |
+| 25 | Listing: gallery | C1 | Corner radius and hover tint estimated; the original's left photo is one image, ours too, but a seeded listing with three photos uses a three-tile grid | Fixable; data |
+| 26 | Listing: photo tour | C5 | No row of room thumbnails and no room headings (our photos have no room names); no Share and Save at the top right | No data; fixable |
+| 27 | Listing: single photo | C6 | Unverified: the capture shows the tour | Needs a capture |
+| 28 | Listing: amenities and reviews modals | C7, C8 | Close button at the right of a header bar; the original's is at the top left, inside the body | Fixable |
+| 29 | Listing: host card | C1 | No review count, rating or years beside the name; no "Superhost" line | No data; bonus B3 |
+| 30 | Listing: sticky bar | C8 | Price per night where the original shows the stay total and a review count | By the assignment (O1) |
+| 31 | Listing: share modal | C10 | One target ("Copy Link") where the original has nine | By plan §6.6 |
