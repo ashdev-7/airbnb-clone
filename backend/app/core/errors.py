@@ -38,6 +38,17 @@ class AppError(Exception):
         self.headers = dict(headers or {})
 
 
+def unauthenticated() -> AppError:
+    return AppError("unauthenticated", 401, "Sign in to continue.")
+
+
+def invalid_field(path: str, message: str) -> AppError:
+    """A 422 for a rule that needs the database, in the same shape as schema errors."""
+    return AppError(
+        "validation_error", 422, "Invalid input.", {"fields": [{"path": path, "message": message}]}
+    )
+
+
 def error_response(
     request_id: str,
     code: str,

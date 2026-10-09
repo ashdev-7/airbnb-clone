@@ -2,6 +2,7 @@
 
 import sqlite3
 from collections.abc import Callable, Iterator
+from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 
 import pytest
@@ -9,8 +10,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
+from app.core.deps import get_today
 from app.db.session import Database
 from app.main import create_app
+from tests.factories import TODAY, Factory
 from tests.support import PROBE_TABLE_DDL, probe_router
 
 AppFactory = Callable[..., FastAPI]
@@ -36,6 +39,7 @@ def make_app(db_path: Path) -> Iterator[AppFactory]:
         settings = Settings(_env_file=None, **values)  # type: ignore[arg-type]
         app = create_app(settings)
         app.include_router(probe_router, prefix="/api")
+        app.dependency_overrides[get_today] = lambda: TODAY
         database: Database = app.state.database
         with database.engine.connect() as connection:
             connection.exec_driver_sql(PROBE_TABLE_DDL)
@@ -71,3 +75,18 @@ def other_connection(db_path: Path, app: FastAPI) -> Iterator[sqlite3.Connection
     connection = sqlite3.connect(db_path, timeout=0, isolation_level=None, check_same_thread=False)
     yield connection
     connection.close()
+
+
+Build = Callable[[], AbstractContextManager[Factory]]
+
+
+@pytest.fixture
+def build(database: Database) -> Build:
+    """`with build() as f:` writes test data in one transaction, committed on exit."""
+
+    @contextmanager
+    def _build() -> Iterator[Factory]:
+        with database.write_session() as session:
+            yield Factory(session)
+
+    return _build

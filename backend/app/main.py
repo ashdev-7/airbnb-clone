@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings
 from app.core.errors import register_error_handlers
@@ -12,8 +13,14 @@ from app.db.engine import create_db_engine
 from app.db.schema import create_schema
 from app.db.session import Database
 from app.health.router import router as health_router
+from app.listings.router import router as listings_router
+from app.reviews.router import router as reviews_router
+from app.users.router import router as auth_router
+from app.wishlist.router import router as wishlist_router
 
 API_PREFIX = "/api"
+SESSION_COOKIE = "airstay_session"
+SESSION_SECONDS = 14 * 24 * 60 * 60
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -38,7 +45,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.database = database
 
-    app.add_middleware(RequestIdMiddleware)
+    # A signed, HttpOnly cookie holding only the user id (plan §10.9). SameSite=Lax keeps
+    # other sites from sending it with a state-changing request.
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.secret_key,
+        session_cookie=SESSION_COOKIE,
+        max_age=SESSION_SECONDS,
+        same_site="lax",
+        https_only=settings.cookie_secure,
+    )
+    app.add_middleware(RequestIdMiddleware)  # added last, so it wraps everything else
     register_error_handlers(app)
-    app.include_router(health_router, prefix=API_PREFIX)
+    for router in (
+        health_router,
+        auth_router,
+        listings_router,
+        reviews_router,
+        wishlist_router,
+    ):
+        app.include_router(router, prefix=API_PREFIX)
     return app

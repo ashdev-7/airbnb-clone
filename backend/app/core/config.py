@@ -13,5 +13,7 @@ class Settings(BaseSettings):
     service_fee_bps: int = Field(default=1500, ge=0, le=10_000)
     app_timezone: str = "Asia/Kolkata"
     seed_on_empty: bool = False
+    # True behind HTTPS (production): the session cookie is then sent over HTTPS only.
+    cookie_secure: bool = False
     # How long a writer waits for SQLite's write lock before the request fails with 503.
     sqlite_busy_timeout_ms: int = Field(default=5000, ge=0)

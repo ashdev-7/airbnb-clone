@@ -7,11 +7,14 @@ commit that fails becomes an error response instead of a false success.
 """
 
 from collections.abc import Iterator
+from datetime import date
 from typing import Annotated
 
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.clock import today
+from app.core.config import Settings
 from app.db.session import Database
 
 
@@ -30,5 +33,17 @@ def _write_session(database: Annotated[Database, Depends(get_database)]) -> Iter
         yield session
 
 
+def get_today(request: Request) -> date:
+    """Today's business date. Tests override this dependency to pin the day."""
+    return today(request.app.state.settings.app_timezone)
+
+
+def get_settings(request: Request) -> Settings:
+    settings: Settings = request.app.state.settings
+    return settings
+
+
+Today = Annotated[date, Depends(get_today)]
+AppSettings = Annotated[Settings, Depends(get_settings)]
 ReadSession = Annotated[Session, Depends(_read_session, scope="function")]
 WriteSession = Annotated[Session, Depends(_write_session, scope="function")]

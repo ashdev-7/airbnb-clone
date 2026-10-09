@@ -5,6 +5,7 @@ description = "AirStay API: FastAPI on SQLite"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.143.0",
+    "itsdangerous>=2.2.0",
     "pydantic>=2.14.0",
     "pydantic-settings>=2.15.0",
     "sqlalchemy>=2",
