@@ -32,7 +32,7 @@ from app.listings.schemas import (
     PropertyTypeOut,
     SearchParams,
 )
-from app.reviews.ratings import shown_average
+from app.reviews.ratings import is_guest_favourite, is_superhost, shown_average
 
 HISTOGRAM_BUCKETS = 30
 LOCATION_SUGGESTIONS = 8
@@ -85,6 +85,7 @@ def card_fields(row: Row[Any], photo_urls: list[str]) -> dict[str, Any]:
         "price_per_night_minor": listing.price_per_night_minor,
         "rating_average": shown_average(row.average, row.review_count),
         "review_count": row.review_count,
+        "guest_favourite": is_guest_favourite(row.average, row.review_count),
     }
 
 
@@ -103,7 +104,7 @@ def to_cards(
     ]
 
 
-def to_detail(session: Session, row: Row[Any]) -> ListingDetail:
+def to_detail(session: Session, row: Row[Any], today: date) -> ListingDetail:
     listing: Listing = row.Listing
     host = listing.host
     photos = repository.photos(session, [listing.id], per_listing=None)[listing.id]
@@ -122,6 +123,7 @@ def to_detail(session: Session, row: Row[Any]) -> ListingDetail:
             bio=host.bio,
             joined_at=host.created_at,
             listing_count=repository.active_listing_count(session, host.id),
+            is_superhost=is_superhost(session, host.id, today),
         ),
         created_at=listing.created_at,
         updated_at=listing.updated_at,
@@ -191,7 +193,7 @@ class ListingService:
         row = repository.one(self._session, listing_id)
         if row is None:
             raise listing_not_found()
-        return to_detail(self._session, row)
+        return to_detail(self._session, row, self._today)
 
     def locations(self, query: str) -> list[LocationOut]:
         """Up to eight suggestions, busiest first, then alphabetical."""

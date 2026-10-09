@@ -91,6 +91,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
             <div>
               <h2 className="text-base leading-5 font-medium">Hosted by {listing.host.name}</h2>
               <p className="pt-1 text-sm leading-[18px] text-muted">
+                {listing.host.is_superhost && "Superhost · "}
                 Hosting since {formatMonthYear(listing.host.joined_at)}
               </p>
             </div>
@@ -139,7 +140,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
             <Avatar name={listing.host.name} avatarUrl={listing.host.avatar_url} size={96} />
             <div>
               <p className="text-[26px] leading-[30px] font-bold tracking-[-0.52px]">{listing.host.name}</p>
-              <p className="pt-1 text-sm leading-[18px]">Host</p>
+              <p className="pt-1 text-xs leading-4 text-muted">{listing.host.is_superhost ? "Superhost" : "Host"}</p>
             </div>
           </div>
           <div>
@@ -148,6 +149,15 @@ export async function ListingView({ id }: { id: Promise<string> }) {
               <li>Hosting since {formatMonthYear(listing.host.joined_at)}</li>
               <li>{plural(listing.host.listing_count, "listing")}</li>
             </ul>
+            {listing.host.is_superhost && (
+              <>
+                <h3 className="pt-6 text-lg leading-6 font-medium">{listing.host.name.split(" ")[0]} is a Superhost</h3>
+                <p className="pt-2 text-base leading-5">
+                  Superhosts are experienced, highly rated hosts who are committed to providing great stays for
+                  guests.
+                </p>
+              </>
+            )}
             {listing.host.bio && <p className="pt-4 text-base leading-6">{listing.host.bio}</p>}
             {/* Messaging is a placeholder in this project (plan §6.11). */}
             <Link

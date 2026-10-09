@@ -47,6 +47,8 @@ class ListingCard(BaseModel):
     # None until the listing has three reviews; the card then shows "New".
     rating_average: float | None
     review_count: int
+    # Bonus B3, derived from the reviews (plan §10.7).
+    guest_favourite: bool
     # The full price of the searched stay, fees included; None when no dates were given.
     stay_total_minor: int | None = None
 
@@ -58,6 +60,7 @@ class HostOut(BaseModel):
     bio: str | None
     joined_at: datetime
     listing_count: int
+    is_superhost: bool
 
 
 class ListingDetail(ListingCard):

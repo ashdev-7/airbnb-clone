@@ -157,6 +157,7 @@ def test_detail_has_all_photos_amenities_host_and_rating(client: TestClient, bui
         "bio": "I restore old homes.",
         "joined_at": "2026-01-01T00:00:00Z",
         "listing_count": 2,
+        "is_superhost": False,
     }
     assert (body["rating_average"], body["review_count"]) == (4.25, 4)
     assert body["description"] == "A place to stay."

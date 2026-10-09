@@ -44,6 +44,8 @@ export type ListingCard = {
   /** Null until the listing has three reviews. */
   rating_average: number | null;
   review_count: number;
+  /** At least five reviews averaging 4.9 or more (decided by the server). */
+  guest_favourite: boolean;
   /** The full price of the searched stay; null when no dates were given. */
   stay_total_minor: number | null;
 };
@@ -99,6 +101,8 @@ export type Host = {
   bio: string | null;
   joined_at: string;
   listing_count: number;
+  /** At least ten completed stays and a rating of 4.8 or more (decided by the server). */
+  is_superhost: boolean;
 };
 
 export type ListingDetail = ListingCard & {

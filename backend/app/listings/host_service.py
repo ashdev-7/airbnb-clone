@@ -154,7 +154,7 @@ class HostListingService:
     def _detail(self, listing_id: int) -> ListingDetail:
         row = repository.one(self._session, listing_id)
         assert row is not None
-        return to_detail(self._session, row)
+        return to_detail(self._session, row, self._today)
 
 
 def _reader(session: ReadSession, today: Today) -> HostListingService:

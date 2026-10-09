@@ -22,6 +22,11 @@ export type CardSize = "home" | "results";
 type Props = { listing: Listing; size: CardSize; eager?: boolean; href?: string };
 
 const PHOTO: Record<CardSize, string> = { home: "aspect-[20/19]", results: "aspect-[4/3]" };
+/** The badge over the photo (bonus B3). Home: capture A1; results: capture B1. */
+const BADGE: Record<CardSize, string> = {
+  home: "top-2.5 left-2.5 rounded-[14px] border border-white/50 bg-white/80 px-[9.5px] py-[5.5px] text-[11px] leading-[13px] font-semibold shadow-[0_2px_6px_rgb(0_0_0/0.04),0_4px_8px_rgb(0_0_0/0.1)]",
+  results: "top-3 left-3 rounded-full border border-white bg-white px-2.5 py-1 text-sm leading-[18px] font-medium shadow-[0_4px_10px_rgb(0_0_0/0.16)]",
+};
 const HEART: Record<CardSize, string> = { home: "top-2 right-2", results: "top-2.5 right-3" };
 
 /**
@@ -115,6 +120,7 @@ export function ListingCard({ listing, size, eager = false, href }: Props) {
           onChange={setPhoto}
           name={headline}
         />
+        {listing.guest_favourite && <span className={`absolute text-ink ${BADGE[size]}`}>Guest favourite</span>}
         <WishlistHeart
           listingId={listing.id}
           listingName={headline}
