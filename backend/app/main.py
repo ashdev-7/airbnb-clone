@@ -24,12 +24,29 @@ SESSION_COOKIE = "airstay_session"
 SESSION_SECONDS = 14 * 24 * 60 * 60
 
 
+def _seed_if_empty(database: Database, settings: Settings) -> None:
+    """Loads the sample data once, on the first start against an empty database
+    (SEED_ON_EMPTY, used in deployment). A database that has users is left alone."""
+    from sqlalchemy import func, select
+
+    from app.core.clock import today
+    from app.seed.loader import seed_database
+    from app.users.models import User
+
+    with database.read_session() as session:
+        users = session.scalar(select(func.count()).select_from(User)) or 0
+    if users == 0:
+        seed_database(database, today(settings.app_timezone), settings.service_fee_bps)
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
     configure_logging()
 
     database = Database(create_db_engine(settings.database_url, settings.sqlite_busy_timeout_ms))
     create_schema(database.engine)
+    if settings.seed_on_empty:
+        _seed_if_empty(database, settings)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
