@@ -32,6 +32,7 @@ from app.listings.schemas import (
 from app.reviews.ratings import shown_average
 
 HISTOGRAM_BUCKETS = 30
+LOCATION_SUGGESTIONS = 8
 
 
 def listing_not_found() -> AppError:
@@ -160,12 +161,20 @@ class ListingService:
         return to_detail(self._session, row)
 
     def locations(self, query: str) -> list[LocationOut]:
-        return [
+        """Up to eight suggestions, busiest first, then alphabetical."""
+        suggestions = [
             LocationOut(
-                city=row.city, state=row.state, country=row.country, listing_count=row.listing_count
+                kind="city" if city else "state" if state else "country",
+                label=", ".join(part for part in (city, state, country) if part),
+                city=city,
+                state=state,
+                country=country,
+                listing_count=listing_count,
             )
-            for row in repository.locations(self._session, query)
+            for city, state, country, listing_count in repository.places(self._session, query)
         ]
+        suggestions.sort(key=lambda place: (-place.listing_count, place.label))
+        return suggestions[:LOCATION_SUGGESTIONS]
 
     def meta(self) -> MetaOut:
         property_types = self._session.scalars(select(PropertyType).order_by(PropertyType.id))

@@ -1,7 +1,7 @@
 """Shapes of the listing API (plan §11). Money is integer paise; `currency` is always INR."""
 
 from datetime import datetime
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
@@ -94,7 +94,11 @@ class ListingSummary(BaseModel):
 
 
 class LocationOut(BaseModel):
-    city: str
+    """A place suggestion. `label` is what is shown and what is sent back as `location`."""
+
+    kind: Literal["city", "state", "country"]
+    label: str
+    city: str | None
     state: str | None
     country: str
     listing_count: int

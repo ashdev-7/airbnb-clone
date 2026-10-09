@@ -35,39 +35,89 @@ def test_meta_serves_reference_data_fee_rate_and_limits(client: TestClient, buil
 # --- /api/locations ----------------------------------------------------------------------
 
 
-def test_locations_are_distinct_places_with_counts_busiest_first(
-    client: TestClient, build: Build
-) -> None:
-    with build() as f:
-        host = f.user("Host")
-        for _ in range(2):
-            f.listing(host, city="Udaipur", state="Rajasthan")
-        f.listing(host, city="Jaipur", state="Rajasthan")
-        f.listing(host, city="Candolim", state="Goa")
-        f.listing(host, city="Jaipur", state="Rajasthan", deleted_at=NOW)  # removed: not counted
-
-    everything = client.get("/api/locations").json()["items"]
-    assert everything[0] == {
-        "city": "Udaipur",
-        "state": "Rajasthan",
-        "country": "India",
-        "listing_count": 2,
-    }
-    assert [(item["city"], item["listing_count"]) for item in everything] == [
-        ("Udaipur", 2),
-        ("Candolim", 1),
-        ("Jaipur", 1),
+def suggest(client: TestClient, query: str = "") -> list[tuple[str, str, int]]:
+    response = client.get("/api/locations", params={"q": query})
+    assert response.status_code == 200
+    return [
+        (item["kind"], item["label"], item["listing_count"]) for item in response.json()["items"]
     ]
 
-    def cities(query: str) -> list[str]:
-        response = client.get("/api/locations", params={"q": query})
-        return [item["city"] for item in response.json()["items"]]
 
-    assert cities("pur") == ["Udaipur", "Jaipur"]
-    assert cities("GOA") == ["Candolim"]
-    assert cities("rajasthan") == ["Udaipur", "Jaipur"]
-    assert cities("%") == []
-    assert cities("nowhere") == []
+def places(build: Build) -> None:
+    with build() as f:
+        host = f.user("Host")
+        for city, state, count in (
+            ("Mumbai", "Maharashtra", 3),
+            ("Manali", "Himachal Pradesh", 2),
+            ("Shimla", "Himachal Pradesh", 1),
+            ("Udaipur", "Rajasthan", 2),
+            ("Jaipur", "Rajasthan", 1),
+            ("Candolim", "Goa", 1),
+            ("Port Blair", None, 1),
+        ):
+            for _ in range(count):
+                f.listing(host, city=city, state=state)
+        f.listing(host, city="Jaipur", state="Rajasthan", deleted_at=NOW)  # removed: not counted
+
+
+def test_without_a_query_the_busiest_cities_are_suggested(client: TestClient, build: Build) -> None:
+    places(build)
+    assert suggest(client) == [
+        ("city", "Mumbai, Maharashtra, India", 3),
+        ("city", "Manali, Himachal Pradesh, India", 2),
+        ("city", "Udaipur, Rajasthan, India", 2),
+        ("city", "Candolim, Goa, India", 1),
+        ("city", "Jaipur, Rajasthan, India", 1),
+        ("city", "Port Blair, India", 1),
+        ("city", "Shimla, Himachal Pradesh, India", 1),
+    ]
+    first = client.get("/api/locations").json()["items"][0]
+    assert first == {
+        "kind": "city",
+        "label": "Mumbai, Maharashtra, India",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India",
+        "listing_count": 3,
+    }
+
+
+def test_a_suggestion_matches_on_its_own_name_by_word_prefix(
+    client: TestClient, build: Build
+) -> None:
+    places(build)
+    # "ma": the state Maharashtra and the city Manali, but not Mumbai (in Maharashtra)
+    # and not Shimla (in Himachal Pradesh).
+    assert suggest(client, "ma") == [
+        ("state", "Maharashtra, India", 3),
+        ("city", "Manali, Himachal Pradesh, India", 2),
+    ]
+    assert suggest(client, "MUM") == [("city", "Mumbai, Maharashtra, India", 3)]
+    assert suggest(client, "pur") == []  # the middle of a word does not match
+    assert suggest(client, "pra") == [("state", "Himachal Pradesh, India", 3)]  # second word
+    assert suggest(client, "himachal pr") == [("state", "Himachal Pradesh, India", 3)]
+    assert suggest(client, "blair") == [("city", "Port Blair, India", 1)]
+    assert suggest(client, "raj") == [("state", "Rajasthan, India", 3)]
+    assert suggest(client, " goa ") == [("state", "Goa, India", 1)]
+    assert suggest(client, "ind") == [("country", "India", 11)]
+    assert suggest(client, "%") == [] and suggest(client, "_") == []
+    assert suggest(client, "nowhere") == []
+
+
+def test_a_state_suggestion_has_no_city(client: TestClient, build: Build) -> None:
+    places(build)
+    (state,) = client.get("/api/locations", params={"q": "raj"}).json()["items"]
+    assert (state["city"], state["state"], state["country"]) == (None, "Rajasthan", "India")
+
+
+def test_every_suggestion_label_works_as_a_search_location(
+    client: TestClient, build: Build
+) -> None:
+    places(build)
+    for query in ("", "ma", "raj", "ind", "blair"):
+        for kind, label, listing_count in suggest(client, query):
+            found = client.get("/api/listings", params={"location": label}).json()["total"]
+            assert found == listing_count, (kind, label)
 
 
 def test_locations_returns_at_most_eight(client: TestClient, build: Build) -> None:
@@ -75,7 +125,8 @@ def test_locations_returns_at_most_eight(client: TestClient, build: Build) -> No
         host = f.user("Host")
         for number in range(10):
             f.listing(host, city=f"Town {number}")
-    assert len(client.get("/api/locations").json()["items"]) == 8
+    assert len(suggest(client)) == 8
+    assert len(suggest(client, "town")) == 8
 
 
 # --- /api/listings/{id} ------------------------------------------------------------------

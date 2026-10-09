@@ -120,7 +120,7 @@ Identity is a signed session cookie; "user" below means a signed-in demo account
 | POST | `/api/auth/login` | anyone | Start a session as a demo account: `{ "user_id": 5 }` |
 | POST | `/api/auth/logout` | anyone | End the session |
 | GET | `/api/auth/me` | anyone | `{ user }` with `is_host`, or `{ user: null }` |
-| GET | `/api/locations?q=` | anyone | Up to eight places with listing counts |
+| GET | `/api/locations?q=` | anyone | Up to eight suggestions (city, state or country) matched by word prefix, with listing counts |
 | GET | `/api/listings` | anyone | Search: `location`, `adults`, `children`, `infants`, `pets`, `min_price_minor`, `max_price_minor`, `property_type` (repeatable, any), `amenity` (repeatable, all), `min_bedrooms`, `min_beds`, `min_bathrooms`, `page`, `page_size` |
 | GET | `/api/listings/summary` | anyone | Count, price range and histogram for the same filters |
 | GET | `/api/listings/{id}` | anyone | Detail: photos, amenities, host, rating |

@@ -15,7 +15,6 @@ from app.wishlist.models import WishlistItem
 
 ACTIVE = Listing.deleted_at.is_(None)
 CARD_PHOTOS = 5
-LOCATION_SUGGESTIONS = 8
 _LIKE_ESCAPE = "\\"
 
 
@@ -189,16 +188,41 @@ def prices(session: Session, filters: ListingFilters) -> Sequence[int]:
     ).all()
 
 
-def locations(session: Session, query: str) -> Sequence[Any]:
-    """Distinct places with their listing counts, busiest first."""
-    listing_count = func.count().label("listing_count")
-    statement = (
-        select(Listing.city, Listing.state, Listing.country, listing_count)
-        .where(ACTIVE)
-        .group_by(Listing.city, Listing.state, Listing.country)
-        .order_by(listing_count.desc(), Listing.city)
-        .limit(LOCATION_SUGGESTIONS)
+def _name_starts_with(column: Any, text: str) -> ColumnElement[bool]:
+    """True when `text` is the beginning of the name or of one of its words."""
+    prefix = _contains(text)[1:]  # escaped, without the leading wildcard
+    return or_(
+        column.ilike(prefix, escape=_LIKE_ESCAPE),
+        column.ilike(f"% {prefix}", escape=_LIKE_ESCAPE),
     )
-    if query.strip():
-        statement = statement.where(_place_matches(query.strip()))
-    return session.execute(statement).all()
+
+
+def places(session: Session, query: str) -> list[tuple[str | None, str | None, str, int]]:
+    """Suggestions for the Where panel as (city, state, country, listing count).
+
+    Each suggestion is matched on its own name: a city on the city, a state on the state
+    (city is then None), a country on the country (city and state are None). So "ma"
+    offers Manali and Maharashtra, but not Mumbai merely because it is in Maharashtra.
+    Without a query, the busiest cities are offered.
+    """
+    listing_count = func.count().label("listing_count")
+    text = query.strip()
+
+    def grouped(*columns: Any) -> Select[Any]:
+        return select(*columns, listing_count).where(ACTIVE).group_by(*columns)
+
+    cities = grouped(Listing.city, Listing.state, Listing.country)
+    if not text:
+        return [(c, s, n, k) for c, s, n, k in session.execute(cities)]
+
+    found: list[tuple[str | None, str | None, str, int]] = [
+        (c, s, n, k)
+        for c, s, n, k in session.execute(cities.where(_name_starts_with(Listing.city, text)))
+    ]
+    states = grouped(Listing.state, Listing.country).where(
+        Listing.state.is_not(None), _name_starts_with(Listing.state, text)
+    )
+    found += [(None, s, n, k) for s, n, k in session.execute(states)]
+    countries = grouped(Listing.country).where(_name_starts_with(Listing.country, text))
+    found += [(None, None, n, k) for n, k in session.execute(countries)]
+    return found
