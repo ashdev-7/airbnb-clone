@@ -69,7 +69,8 @@ def column(db: Connection, sql: str, *parameters: Any) -> list[Any]:
 
 
 def test_users(db: Connection) -> None:
-    assert scalar(db, "SELECT count(*) FROM users") == 20
+    assert scalar(db, "SELECT count(*) FROM users") == 28
+    assert scalar(db, "SELECT count(*) FROM users WHERE avatar_url IS NOT NULL") == 0
     demo = column(db, "SELECT name FROM users WHERE is_demo ORDER BY id")
     assert demo == [*DEMO_HOSTS, MEERA, ARJUN, ZOYA]
 
@@ -78,19 +79,37 @@ def test_property_types_and_amenities(db: Connection) -> None:
     assert scalar(db, "SELECT count(*) FROM property_types") == 8
     assert scalar(db, "SELECT count(*) FROM amenities") >= 30
     assert scalar(db, "SELECT count(DISTINCT category) FROM amenities") == 11
-    assert scalar(db, "SELECT count(*) FROM amenities WHERE slug = 'pets-allowed'") == 1
+    # Whether pets may come is a column on the listing, not an amenity.
+    assert scalar(db, "SELECT count(*) FROM amenities WHERE slug LIKE '%pet%'") == 0
 
 
-def test_hosts_two_with_several_listings_and_two_with_one(db: Connection) -> None:
+def test_listings_are_spread_over_about_twelve_hosts(db: Connection) -> None:
     counts = dict(
         tuple(row)
         for row in db.exec_driver_sql(
             "SELECT u.name, count(*) FROM listings l JOIN users u ON u.id = l.host_id GROUP BY u.id"
         )
     )
-    assert set(counts) == set(DEMO_HOSTS)
+    assert len(counts) == 12 and sum(counts.values()) == 60
     assert counts["Leela Nair"] == counts["Kabir Sethi"] == 1
-    assert counts["Ananya Rao"] > 5 and counts["Vikram Mehta"] > 5
+    assert counts["Ananya Rao"] == counts["Vikram Mehta"] == 6
+    others = [count for name, count in counts.items() if name not in DEMO_HOSTS]
+    assert len(others) == 8 and all(3 <= count <= 7 for count in others)
+    assert (
+        scalar(
+            db,
+            "SELECT count(*) FROM users u WHERE NOT u.is_demo"
+            " AND EXISTS (SELECT 1 FROM listings l WHERE l.host_id = u.id)",
+        )
+        == 8
+    )
+
+
+def test_no_host_has_all_their_listings_in_one_city(db: Connection) -> None:
+    cities = column(
+        db, "SELECT count(DISTINCT city) FROM listings GROUP BY host_id HAVING count(*) > 1"
+    )
+    assert all(count > 1 for count in cities)
 
 
 # --- listings ----------------------------------------------------------------------------
@@ -159,12 +178,7 @@ def test_photos(db: Connection) -> None:
 
 def test_every_listing_has_amenities_and_some_allow_pets(db: Connection) -> None:
     assert scalar(db, "SELECT count(DISTINCT listing_id) FROM listing_amenities") == 60
-    pets = scalar(
-        db,
-        "SELECT count(*) FROM listing_amenities la JOIN amenities a ON a.id = la.amenity_id"
-        " WHERE a.slug = 'pets-allowed'",
-    )
-    assert 5 <= pets < 60
+    assert 8 <= scalar(db, "SELECT count(*) FROM listings WHERE pets_allowed") <= 30
 
 
 # --- bookings and reviews ----------------------------------------------------------------
@@ -211,9 +225,8 @@ def test_bookings_respect_the_guest_rules(db: Connection) -> None:
     assert (
         scalar(
             db,
-            "SELECT count(*) FROM bookings b WHERE b.pets > 0 AND NOT EXISTS (SELECT 1 FROM"
-            " listing_amenities la JOIN amenities a ON a.id = la.amenity_id"
-            " WHERE la.listing_id = b.listing_id AND a.slug = 'pets-allowed')",
+            "SELECT count(*) FROM bookings b JOIN listings l ON l.id = b.listing_id"
+            " WHERE b.pets > 0 AND NOT l.pets_allowed",
         )
         == 0
     )

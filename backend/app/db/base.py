@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import DateTime, MetaData, Text
+from sqlalchemy import CheckConstraint, DateTime, MetaData, Text
 from sqlalchemy.engine import Dialect
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.types import TypeDecorator
@@ -34,6 +34,16 @@ class UtcDateTime(TypeDecorator[datetime]):
 
     def process_result_value(self, value: Any | None, dialect: Dialect) -> datetime | None:
         return None if value is None else value.replace(tzinfo=UTC)
+
+
+def integer_checks(*columns: str) -> list[CheckConstraint]:
+    """SQLite stores any value in any column: an INTEGER column keeps the text 'abc' as
+    text, and 'abc' > 0 is true there. These checks make the declared type real for the
+    columns whose range or arithmetic the other constraints rely on (plan §8.1)."""
+    return [
+        CheckConstraint(f"typeof({column}) = 'integer'", name=f"{column}_is_integer")
+        for column in columns
+    ]
 
 
 class Base(DeclarativeBase):

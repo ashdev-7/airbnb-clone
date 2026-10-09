@@ -103,9 +103,68 @@ def test_listings_reject(conn: Connection, bad: dict[str, Any]) -> None:
 def test_listings_accept_the_edges_and_apply_defaults(conn: Connection) -> None:
     listing_id = rows.listing(conn, bedrooms=0, latitude=-90, longitude=180, state=None)
     row = conn.exec_driver_sql(
-        "SELECT cleaning_fee_minor, deleted_at FROM listings WHERE id = ?", (listing_id,)
+        "SELECT cleaning_fee_minor, pets_allowed, deleted_at FROM listings WHERE id = ?",
+        (listing_id,),
     ).one()
-    assert tuple(row) == (0, None)
+    assert tuple(row) == (0, 0, None)
+
+
+def test_listings_pets_allowed_must_be_boolean(conn: Connection) -> None:
+    rows.listing(conn, pets_allowed=1)
+    rejected(conn, rows.listing, pets_allowed=2)
+    rejected(conn, rows.listing, pets_allowed=None)
+
+
+# SQLite would otherwise keep 'abc' in an INTEGER column, where 'abc' > 0 is true.
+NOT_INTEGERS = ("abc", 1.5, "")
+
+
+@pytest.mark.parametrize(
+    "column",
+    ["price_per_night_minor", "cleaning_fee_minor", "max_guests", "bedrooms", "beds", "bathrooms"],
+)
+@pytest.mark.parametrize("value", NOT_INTEGERS)
+def test_listings_integer_columns_hold_integers(conn: Connection, column: str, value: Any) -> None:
+    rejected(conn, rows.listing, **{column: value})
+
+
+@pytest.mark.parametrize("value", NOT_INTEGERS)
+def test_listing_images_position_holds_an_integer(conn: Connection, value: Any) -> None:
+    image = {"listing_id": rows.listing(conn), "url": "https://example.com/a.jpg"}
+    with pytest.raises(IntegrityError):
+        rows.insert(conn, "listing_images", image | {"position": value})
+
+
+@pytest.mark.parametrize(
+    "column",
+    [
+        "adults",
+        "children",
+        "infants",
+        "pets",
+        "nightly_price_minor",
+        "cleaning_fee_minor",
+        "service_fee_minor",
+        "total_minor",
+    ],
+)
+@pytest.mark.parametrize("value", NOT_INTEGERS)
+def test_bookings_integer_columns_hold_integers(conn: Connection, column: str, value: Any) -> None:
+    rejected(conn, rows.booking, **{column: value})
+
+
+@pytest.mark.parametrize("value", NOT_INTEGERS)
+def test_reviews_rating_holds_an_integer(conn: Connection, value: Any) -> None:
+    rejected(conn, rows.review, rating=value)
+
+
+def test_integer_columns_still_accept_whole_numbers_written_as_text(conn: Connection) -> None:
+    """Column affinity turns '4' into 4 before the check runs; that is fine."""
+    listing_id = rows.listing(conn, max_guests="4")
+    stored = conn.exec_driver_sql(
+        "SELECT typeof(max_guests), max_guests FROM listings WHERE id = ?", (listing_id,)
+    ).one()
+    assert tuple(stored) == ("integer", 4)
 
 
 def test_listing_images_reject(conn: Connection) -> None:

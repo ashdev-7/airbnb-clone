@@ -13,8 +13,6 @@ PROPERTY_TYPES: tuple[tuple[str, str], ...] = (
     ("treehouse", "Treehouse"),
 )
 
-PETS_ALLOWED = "pets-allowed"
-
 # (slug, name, category). The categories are the amenity groups of REF-S1.
 AMENITIES: tuple[tuple[str, str, str], ...] = (
     ("hot-water", "Hot water", "bathroom"),
@@ -51,7 +49,6 @@ AMENITIES: tuple[tuple[str, str, str], ...] = (
     ("free-parking", "Free parking on premises", "parking_facilities"),
     ("lift", "Lift", "parking_facilities"),
     ("gym", "Gym", "parking_facilities"),
-    (PETS_ALLOWED, "Pets allowed", "parking_facilities"),
 )
 
 # Amenities nearly every home has, and the ones that depend on the place.
@@ -263,6 +260,20 @@ DEMO_HOSTS = (
     ("Leela Nair", "I host one cottage and treat every guest like family."),
     ("Kabir Sethi", "My place books out fast. Ask me about the monsoon."),
 )
+# Hosts who are not demo accounts: (name, bio, number of listings).
+SEEDED_HOSTS = (
+    ("Gauri Deshpande", "Retired teacher; my garden is my pride.", 7),
+    ("Naveen Shetty", "Coffee grower and host of a few hill homes.", 7),
+    ("Ritu Bansal", "Interior designer who cannot stop renovating.", 6),
+    ("Joseph Mathew", "I grew up on the backwaters and still live there.", 6),
+    ("Simran Gill", "Mountain guide in summer, host all year.", 6),
+    ("Harish Agarwal", "Family-run stays for three generations.", 5),
+    ("Pooja Saxena", "City host with a soft spot for old houses.", 5),
+    ("Tenzin Lama", "Tea, books and long views of the hills.", 4),
+)
+# Listings owned by each of the two main demo hosts; the other two own one each.
+MAIN_DEMO_HOST_LISTINGS = 6
+
 DEMO_GUESTS = (
     ("Meera Iyer", "Always planning the next long weekend."),
     ("Arjun Kapoor", "I travel for food and stay for the views."),

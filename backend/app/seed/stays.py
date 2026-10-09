@@ -20,7 +20,7 @@ from app.users.models import User
 
 # Listings by index (see catalogue.build_listings).
 FULLY_BOOKED_LISTING = 1  # the fourth demo host's only listing
-BACK_TO_BACK_LISTING = 3
+BACK_TO_BACK_LISTING = 2  # one of the first demo host's listings
 CURRENT_STAY_LISTINGS = (12, 25)
 FEW_REVIEW_LISTINGS = (5, 17, 33, 48)  # fewer than three reviews: shown as "New"
 MEERA_PAST_LISTINGS = range(2, 6)  # the first demo guest: past, current and upcoming trips
@@ -40,14 +40,12 @@ class StayBuilder:
         service_fee_bps: int,
         people: People,
         listings: list[Listing],
-        pets_allowed: set[Listing],
     ) -> None:
         self.rng = rng
         self.today = today
         self.service_fee_bps = service_fee_bps
         self.people = people
         self.listings = listings
-        self.pets_allowed = pets_allowed
         self.bookings: list[Booking] = []
         self.reviews: list[Review] = []
         self._codes: set[str] = set()
@@ -100,7 +98,7 @@ class StayBuilder:
             adults=adults,
             children=self.rng.randint(0, min(2, listing.max_guests - adults)),
             infants=self.rng.choice((0, 0, 0, 1)),
-            pets=self.rng.choice((0, 1)) if listing in self.pets_allowed else 0,
+            pets=self.rng.choice((0, 1)) if listing.pets_allowed else 0,
             nightly_price_minor=price.nightly_price_minor,
             cleaning_fee_minor=price.cleaning_fee_minor,
             service_fee_minor=price.service_fee_minor,

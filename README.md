@@ -85,7 +85,7 @@ erDiagram
 |---|---|---|
 | `users` | People. A host is simply a user who owns a listing | Unique email; non-empty name |
 | `property_types`, `amenities` | Reference data | Unique slugs; amenity category from a fixed list |
-| `listings` | Homes | Price > 0; fees ≥ 0; guests, beds, bathrooms ≥ 1; coordinates both set or both empty; `deleted_at` marks a removed listing |
+| `listings` | Homes | Price > 0; fees ≥ 0; guests, beds, bathrooms ≥ 1; coordinates both set or both empty; `pets_allowed` flag; `deleted_at` marks a removed listing |
 | `listing_images` | Photo URLs in order; position 0 is the cover | Unique `(listing_id, position)`; deleted with the listing |
 | `listing_amenities` | Which listing offers which amenity | Composite primary key |
 | `bookings` | Stays, with a snapshot of what was charged | Valid ISO dates; `check_out > check_in`; `total = nightly × nights + cleaning + service`; unique confirmation code; unique `(guest_id, idempotency_key)` |
@@ -94,9 +94,10 @@ erDiagram
 
 Design notes:
 
-- **No double booking, guaranteed by the database.** Two triggers on `bookings` (insert and update) abort any write that would make two confirmed stays on one listing overlap. A stay is the half-open range `[check_in, check_out)`, so one guest can arrive on the day another leaves. The API checks the same rule first to give a clean error; the triggers make it impossible for any other code path, script or manual SQL to break it.
+- **No double booking, guaranteed by the database.** Two triggers on `bookings` (insert and update) abort any write that would make two confirmed stays on one listing overlap. A stay is the half-open range `[check_in, check_out)`, so one guest can arrive on the day another leaves. The triggers make it impossible for any code path, script or manual SQL to break the rule. The API-side check of the same rule, which exists to return a clean error before the trigger would fire, arrives with the booking endpoint in Phase 4.
 - **Money is an integer number of paise** (₹1 = 100). No floating point touches money, and every amount is a whole rupee, so displayed lines always add up.
 - **Nothing derived is stored.** Ratings, review counts, "upcoming / past" and host status are computed when read. The one deliberate exception is the price snapshot on a booking: it records what was charged, and a CHECK keeps its lines and total consistent.
+- **Integer columns are really integers.** SQLite will keep text in an INTEGER column, where `'abc' > 0` is true, so every integer column with a range check also has `CHECK (typeof(col) = 'integer')`.
 - **Dates are ISO text** (`YYYY-MM-DD`), which sorts and compares correctly; a CHECK rejects malformed values.
 - **Soft delete only for listings**, so past trips and reviews keep their references. Everything else uses real foreign keys with `RESTRICT` or `CASCADE`.
 - **Indexes** serve the queries the app makes: listings by host, city, property type and price; amenity lookups; a partial index on confirmed bookings by `(listing_id, check_in, check_out)` for availability; bookings by guest for Trips.
@@ -104,7 +105,7 @@ Design notes:
 
 ### Seed data
 
-`npm run seed` rebuilds the database and loads 20 users (seven demo accounts), 8 property types, 35 amenities, 60 listings across 12 Indian destinations, about 1,060 bookings and 970 reviews. Stays are placed relative to the day you run it, so there are always past, current and upcoming trips; running it twice on the same day produces identical data. `npm run seed -- --check-images` requests every photo URL.
+`npm run seed` rebuilds the database and loads 28 users (seven demo accounts; 12 of the users are hosts), 8 property types, 34 amenities, 60 listings across 12 Indian destinations, and roughly a thousand bookings and reviews. Stays are placed relative to the day you run it, so there are always past, current and upcoming trips; running it twice on the same day produces identical data. `npm run seed -- --check-images` requests every photo URL.
 
 ## API overview
 

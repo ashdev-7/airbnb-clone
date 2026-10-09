@@ -10,7 +10,6 @@ from datetime import date
 from app.db.schema import rebuild_schema
 from app.db.session import Database
 from app.seed.catalogue import build_amenities, build_listings, build_people, build_property_types
-from app.seed.data import PETS_ALLOWED
 from app.seed.stays import StayBuilder
 
 RANDOM_SEED = 20261009
@@ -26,8 +25,7 @@ def seed_database(database: Database, today: date, service_fee_bps: int) -> dict
     property_types = build_property_types()
     amenities = build_amenities()
     listings, amenity_links = build_listings(rng, today, people, property_types, amenities)
-    pets_allowed = {link.listing for link in amenity_links if link.amenity.slug == PETS_ALLOWED}
-    stays = StayBuilder(rng, today, service_fee_bps, people, listings, pets_allowed)
+    stays = StayBuilder(rng, today, service_fee_bps, people, listings)
     stays.build()
 
     with database.write_session() as session:

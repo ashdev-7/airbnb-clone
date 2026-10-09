@@ -592,6 +592,7 @@ erDiagram
 | max_guests | INTEGER | NOT NULL, CHECK ≥ 1 |
 | bedrooms | INTEGER | NOT NULL, CHECK ≥ 0 |
 | beds, bathrooms | INTEGER | NOT NULL, CHECK ≥ 1 |
+| pets_allowed | BOOLEAN | NOT NULL, default false — whether guests may bring pets (§10.8) |
 | created_at, updated_at | DATETIME (UTC) | NOT NULL |
 | deleted_at | DATETIME (UTC) | nullable — set when the host removes the listing (D3) |
 
@@ -619,6 +620,8 @@ erDiagram
 | created_at | DATETIME (UTC) | NOT NULL |
 
 In SQLite the date CHECK is `check_in IS date(check_in)` (likewise `check_out`), and nights inside the total CHECK is `CAST(julianday(check_out) - julianday(check_in) AS INTEGER)`. Use `IS`, not `=`: `date()` returns NULL for a malformed value, and a CHECK that evaluates to NULL passes. These constraints, both triggers and the write-lock behaviour were tried on SQLite 3.45 while writing this plan (the §10.1 fixture table behaved as specified; eight simultaneous bookings produced one success and seven conflicts). Phase 2 turns that into permanent tests.
+
+**Integer columns are really integers.** SQLite stores any value in any column: an INTEGER column keeps the text `'abc'` as text, and `'abc' > 0` is true there, so a range CHECK alone can be bypassed. Every integer column that has a range or comparison CHECK therefore also has `CHECK (typeof(col) = 'integer')`: the money columns, guest counts, room counts, `rating` and the image `position`. Whole numbers written as text (`'4'`) are still accepted, because the column's affinity converts them before the check runs.
 
 **reviews** — id PK; booking_id NOT NULL UNIQUE FK → bookings (RESTRICT); rating NOT NULL CHECK 1–5; comment NOT NULL, non-empty; created_at. The listing and the author are reached through the booking, so a review cannot exist without a stay and cannot disagree with it.
 
@@ -801,6 +804,7 @@ The 15% rate is OURS; for comparison, Airbnb's guest fee under its split-fee str
 | price per night | whole rupees, ₹500–₹5,00,000 (stored in paise) |
 | cleaning fee | whole rupees, ₹0–₹25,000 (stored in paise) |
 | max_guests / bedrooms / beds / bathrooms | 1–16 / 0–20 / 1–30 / 1–20 |
+| pets_allowed | boolean; false when omitted |
 | photos | 1–20 URLs, `https` only, at most 2,000 characters each, order kept, first is the cover. Five or more recommended |
 | amenities | existing amenity slugs; duplicates dropped |
 
@@ -815,7 +819,7 @@ The 15% rate is OURS; for comparison, Airbnb's guest fee under its split-fee str
 |---|---|
 | `location` | Split on commas; each part must match city, state or country (case-insensitive substring; wildcard characters escaped). Empty = everywhere |
 | `check_in`, `check_out` | Both or neither, valid per §10.1. Keeps listings with no confirmed booking overlapping the range |
-| `adults`, `children`, `infants`, `pets` | `max_guests ≥ adults + children`. `pets > 0` keeps listings with the `pets-allowed` amenity |
+| `adults`, `children`, `infants`, `pets` | `max_guests ≥ adults + children`. `pets > 0` keeps listings whose `pets_allowed` is true |
 | `min_price_minor`, `max_price_minor` | Inclusive bounds on the nightly price; `min > max` → 422 |
 | `property_type` | Repeatable slug; any of (OR) |
 | `amenity` | Repeatable slug; listing must have all (AND) |
@@ -839,7 +843,7 @@ The 15% rate is OURS; for comparison, Airbnb's guest fee under its split-fee str
 
 - Categories: adults, children, infants, pets (REF-G1).
 - `guests = adults + children`. Children count toward a listing's maximum (REF-G1).
-- **Provisional (OURS) until captures A5 and C3 are read:** infants and pets do not count toward the maximum; at most 5 infants and 5 pets; pets only where the listing has the `pets-allowed` amenity.
+- **Provisional (OURS) until captures A5 and C3 are read:** infants and pets do not count toward the maximum; at most 5 infants and 5 pets; pets only where the listing's `pets_allowed` is true.
 - Valid when `adults ≥ 1`, `guests ≤ listing.max_guests` and the limits above hold.
 - The limits are named constants in one module on each side (`bookings/guests.py`, authoritative; `lib/guests.ts`, to disable steppers) and are served by `/api/meta`, so the captures change values, not code.
 
@@ -919,9 +923,9 @@ FastAPI's generated `/docs` is the detailed reference; the README carries this o
 
 | Data | Amount and purpose |
 |---|---|
-| Users | About 20. Seven demo accounts for the login modal: four hosts (two with several listings, one with one, one with one fully booked next month) and three guests (one with past and upcoming trips, one with only past trips, one with none). The rest only author past stays and reviews |
-| Property types, amenities | 8 and about 30, spread over Airbnb's amenity groups (REF-S1), including `pets-allowed` |
-| Listings | 60 (three pages at the default size) across at least 10 Indian destinations with coordinates (for example Goa, Manali, Jaipur, Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling), every property type, prices about ₹1,500–₹60,000 a night, capacity 1–12 |
+| Users | 28. Seven demo accounts for the login modal: four hosts (two with six listings each, one with one, one with one nearly fully booked next month) and three guests (one with past and upcoming trips, one with only past trips, one with none). Eight further hosts who are not demo accounts, with 3–7 listings each. The remaining 13 only author past stays and reviews. `avatar_url` is empty for all of them |
+| Property types, amenities | 8 and about 30, spread over Airbnb's amenity groups (REF-S1) |
+| Listings | 60 (three pages at the default size) across at least 10 Indian destinations with coordinates (for example Goa, Manali, Jaipur, Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling), every property type, prices about ₹1,500–₹60,000 a night, capacity 1–12; spread over 12 hosts, each host's homes in more than one city; about a third allow pets |
 | Photos | At least five per listing from a curated pool; two listings with three photos to exercise the gallery fallback |
 | Past bookings and reviews | Most listings have 3–40 reviews; a few have fewer than three ("New") |
 | Upcoming bookings | About 30, including a back-to-back pair and one listing almost fully booked next month |
@@ -1113,6 +1117,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 2 amendments (product owner). (1) Listings are spread over 12 hosts: the two main demo hosts own 6 each, the other two demo hosts 1 each, and eight seeded non-demo hosts 3–7 each; 28 users in all (§12). (2) `pets-allowed` is no longer an amenity: `listings.pets_allowed` (BOOLEAN NOT NULL DEFAULT false) replaces it (§8.1, §10.5, §10.6, §10.8, §12); 34 amenities remain. (3) Every integer column with a range or comparison CHECK also has `CHECK (typeof(col) = 'integer')`, with a raw-SQL test per table (§8.1). (4) `avatar_url` stays empty for seeded users; revisited in Phase 7 against the listing-page capture (set C). (5) README states that the API-side overlap check arrives in Phase 4. Ctrl+C on `npm run dev` confirmed working by the product owner. |
 | 2026-10-09 | Phase 2. Dependency `tzdata` added (Python's `zoneinfo` has no timezone database on Windows). `bookings/pricing.py`, the overlap predicate and trigger SQL in `bookings/availability.py`, and `core/clock.py` were created in this phase rather than Phase 4, because §12 requires the seed to use the pricing module and to place stays relative to today; Phase 4 extends them. The schema is created at application start (`create_all`, a no-op when it exists). Amenity links are written as `listing_amenities` rows and `Listing.amenities` is read-only, so row order is deterministic. Seed specifics: 12 destinations × 5 listings; demo hosts own 29, 29, 1 and 1 listings; 35 amenities, with `pets-allowed` filed under `parking_facilities` because §8.1 has no booking-options category; `avatar_url` is empty for every seeded user (initials are shown until the product owner decides otherwise). Photo URLs were collected from Unsplash's free-licence search pages and all 193 pass `--check-images`. |
 | 2026-10-09 | Decision: **Cache Components and Partial Prefetching stay on** (the Next.js 16.4 default; both become mandatory in the next major release, so turning them off would only postpone the work). Consequences for Phases 5–10, from the bundled guides `08-caching.md` and `preserving-ui-state.md`: (1) data that changes — availability, bookings, quotes and prices, wishlist, the current user, search results — is never marked `"use cache"`; every API call stays `cache: "no-store"` (§7.4 rule 6). (2) A Server Component that reads uncached data, `cookies()`, `headers()`, `params` or `searchParams` sits inside a `<Suspense>` boundary whose fallback is the page's skeleton (§6.13); `next build` fails otherwise, so `npm run check` enforces it. (3) Routes are hidden, not unmounted, on navigation (up to three are kept), so component state survives: modals, popovers, menus and toasts must close when their route is hidden (`useLayoutEffect` cleanup, or open state derived from the URL), and forms reset after a successful submit. (4) Signing in, switching account and logging out do a full page load, so no state from one account is shown to another. (5) Playwright uses visibility-aware selectors (`getByRole`, `getByLabel`), because hidden routes stay in the DOM. |
 | 2026-10-09 | §9.3 row 9 corrected to match §9.4: idempotent requests are retried twice with backoff, not once. |

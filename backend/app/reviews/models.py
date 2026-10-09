@@ -4,7 +4,7 @@ from sqlalchemy import CheckConstraint, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.bookings.models import Booking
-from app.db.base import Base, UtcDateTime
+from app.db.base import Base, UtcDateTime, integer_checks
 
 
 class Review(Base):
@@ -14,6 +14,7 @@ class Review(Base):
     __tablename__ = "reviews"
     __table_args__ = (
         CheckConstraint("rating BETWEEN 1 AND 5", name="rating_range"),
+        *integer_checks("rating"),
         CheckConstraint("length(trim(comment)) > 0", name="comment_not_empty"),
     )
 

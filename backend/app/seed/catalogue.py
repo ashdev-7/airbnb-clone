@@ -10,8 +10,7 @@ from app.seed import data
 from app.seed.photos import COVERS, ROOMS, photo_url
 from app.users.models import User
 
-# Listings by index: who hosts the single-listing accounts, and which galleries are short.
-SINGLE_LISTING_HOST = {0: 2, 1: 3}  # listing index → index into the demo hosts
+PETS_ALLOWED_SHARE = 0.3
 SHORT_GALLERY_LISTINGS = (10, 20)
 SHORT_GALLERY_SIZE = 3
 
@@ -22,7 +21,7 @@ _ONLY_FOR = {
     "pool": {"villa", "house"},
     "indoor-fireplace": {"cabin", "cottage", "house"},
 }
-_HOST_YEARS = (7, 5, 4, 3)
+_DEMO_HOST_YEARS = (7, 5, 4, 3)
 
 
 def moment(day: date) -> datetime:
@@ -34,10 +33,11 @@ def moment(day: date) -> datetime:
 class People:
     demo_hosts: list[User]
     demo_guests: list[User]
+    seeded_hosts: list[User]
     others: list[User]
 
     def everyone(self) -> list[User]:
-        return [*self.demo_hosts, *self.demo_guests, *self.others]
+        return [*self.demo_hosts, *self.demo_guests, *self.seeded_hosts, *self.others]
 
 
 def _user(name: str, bio: str | None, is_demo: bool, joined: date) -> User:
@@ -48,17 +48,37 @@ def _user(name: str, bio: str | None, is_demo: bool, joined: date) -> User:
 def build_people(today: date) -> People:
     hosts = [
         _user(name, bio, True, today - timedelta(days=365 * years))
-        for (name, bio), years in zip(data.DEMO_HOSTS, _HOST_YEARS, strict=True)
+        for (name, bio), years in zip(data.DEMO_HOSTS, _DEMO_HOST_YEARS, strict=True)
     ]
     guests = [
         _user(name, bio, True, today - timedelta(days=500 + 90 * index))
         for index, (name, bio) in enumerate(data.DEMO_GUESTS)
     ]
+    seeded_hosts = [
+        _user(name, bio, False, today - timedelta(days=365 * (3 + index % 4) + 30 * index))
+        for index, (name, bio, _) in enumerate(data.SEEDED_HOSTS)
+    ]
     others = [
         _user(name, None, False, today - timedelta(days=450 + 40 * index))
         for index, name in enumerate(data.OTHER_GUESTS)
     ]
-    return People(hosts, guests, others)
+    return People(hosts, guests, seeded_hosts, others)
+
+
+def listing_hosts(people: People) -> list[User]:
+    """The host of each listing, by listing index. The two single-listing demo hosts come
+    first; the rest are dealt out in turn, so every host's homes are spread over the
+    destinations."""
+    main_a, main_b, single_a, single_b = people.demo_hosts
+    remaining = [(main_a, data.MAIN_DEMO_HOST_LISTINGS), (main_b, data.MAIN_DEMO_HOST_LISTINGS)]
+    remaining += [
+        (host, count)
+        for host, (_, _, count) in zip(people.seeded_hosts, data.SEEDED_HOSTS, strict=True)
+    ]
+    hosts = [single_a, single_b]
+    for turn in range(max(count for _, count in remaining)):
+        hosts.extend(host for host, count in remaining if turn < count)
+    return hosts
 
 
 def build_property_types() -> dict[str, PropertyType]:
@@ -131,6 +151,8 @@ def build_listings(
     titles: set[str] = set()
     slots = len(data.DESTINATIONS[0].property_types)
     total = slots * len(data.DESTINATIONS)
+    hosts = listing_hosts(people)
+    assert len(hosts) == total
 
     for slot in range(slots):
         for destination in data.DESTINATIONS:
@@ -148,10 +170,9 @@ def build_listings(
             )
             title, description = _text(rng, profile.noun, destination.setting, titles)
             created = moment(today - timedelta(days=800 + total - index))
-            host = people.demo_hosts[SINGLE_LISTING_HOST.get(index, index % 2)]
 
             listing = Listing(
-                host=host,
+                host=hosts[index],
                 property_type=property_types[type_slug],
                 title=title,
                 description=description,
@@ -166,6 +187,7 @@ def build_listings(
                 bedrooms=bedrooms,
                 beds=max(1, bedrooms, math.ceil(max_guests / 2)),
                 bathrooms=max(1, bedrooms - rng.randint(0, 1)),
+                pets_allowed=rng.random() < PETS_ALLOWED_SHARE,
                 created_at=created,
                 updated_at=created,
                 images=_photos(index, type_slug),

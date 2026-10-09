@@ -4,7 +4,7 @@ from sqlalchemy import DDL, CheckConstraint, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.bookings.availability import NO_OVERLAP_INSERT_TRIGGER, NO_OVERLAP_UPDATE_TRIGGER
-from app.db.base import Base, UtcDateTime
+from app.db.base import Base, UtcDateTime, integer_checks
 from app.listings.models import Listing
 from app.users.models import User
 
@@ -34,6 +34,16 @@ class Booking(Base):
             f"total_minor = nightly_price_minor * {_NIGHTS_SQL}"
             " + cleaning_fee_minor + service_fee_minor",
             name="total_adds_up",
+        ),
+        *integer_checks(
+            "adults",
+            "children",
+            "infants",
+            "pets",
+            "nightly_price_minor",
+            "cleaning_fee_minor",
+            "service_fee_minor",
+            "total_minor",
         ),
         CheckConstraint(
             f"status IN ('{STATUS_CONFIRMED}', '{STATUS_CANCELLED}')", name="status_known"

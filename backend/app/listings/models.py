@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, UniqueConstraint, text
+from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Index, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, UtcDateTime
+from app.db.base import Base, UtcDateTime, integer_checks
 from app.users.models import User
 
 AMENITY_CATEGORIES = (
@@ -54,6 +54,14 @@ class Listing(Base):
         CheckConstraint("bedrooms >= 0", name="bedrooms_min"),
         CheckConstraint("beds >= 1", name="beds_min"),
         CheckConstraint("bathrooms >= 1", name="bathrooms_min"),
+        *integer_checks(
+            "price_per_night_minor",
+            "cleaning_fee_minor",
+            "max_guests",
+            "bedrooms",
+            "beds",
+            "bathrooms",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -75,6 +83,11 @@ class Listing(Base):
     bedrooms: Mapped[int]
     beds: Mapped[int]
     bathrooms: Mapped[int]
+    pets_allowed: Mapped[bool] = mapped_column(
+        Boolean(create_constraint=True, name="pets_allowed_boolean"),
+        default=False,
+        server_default=text("0"),
+    )
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime)
     # Set when the host removes the listing; the row stays so past trips keep their link.
@@ -97,6 +110,7 @@ class ListingImage(Base):
     __tablename__ = "listing_images"
     __table_args__ = (
         CheckConstraint("position >= 0", name="position_not_negative"),
+        *integer_checks("position"),
         UniqueConstraint("listing_id", "position"),
     )
 
