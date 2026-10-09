@@ -95,7 +95,7 @@ erDiagram
 
 Design notes:
 
-- **No double booking, guaranteed by the database.** Two triggers on `bookings` (insert and update) abort any write that would make two confirmed stays on one listing overlap. A stay is the half-open range `[check_in, check_out)`, so one guest can arrive on the day another leaves. The triggers make it impossible for any code path, script or manual SQL to break the rule. The API-side check of the same rule, which exists to return a clean error before the trigger would fire, arrives with the booking endpoint in Phase 4.
+- **No double booking, guaranteed by the database.** Two triggers on `bookings` (insert and update) abort any write that would make two confirmed stays on one listing overlap. A stay is the half-open range `[check_in, check_out)`, so one guest can arrive on the day another leaves. The triggers make it impossible for any code path, script or manual SQL to break the rule. The booking endpoint checks the same rule first, inside its write transaction, so that a guest gets a clean `409 dates_unavailable` instead of a database error.
 - **Money is an integer number of paise** (₹1 = 100). No floating point touches money, and every amount is a whole rupee, so displayed lines always add up.
 - **Nothing derived is stored.** Ratings, review counts, "upcoming / past" and host status are computed when read. The one deliberate exception is the price snapshot on a booking: it records what was charged, and a CHECK keeps its lines and total consistent.
 - **Integer columns are really integers.** SQLite will keep text in an INTEGER column, where `'abc' > 0` is true, so every integer column with a range check also has `CHECK (typeof(col) = 'integer')`.
@@ -121,18 +121,38 @@ Identity is a signed session cookie; "user" below means a signed-in demo account
 | POST | `/api/auth/logout` | anyone | End the session |
 | GET | `/api/auth/me` | anyone | `{ user }` with `is_host`, or `{ user: null }` |
 | GET | `/api/locations?q=` | anyone | Up to eight suggestions (city, state or country) matched by word prefix, with listing counts |
-| GET | `/api/listings` | anyone | Search: `location`, `adults`, `children`, `infants`, `pets`, `min_price_minor`, `max_price_minor`, `property_type` (repeatable, any), `amenity` (repeatable, all), `min_bedrooms`, `min_beds`, `min_bathrooms`, `page`, `page_size` |
+| GET | `/api/listings` | anyone | Search: `location`, `check_in`, `check_out`, `adults`, `children`, `infants`, `pets`, `min_price_minor`, `max_price_minor`, `property_type` (repeatable, any), `amenity` (repeatable, all), `min_bedrooms`, `min_beds`, `min_bathrooms`, `page`, `page_size` |
 | GET | `/api/listings/summary` | anyone | Count, price range and histogram for the same filters |
 | GET | `/api/listings/{id}` | anyone | Detail: photos, amenities, host, rating |
 | GET | `/api/listings/{id}/reviews` | anyone | Paginated reviews |
+| GET | `/api/listings/{id}/availability` | anyone | Booked date ranges in a window (`from`, `to`) |
+| GET | `/api/listings/{id}/quote` | anyone | Price breakdown for dates and guests |
 | POST | `/api/listings` | user | Create a listing; the host is the signed-in user |
 | PATCH | `/api/listings/{id}` | owner | Partial update |
 | DELETE | `/api/listings/{id}` | owner | Remove; refused while reservations are upcoming |
 | GET | `/api/hosting/listings` | user | The caller's listings |
+| POST | `/api/bookings` | user | Book a stay; needs an `Idempotency-Key` header (a UUID) |
+| GET | `/api/bookings` | user | The caller's trips |
+| GET | `/api/bookings/{id}` | its guest or the listing's host | Reservation detail |
+| GET | `/api/hosting/reservations` | user | Reservations on the caller's listings; `status`, `listing_id` filters |
 | GET | `/api/wishlist`, `/api/wishlist/ids` | user | Saved listings as cards; their ids |
 | PUT / DELETE | `/api/wishlist/{listing_id}` | user | Save / unsave (idempotent) |
 
-Search by dates, availability, quotes, bookings and reservations arrive in Phase 4. Money is always integer paise with `currency: "INR"`; dates are `YYYY-MM-DD`.
+Money is always integer paise with `currency: "INR"`; dates are `YYYY-MM-DD`.
+
+### How a booking is made
+
+`POST /api/bookings` runs in one transaction that takes SQLite's write lock before reading anything, so two guests cannot both see the dates as free. In order: the idempotency key is looked up (a repeat of the same request returns the first booking with 200); the listing must exist; the guest must not be its host; dates and guest counts are validated; overlap with confirmed stays is checked; the price is computed on the server and compared with the total the guest saw (`409 price_changed` with the new quote if they differ); the mock payment is charged (`402 payment_declined` for the declining test card); the booking is inserted with a snapshot of the price. Any failure rolls everything back.
+
+| Status | Codes |
+|---|---|
+| 401 | `unauthenticated` |
+| 402 | `payment_declined` |
+| 403 | `cannot_book_own_listing`, `not_listing_owner` |
+| 404 | `listing_not_found`, `booking_not_found`, `demo_account_not_found` |
+| 409 | `dates_unavailable`, `price_changed`, `listing_has_upcoming_reservations` |
+| 422 | `validation_error`, `invalid_dates`, `invalid_guest_count`, `idempotency_key_reused` |
+| 503 | `busy` (the write lock was not obtained in time; retry) |
 
 Error shape:
 

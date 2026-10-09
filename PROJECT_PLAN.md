@@ -908,7 +908,7 @@ One list per user. `PUT` and `DELETE /api/wishlist/{listing_id}` are idempotent.
 | GET | `/api/bookings` | user | The caller's trips |
 | GET | `/api/bookings/{id}` | its guest or the listing's host | Reservation detail |
 | GET | `/api/hosting/listings` | user | The caller's listings |
-| GET | `/api/hosting/reservations` | user | Reservations on the caller's listings; `status`, `listing_id` filters |
+| GET | `/api/hosting/reservations` | user | Reservations on the caller's listings, including listings removed since (marked `removed`); `status` (`upcoming`, `current`, `past`, `cancelled`) and `listing_id` filters. Empty for a user who has never hosted |
 | GET | `/api/wishlist` | user | Saved listings as cards |
 | GET | `/api/wishlist/ids` | user | Saved listing ids |
 | PUT / DELETE | `/api/wishlist/{listing_id}` | user | Save / unsave |
@@ -1005,13 +1005,13 @@ Auth endpoints and dependencies; `/api/meta`; `/api/locations`; `GET /api/listin
 - [x] Query-count test: a page of search results issues a fixed, small number of queries
 - [x] Page size and guest limits are single named constants, set from captures A5, B1 and B2 if they have arrived
 
-### [ ] Phase 4 — Availability, pricing, booking, trips, reservations
+### [x] Phase 4 — Availability, pricing, booking, trips, reservations
 Overlap rule; availability; quote; search by dates; `POST /api/bookings` exactly as §10.3; `GET /api/bookings`, `/api/bookings/{id}`, `/api/hosting/reservations`.
-- [ ] Overlap fixture table passes; pricing tests include a rounding case
-- [ ] Every step of §10.3 has a failing-path test; declined payment leaves no row
-- [ ] Concurrency and idempotency tests pass (§13)
-- [ ] Removal with an upcoming reservation → 409; after the stay is in the past → allowed
-- [ ] Persistence test passes
+- [x] Overlap fixture table passes; pricing tests include a rounding case
+- [x] Every step of §10.3 has a failing-path test; declined payment leaves no row
+- [x] Concurrency and idempotency tests pass (§13)
+- [x] Removal with an upcoming reservation → 409; after the stay is in the past → allowed
+- [x] Persistence test passes
 
 *The backend now covers every MUST. Captures (§5.3) are required from here on.*
 
@@ -1118,6 +1118,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 4. API details decided here: every booking carries a derived `period` (`upcoming`, `current`, `past`, `cancelled`; a stay that checks out today is `past`), and the `status` filter of `/api/hosting/reservations` takes the same four values. Reservations include those on listings the host has since removed, with `listing.removed: true`, and the endpoint answers an empty list for a user with no listings (product owner). The availability window is `from`/`to`; a booking not visible to the caller answers 404 `booking_not_found`. Idempotency step 4 compares the stored booking with the request (listing, dates, guest counts, total), since no request payload is stored. The session user is now looked up in a short read session of its own, released before the write lock is taken, so a request never holds two connections. The concurrency tests use a payment gateway that pauses inside the transaction: without it eight threads rarely overlap and the tests passed even with the write lock removed. |
 | 2026-10-09 | Phase 3 amendment (product owner): `/api/locations` matches each suggestion on its own displayed name by word prefix and returns cities, states and countries as separate suggestions with `kind` and `label` (§10.6). The search filter itself is unchanged. |
 | 2026-10-09 | Phase 3. Captures A5, B1, B2, C2 and C3 read; answers in `docs/parity-notes.md`. Set from them: default page size 18 (was 24, provisional); 16 guests and 5 infants at most; infants do not count toward capacity (§10.6, §10.8, §12). Listing cards open in a new tab on Airbnb (named `target` per listing), to be applied in Phase 5. Search-page URL names are `checkin`/`checkout`, listing-page names `check_in`/`check_out` (§10.6). Dependency `itsdangerous` added: Starlette's `SessionMiddleware` (§7.3) requires it. New setting `COOKIE_SECURE` (§7.6). API details decided here: listing input uses `price_per_night_minor` and `cleaning_fee_minor` in paise, whole rupees only; unknown body fields are refused (so `host_id` cannot be sent); `rating_average` is null until three reviews; cards carry up to five photos; `/api/meta` and `/api/locations` live in the listings module; signing in with a non-demo or unknown id answers 404 `demo_account_not_found`; changing someone else's listing answers 403 `not_listing_owner`; the search summary's histogram has 30 equal-width buckets. Search costs three statements (count, page, photos) rather than the two named in §10.6, because the total is needed even for a page past the end. |
 | 2026-10-09 | Phase 2 amendments (product owner). (1) Listings are spread over 12 hosts: the two main demo hosts own 6 each, the other two demo hosts 1 each, and eight seeded non-demo hosts 3–7 each; 28 users in all (§12). (2) `pets-allowed` is no longer an amenity: `listings.pets_allowed` (BOOLEAN NOT NULL DEFAULT false) replaces it (§8.1, §10.5, §10.6, §10.8, §12); 34 amenities remain. (3) Every integer column with a range or comparison CHECK also has `CHECK (typeof(col) = 'integer')`, with a raw-SQL test per table (§8.1). (4) `avatar_url` stays empty for seeded users; revisited in Phase 7 against the listing-page capture (set C). (5) README states that the API-side overlap check arrives in Phase 4. Ctrl+C on `npm run dev` confirmed working by the product owner. |
