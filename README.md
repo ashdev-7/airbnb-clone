@@ -156,6 +156,8 @@ Identity is a signed session cookie; "user" below means a signed-in demo account
 | POST | `/api/bookings` | user | Book a stay; needs an `Idempotency-Key` header (a UUID) |
 | GET | `/api/bookings` | user | The caller's trips |
 | GET | `/api/bookings/{id}` | its guest or the listing's host | Reservation detail |
+| POST | `/api/bookings/{id}/review` | its guest | Review a stay that has ended (within 14 days, once) |
+| GET | `/api/reviews/mine` | user | The reviews the caller has written |
 | GET | `/api/hosting/reservations` | user | Reservations on the caller's listings; `status`, `listing_id` filters |
 | GET | `/api/wishlist`, `/api/wishlist/ids` | user | Saved listings as cards; their ids |
 | PUT / DELETE | `/api/wishlist/{listing_id}` | user | Save / unsave (idempotent) |
@@ -197,6 +199,17 @@ Error shape:
 
 The browser only ever talks to the frontend's origin, which forwards `/api/*` to the backend, so the session cookie is first-party and no CORS setup is needed.
 
+## Bonus features
+
+| Bonus | Status |
+|---|---|
+| Interactive map with listing pins | Built: price pins on the results map; a pin opens the card of its home |
+| Leave a review after a completed stay | Built: from the trip's page, for 14 days after checkout |
+| Superhost badges, rating aggregation | Built: ratings are averaged when read; "Guest favourite" (5+ reviews averaging 4.9) and "Superhost" (10+ completed stays, 4.8+) are derived, never stored |
+| Responsive design | Built: phone, tablet and desktop |
+| Dark mode | Built: a switch in the account menu |
+| Image upload to cloud storage | Not built |
+
 ## Assumptions
 
 - **Login is mocked**, as the assignment allows: an account picker over seeded users, with a real signed, HttpOnly session cookie. There are no passwords.
@@ -217,6 +230,8 @@ The browser only ever talks to the frontend's origin, which forwards `/api/*` to
 - **An unknown listing answers HTTP 200 with the not-found page** (the page is streamed; it is marked `noindex`, and the API answers 404).
 - **SQLite with one writer**: correct for this size, and the reason the backend runs as a single process. A busy write lock answers `503` and the client retries.
 - **The map** uses OpenStreetMap tiles and does not search as it moves. If tiles fail to load, the place name is shown instead.
-- **Reviews are read-only**: they come from the seed; guests cannot write one yet.
-- **Desktop first**: the layout is built for a laptop-width window and is only partly adapted to phones.
-- **Tests**: 480 backend tests and 97 frontend unit tests run in `npm run check`; the browser tests (`npm run e2e`) cover search, the listing page, wishlists, login and one smoke test each for booking and hosting.
+- **Reviews**: a guest can review a stay for 14 days after it ends, once; a review cannot be edited or removed.
+- **Phones and tablets**: every page fits them, but the design reference is a desktop window, so the small layouts are this project's own.
+- **No image upload**: photos are given as `https` addresses. Upload to cloud storage (a bonus item) is not built.
+- **Dark mode** is a switch in the account menu, off by default; its colours are this project's own. A visitor who chose it sees the light theme for a moment while a page loads.
+- **Tests**: 498 backend tests and 97 frontend unit tests run in `npm run check`; 59 browser tests (`npm run e2e`) cover search, the listing page, wishlists, login, booking, two guests wanting the same nights, the booking and hosting edge cases, reviews, the profile page, phone and tablet widths, and dark mode.
