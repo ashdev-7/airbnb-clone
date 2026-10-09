@@ -76,6 +76,7 @@ export function useStay(listingId: number) {
   /** Closes the view on top. `fallback` is what lies under it when we cannot go back. */
   const closeModal = useCallback(
     (fallback: StayModal = null) => {
+      if (latest.current.modal === null) return; // nothing is open
       if (openedViews > 0) {
         openedViews -= 1;
         setPending(null);

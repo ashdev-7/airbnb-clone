@@ -51,4 +51,38 @@ test.describe("the wishlist heart (plan §6.3)", () => {
     await cards(page).nth(4).getByRole("button", { name: /^Remove from wishlist/ }).click();
     await expect(page.getByText("Removed from Wishlist")).toBeVisible();
   });
+
+  test("the Wishlists page lists the saved homes; the heart there removes one", async ({ page }) => {
+    await page.goto("/wishlists");
+    await expect(page.getByRole("heading", { name: "Log in to view your wishlists" })).toBeVisible();
+    await page.getByRole("main").getByRole("button", { name: "Log in" }).click();
+    await chooseAccount(page, "Zoya Khan");
+    await expect(page.getByRole("heading", { name: "No saved homes yet" })).toBeVisible();
+
+    // Save two homes from the home page, then find them on the page.
+    await page.getByRole("link", { name: "Start exploring" }).click();
+    const names: string[] = [];
+    for (const index of [0, 3]) {
+      names.push(await cards(page).nth(index).getByRole("heading").innerText());
+      await cards(page).nth(index).getByRole("button", { name: /^Add to wishlist/ }).click();
+      await expect(cards(page).nth(index).getByRole("button", { name: /^Remove from wishlist/ })).toBeVisible();
+    }
+    await openMenu(page);
+    await page.getByRole("dialog").getByRole("link", { name: "Wishlists" }).click();
+    await expect(page).toHaveURL(/\/wishlists$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Wishlists");
+    const tiles = page.getByRole("main").getByRole("listitem");
+    await expect(tiles).toHaveCount(2);
+    for (const name of names) await expect(tiles.filter({ hasText: name }).first()).toBeVisible();
+    await expect(tiles.first().getByRole("link")).toHaveAttribute("href", /^\/rooms\/\d+$/);
+
+    // Removing: the tile goes at once, and stays gone after a reload.
+    await tiles.first().getByRole("button", { name: /^Remove from wishlist/ }).click();
+    await expect(page.getByText("Removed from Wishlist")).toBeVisible();
+    await expect(tiles).toHaveCount(1);
+    await page.reload();
+    await expect(tiles).toHaveCount(1);
+    await tiles.first().getByRole("button", { name: /^Remove from wishlist/ }).click();
+    await expect(page.getByRole("heading", { name: "No saved homes yet" })).toBeVisible();
+  });
 });

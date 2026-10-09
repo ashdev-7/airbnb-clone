@@ -1,16 +1,34 @@
 import { expect, test } from "@playwright/test";
-import { cardLinks, cards, heading, walkPages } from "./helpers";
+import { cards, heading } from "./helpers";
 
-const SEEDED_LISTINGS = 120;
-const PAGE_SIZE = 18;
+const ROWS = ["Popular homes in Goa", "Stay in Manali", "Homes in Jaipur", "Stay in Kerala", "Homes in Karnataka"];
 
-test.describe("home: the explore view (plan §6.3)", () => {
-  test("a card shows photo, type and city, title, price per night and rating, and links to the listing", async ({
+test.describe("home: rows of homes by destination (plan §6.3, capture A1)", () => {
+  test("shows a row per destination, seven cards across, and no filters or pagination", async ({ page }) => {
+    await page.goto("/");
+    for (const title of ROWS) {
+      await expect(page.getByRole("region", { name: title }).getByRole("heading", { name: title })).toBeVisible();
+    }
+    const goa = page.getByRole("region", { name: ROWS[0] });
+    await expect(goa.getByRole("article")).toHaveCount(14);
+    await expect(goa).toContainText("40 homes");
+
+    // Seven cards fit the row at the captured window; the eighth starts past its right edge.
+    const row = await goa.getByRole("list").boundingBox();
+    const seventh = await goa.getByRole("article").nth(6).boundingBox();
+    const eighth = await goa.getByRole("article").nth(7).boundingBox();
+    expect(seventh!.x + seventh!.width).toBeLessThanOrEqual(row!.x + row!.width + 1);
+    expect(eighth!.x).toBeGreaterThanOrEqual(row!.x + row!.width - 1);
+
+    // Filters, the grid with its map, and pagination live on the search page, not here.
+    await expect(page.getByRole("group", { name: "Filters" })).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: /pagination/ })).toHaveCount(0);
+  });
+
+  test("a card shows photo, type and city, price per night and rating, and links to the listing", async ({
     page,
   }) => {
     await page.goto("/");
-    await expect(cards(page)).toHaveCount(PAGE_SIZE);
-
     const card = cards(page).first();
     await expect(card.getByRole("img").first()).toBeVisible();
     await expect(card.getByRole("heading")).toHaveText(/^.+ in .+$/);
@@ -24,26 +42,23 @@ test.describe("home: the explore view (plan §6.3)", () => {
     await expect(link).toHaveAttribute("target", `listing_${href?.split("/").pop()}`);
   });
 
-  test("pagination walks every listing once, and Back returns to the page before", async ({ page }) => {
+  test("the row arrows move the row; the heading opens the search for the place", async ({ page }) => {
     await page.goto("/");
-    const pages = await walkPages(page, "Homes pagination");
-    const ids = pages.flat();
+    const goa = page.getByRole("region", { name: ROWS[0] });
+    const previous = goa.getByRole("button", { name: /^Previous homes/ });
+    const next = goa.getByRole("button", { name: /^Next homes/ });
+    await expect(previous).toBeDisabled();
+    await next.click();
+    await expect(previous).toBeEnabled();
+    await expect(next).toBeDisabled();
+    await expect(goa.getByRole("article").nth(13)).toBeInViewport();
+    await previous.click();
+    await expect(previous).toBeDisabled();
 
-    expect(pages).toHaveLength(Math.ceil(SEEDED_LISTINGS / PAGE_SIZE));
-    expect(pages.slice(0, -1).every((onPage) => onPage.length === PAGE_SIZE)).toBe(true);
-    expect(ids).toHaveLength(SEEDED_LISTINGS);
-    expect(new Set(ids).size).toBe(SEEDED_LISTINGS);
-
-    await page.goBack();
-    await expect(page).toHaveURL(new RegExp(`\\?page=${pages.length - 1}$`));
-    expect(await cardLinks(page)).toEqual(pages.at(-2)?.map((id) => `/rooms/${id}`));
-  });
-
-  test("a page past the end explains itself", async ({ page }) => {
-    await page.goto("/?page=99");
-    await expect(page.getByText("There is no such page")).toBeVisible();
-    await page.getByRole("link", { name: "Back to the first page" }).click();
-    await expect(cards(page)).toHaveCount(PAGE_SIZE);
+    await goa.getByRole("link", { name: /Popular homes in Goa/ }).click();
+    await expect(page).toHaveURL(/\/s\/Goa\/homes$/);
+    await expect(heading(page)).toHaveText("40 homes in Goa");
+    await expect(page.getByRole("navigation", { name: "Search results pagination" })).toBeVisible();
   });
 
   test("the photo arrows change the photo without opening the listing", async ({ page }) => {
@@ -57,13 +72,12 @@ test.describe("home: the explore view (plan §6.3)", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
-  test("a filter chip on home opens the search page with it applied", async ({ page }) => {
+  test("the Homes tab opens the full list with filters and pagination", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("main").getByRole("checkbox", { name: "Villa", exact: true }).click();
-    await expect(page).toHaveURL(/\/s\/homes\?property_type=villa$/);
-    await expect(heading(page)).toHaveText(/^\d+ homes$/);
-    for (const text of await cards(page).getByRole("heading").allInnerTexts()) {
-      expect(text).toMatch(/^Villa in /);
-    }
+    await page.getByRole("navigation", { name: "Categories" }).getByRole("link", { name: "Homes" }).click();
+    await expect(page).toHaveURL(/\/s\/homes$/);
+    await expect(heading(page)).toHaveText("120 homes");
+    await expect(page.getByRole("banner").getByRole("group", { name: "Filters" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Search results pagination" })).toBeVisible();
   });
 });

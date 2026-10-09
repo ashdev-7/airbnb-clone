@@ -35,7 +35,9 @@ export function Modal({
   footer,
   children,
 }: Props) {
-  useCloseWhenHidden(() => onOpenChange(false));
+  useCloseWhenHidden(() => {
+    if (open) onOpenChange(false);
+  });
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

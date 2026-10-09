@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/layout/brand-mark";
+
+export const metadata: Metadata = { title: "Page not found" };
 
 /** Any address that is not a page of this site. */
 export default function NotFound() {

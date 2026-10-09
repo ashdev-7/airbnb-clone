@@ -4,14 +4,12 @@ import type { ListingCard as Listing } from "@/types/api";
 import { ListingCard, type CardSize } from "./listing-card";
 
 /*
- * home: the small cards of capture A1, 12 px apart. Columns are at least 200 px wide, which
- * gives six at the captured window, so a page of 18 fills three even rows (product owner,
- * plan §19). The 32 px between rows is ours: the original shows these cards in single rows.
  * results: the cards of capture B1 beside the map: two columns, 24 px apart, 40 px between
- * rows.
+ * rows. home: the small cards of capture A1 in a grid; the home page itself shows them in
+ * rows (listing-row.tsx).
  */
 const GRID: Record<CardSize, string> = {
-  home: "grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-3 gap-y-8",
+  home: "grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-x-3 gap-y-8",
   results: "grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2",
 };
 const EAGER_CARDS: Record<CardSize, number> = { home: 6, results: 4 };

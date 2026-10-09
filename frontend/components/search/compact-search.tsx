@@ -1,4 +1,5 @@
-import { House, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import Image from "next/image";
 import { formatDateRange, shortPlace } from "@/lib/format";
 import { guestSummary } from "@/lib/guests";
 import type { SearchState } from "@/lib/search-params";
@@ -39,7 +40,7 @@ export function CompactSearch({ search, onOpen }: Props) {
             onClick={() => onOpen(field)}
             className="flex h-full min-w-0 items-center gap-2 rounded-full px-4 text-sm leading-[22px] font-medium"
           >
-            {index === 0 && <House size={22} strokeWidth={1.75} className="shrink-0" aria-hidden />}
+            {index === 0 && <Image src="/icons/house.png" alt="" width={28} height={28} className="-ml-1 shrink-0" />}
             <span className="sr-only">{name}: </span>
             <span className="truncate">{text}</span>
           </button>

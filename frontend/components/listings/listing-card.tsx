@@ -11,8 +11,9 @@ import { WishlistHeart } from "./wishlist-heart";
 
 /**
  * Two sizes, each from its capture:
- * - "home": the small card of the home page (A1). Photo 20:19; text 8 px below at 13 and
- *   12 px; the price and rating share the last line.
+ * - "home": the small card of the home page (A1). Photo 20:19; 8 px below it the name of
+ *   the place in 13 px medium (it may run to two lines), then one 12 px grey line with the
+ *   price and, after a dot, the rating.
  * - "results": the card beside the map on the search page (B1). Photo 4:3; text 12 px
  *   below at 15 px; the rating sits at the right of the first line.
  */
@@ -30,7 +31,7 @@ const HEART: Record<CardSize, string> = { home: "top-2 right-2", results: "top-2
 function Price({ listing }: { listing: Listing }) {
   return (
     <>
-      <span className="font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span>{" "}
+      <span className="leading-[normal] font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span>{" "}
       per night
       {listing.stay_total_minor !== null && (
         <>
@@ -72,7 +73,7 @@ export function ListingCard({ listing, size, eager = false, href }: Props) {
       <Link
         href={href ?? listingHref(listing.id)}
         target={listingTarget(listing.id)}
-        rel="noopener noreferrer"
+       
         className="block rounded-card"
       >
         <div className={`relative overflow-hidden rounded-card bg-line ${PHOTO[size]}`}>
@@ -81,12 +82,9 @@ export function ListingCard({ listing, size, eager = false, href }: Props) {
 
         {size === "home" ? (
           <div className="mx-1 mt-2 grid gap-0.5 text-xs leading-4 text-muted">
-            <h3 className="truncate text-[13px] font-medium text-ink">{headline}</h3>
-            <p className="truncate">{listing.title}</p>
-            <p className="flex items-center gap-1">
-              <span>
-                <Price listing={listing} />
-              </span>
+            <h3 className="text-[13px] font-medium text-ink">{headline}</h3>
+            <p className="flex flex-wrap items-center gap-x-1">
+              <span>{formatMoney(listing.price_per_night_minor)} per night</span>
               <span aria-hidden className="font-bold text-faint">
                 ·
               </span>

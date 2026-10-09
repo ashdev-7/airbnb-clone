@@ -8,7 +8,7 @@ import { cards, daysFromNow, heading, profileNav, signIn } from "./helpers";
  * before a part is attached: these tests load each page in each state and require silence.
  */
 test.describe("pages attach to the server HTML without errors", () => {
-  for (const path of ["/", "/?page=3", "/s/homes", "/s/Goa/homes?adults=2&amenities=pool"]) {
+  for (const path of ["/", "/s/homes", "/s/homes?page=3", "/s/Goa/homes?adults=2&amenities=pool"]) {
     test(`signed out: ${path}`, async ({ page }) => {
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
@@ -48,8 +48,9 @@ test.describe("pages attach to the server HTML without errors", () => {
       await expect(cards(page).first().getByRole("button", { name: /^Remove from wishlist/ })).toBeVisible();
       await expect(cards(page).getByRole("button", { name: /^Remove from wishlist/ })).toHaveCount(1);
     }
-    await page.goto("/s/homes");
-    await expect(heading(page)).toHaveText(/homes$/);
+    // The first card of the home page is the first home of Goa.
+    await page.goto("/s/Goa/homes");
+    await expect(heading(page)).toHaveText(/homes in Goa$/);
     await expect(cards(page).getByRole("button", { name: /^Remove from wishlist/ })).toHaveCount(1);
 
     // The listing page too: its price is there after every load, and "Saved" on the title.

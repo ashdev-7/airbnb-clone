@@ -4,7 +4,7 @@ import { SITE_NAME } from "@/lib/config";
 
 type Column = { title: string; links: { label: string; href?: string }[] };
 
-/** Links: REF-I3, renamed per plan §5.2. Only the hosting link leads anywhere (plan §6.2). */
+/** Links: REF-I3, renamed per plan §5.2. Those without a page of their own lead to "Coming soon". */
 const COLUMNS: Column[] = [
   {
     title: "Support",
@@ -45,9 +45,11 @@ const COLUMNS: Column[] = [
   },
 ];
 
+const soon = (label: string) => `/coming-soon?about=${encodeURIComponent(label)}`;
+
 const LEGAL = ["Privacy", "Terms", "Company details"];
 
-/** Our own simple drawings of the three social marks; they are not links (plan §5.2). */
+/** Our own simple drawings of the three social marks. */
 const SOCIAL = [
   {
     label: "Facebook",
@@ -89,13 +91,9 @@ export function Footer() {
             <ul className="grid gap-4">
               {links.map(({ label, href }) => (
                 <li key={label} className="leading-[18px]">
-                  {href ? (
-                    <Link href={href} className="hover:underline">
-                      {label}
-                    </Link>
-                  ) : (
-                    <span>{label}</span>
-                  )}
+                  <Link href={href ?? soon(label)} className="hover:underline">
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -110,7 +108,9 @@ export function Footer() {
               <span aria-hidden className="px-2">
                 ·
               </span>
-              {label}
+              <Link href={soon(label)} className="hover:underline">
+                {label}
+              </Link>
             </span>
           ))}
         </p>
@@ -123,9 +123,11 @@ export function Footer() {
           <ul className="ml-2 flex items-center gap-5">
             {SOCIAL.map(({ label, shape }) => (
               <li key={label}>
-                <svg viewBox="0 0 16 16" width={16} height={16} role="img" aria-label={label}>
-                  {shape}
-                </svg>
+                <Link href={soon(label)} aria-label={label} className="block">
+                  <svg viewBox="0 0 16 16" width={16} height={16} aria-hidden>
+                    {shape}
+                  </svg>
+                </Link>
               </li>
             ))}
           </ul>

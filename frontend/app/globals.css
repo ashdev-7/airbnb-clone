@@ -7,6 +7,8 @@
 @theme {
   --font-sans: var(--font-brand), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
+  --font-wordmark: var(--font-wordmark-face), var(--font-brand), ui-rounded, sans-serif;
+
   --color-ink: #222222;
   --color-muted: #6c6c6c;
   --color-faint: #c1c1c1;

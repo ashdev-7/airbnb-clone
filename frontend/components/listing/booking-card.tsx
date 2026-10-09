@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { inOverlay, overlayOpen } from "@/components/ui/overlay";
 import { useCloseWhenHidden } from "@/components/ui/use-close-when-hidden";
 import { formatFieldDate, formatMoney } from "@/lib/format";
 import { guestSummary } from "@/lib/guests";
@@ -32,16 +33,17 @@ export function BookingCard({ listing }: Props) {
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(null);
+      if (!root.current?.contains(event.target as Node) && !inOverlay(event.target)) setOpen(null);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(null);
+      if (event.key === "Escape" && !overlayOpen()) setOpen(null);
     };
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
+    // Capture phase, so this runs before an open modal handles the key and closes itself.
+    document.addEventListener("keydown", onKeyDown, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown, true);
     };
   }, [open]);
 
@@ -55,7 +57,7 @@ export function BookingCard({ listing }: Props) {
       className="sticky top-[104px] scroll-mt-28 rounded-xl border border-line bg-white p-6 shadow-[0_6px_16px_rgb(0_0_0/0.12)]"
     >
       <p className="pb-6 text-base leading-5">
-        <span className="text-[22px] leading-[26px] font-semibold">{formatMoney(listing.price_per_night_minor)}</span>{" "}
+        <span className="text-[22px] leading-[normal] font-medium">{formatMoney(listing.price_per_night_minor)}</span>{" "}
         per night
       </p>
 
@@ -68,13 +70,13 @@ export function BookingCard({ listing }: Props) {
         >
           <span className={FIELD}>
             <span className={LABEL}>Check-in</span>
-            <span className={`text-sm leading-[18px] ${stay.checkIn ? "" : "text-muted"}`}>
+            <span className={`text-sm leading-[18px] ${stay.checkIn ? "text-black" : "text-muted"}`}>
               {stay.checkIn ? formatFieldDate(stay.checkIn) : "Add date"}
             </span>
           </span>
           <span className={FIELD}>
             <span className={LABEL}>Checkout</span>
-            <span className={`text-sm leading-[18px] ${stay.checkOut ? "" : "text-muted"}`}>
+            <span className={`text-sm leading-[18px] ${stay.checkOut ? "text-black" : "text-muted"}`}>
               {stay.checkOut ? formatFieldDate(stay.checkOut) : "Add date"}
             </span>
           </span>
@@ -87,7 +89,7 @@ export function BookingCard({ listing }: Props) {
         >
           <span>
             <span className={LABEL}>Guests</span>
-            <span className="text-sm leading-[18px]">{guestSummary(stay.guests)}</span>
+            <span className="text-sm leading-[18px] text-black">{guestSummary(stay.guests)}</span>
           </span>
           <ChevronDown size={18} className={open === "guests" ? "rotate-180" : ""} aria-hidden />
         </button>
@@ -114,7 +116,7 @@ export function BookingCard({ listing }: Props) {
         type="button"
         onClick={() => reserve(() => setOpen("dates"))}
         disabled={ready && !quote}
-        className="mt-4 flex h-12 w-full items-center justify-center rounded-full text-base font-medium text-white [background:var(--gradient-primary)] disabled:opacity-50"
+        className="mt-4 flex h-12 w-full items-center justify-center rounded-full text-base leading-5 font-medium text-white [background:var(--gradient-primary)] disabled:opacity-50"
       >
         {ready ? "Reserve" : "Check availability"}
       </button>

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SITE_NAME } from "@/lib/config";
 import { BrandMark } from "./brand-mark";
 import { UserNav } from "./user-nav";
 
@@ -28,7 +27,7 @@ export function HostingHeader() {
     <header className="sticky top-0 z-[100] border-b border-line-soft bg-white">
       <div className="grid h-header grid-cols-[1fr_auto_1fr] items-center px-gutter">
         <div>
-          <BrandMark href="/hosting" label={`${SITE_NAME} hosting homepage`} />
+          <BrandMark />
         </div>
         <nav aria-label="Primary" className="flex items-center gap-2">
           {LINKS.map(({ label, href }) => {

@@ -17,12 +17,12 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
  */
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "h-12 rounded-control px-6 text-base font-medium text-white [background:var(--gradient-primary)]",
-  dark: "h-12 rounded-control bg-ink px-6 text-base font-medium text-white",
+    "h-12 rounded-control px-6 text-base leading-5 font-medium text-white [background:var(--gradient-primary)]",
+  dark: "h-12 rounded-control bg-ink px-6 text-base leading-5 font-medium text-white",
   outline:
     "h-12 rounded-control border border-line bg-white px-6 text-sm font-medium text-ink hover:bg-surface",
   ghost: "h-10 rounded-full px-3 text-sm leading-[18px] font-medium text-ink hover:bg-control",
-  soft: "h-12 rounded-control bg-control px-6 text-base font-medium text-ink hover:bg-line-soft",
+  soft: "h-12 rounded-control bg-control px-6 text-base leading-5 font-medium text-ink hover:bg-line-soft",
 };
 
 export function Button({

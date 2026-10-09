@@ -152,7 +152,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
             {/* Messaging is a placeholder in this project (plan §6.11). */}
             <Link
               href="/messages"
-              className="mt-6 inline-flex h-12 items-center rounded-control bg-control px-6 text-base font-medium hover:bg-line-soft"
+              className="mt-6 inline-flex h-12 items-center rounded-control bg-control px-6 text-base leading-5 font-medium hover:bg-line-soft"
             >
               Message host
             </Link>

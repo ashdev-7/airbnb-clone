@@ -26,7 +26,9 @@ export function Popover({
   offset = 17,
   className = "",
 }: Props) {
-  useCloseWhenHidden(() => onOpenChange(false));
+  useCloseWhenHidden(() => {
+    if (open) onOpenChange(false);
+  });
 
   return (
     <RadixPopover.Root open={open} onOpenChange={onOpenChange}>

@@ -1,9 +1,11 @@
 "use client";
 
+import { X } from "lucide-react";
 import { DateRangeCalendar } from "@/components/search/date-range-calendar";
+import { ServiceAnimalLink } from "@/components/search/service-animal";
 import { Stepper } from "@/components/ui/stepper";
 import { nightsBetween, type DateSelection, type Stay } from "@/lib/dates";
-import { formatLongDay, plural } from "@/lib/format";
+import { formatFieldDate, formatLongDay, plural } from "@/lib/format";
 import {
   BOOKING_HINTS,
   GUEST_ROWS,
@@ -27,6 +29,39 @@ export function stayHeading(dates: DateSelection): { title: string; line: string
     : { title: "Select check-in date", line: "Add your travel dates for exact pricing" };
 }
 
+/**
+ * One of the two date fields at the top right of the date panel (capture C4): the label in
+ * 10 px bold capitals over the date written as in C2 ("10/29/2026"), with a cross to clear
+ * it; the field being filled has a dark outline.
+ */
+function DateField({
+  label,
+  date,
+  current,
+  onClear,
+}: {
+  label: string;
+  date: string | null;
+  current: boolean;
+  onClear: () => void;
+}) {
+  return (
+    <div className={`flex flex-1 items-center justify-between px-3 py-2.5 ${current ? "rounded-lg outline-2 outline-ink" : ""}`}>
+      <div>
+        <span className="block text-[10px] leading-3 font-bold uppercase">{label}</span>
+        <span className={`text-sm leading-[18px] ${date ? "" : "text-muted"}`}>
+          {date ? formatFieldDate(date) : "Add date"}
+        </span>
+      </div>
+      {date && (
+        <button type="button" aria-label={`Clear ${label.toLowerCase()}`} onClick={onClear} className="flex size-6 items-center justify-center rounded-full hover:bg-control">
+          <X size={12} strokeWidth={3} aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+}
+
 type DatesProps = {
   dates: DateSelection;
   booked: readonly Stay[];
@@ -47,8 +82,26 @@ export function DatesPanel({ dates, booked, onChange, onClose }: DatesProps) {
       aria-label="Choose dates"
       className="absolute -top-6 -right-8 z-[5] w-[661px] rounded-2xl bg-white px-8 pt-6 pb-4 shadow-[0_2px_16px_rgb(0_0_0/0.15)]"
     >
-      <h3 className="text-[22px] leading-[26px] font-medium">{title}</h3>
-      <p className="pt-2 pb-2 text-sm leading-[18px] text-muted">{line}</p>
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <h3 className="text-[22px] leading-[26px] font-medium">{title}</h3>
+          <p className="pt-2 pb-2 text-sm leading-[18px] text-muted">{line}</p>
+        </div>
+        <div className="flex w-[315px] shrink-0 divide-x divide-muted rounded-lg border border-muted">
+          <DateField
+            label="Check-in"
+            date={dates.checkIn}
+            current={!dates.checkIn || Boolean(dates.checkOut)}
+            onClear={() => onChange({ checkIn: null, checkOut: null })}
+          />
+          <DateField
+            label="Checkout"
+            date={dates.checkOut}
+            current={Boolean(dates.checkIn) && !dates.checkOut}
+            onClear={() => onChange({ checkIn: dates.checkIn, checkOut: null })}
+          />
+        </div>
+      </div>
       <DateRangeCalendar value={dates} onChange={onChange} booked={booked} size="listing" />
       <div className="flex items-center justify-end gap-4 pt-2">
         <button
@@ -95,7 +148,11 @@ export function GuestsPanel({ guests, limits, petsAllowed, onChange, onClose }: 
           <li key={kind} className="flex items-center justify-between py-3">
             <div>
               <h4 className="text-base leading-5 font-medium">{label}</h4>
-              <p className="text-sm leading-[18px]">{BOOKING_HINTS[kind]}</p>
+              {kind === "pets" ? (
+                <ServiceAnimalLink className="text-sm leading-[18px]" />
+              ) : (
+                <p className="text-sm leading-[18px]">{BOOKING_HINTS[kind]}</p>
+              )}
             </div>
             <Stepper
               label={label}

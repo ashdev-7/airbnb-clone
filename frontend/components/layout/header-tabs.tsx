@@ -1,18 +1,15 @@
-"use client";
-
-import { ConciergeBell, Earth, House, Ticket, type LucideIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 /** `width` and `labelLeft` are the tab's box and where its label starts, from capture A1. */
-type Tab = { label: string; href: string; icon: LucideIcon; width: number; labelLeft: number };
+type Tab = { label: string; href: string; icon: string; width: number; labelLeft: number };
 
 /** Labels: REF-H1. Experiences and Services lead to "Coming soon" pages (plan §6.11). */
 const TABS: Tab[] = [
-  { label: "All", href: "/", icon: Earth, width: 71, labelLeft: 44 },
-  { label: "Homes", href: "/s/homes", icon: House, width: 98.5, labelLeft: 52 },
-  { label: "Experiences", href: "/experiences", icon: Ticket, width: 124.7, labelLeft: 44 },
-  { label: "Services", href: "/services", icon: ConciergeBell, width: 103.7, labelLeft: 48 },
+  { label: "All", href: "/", icon: "globe", width: 71, labelLeft: 44 },
+  { label: "Homes", href: "/s/homes", icon: "house", width: 98.5, labelLeft: 52 },
+  { label: "Experiences", href: "/experiences", icon: "balloon", width: 124.7, labelLeft: 44 },
+  { label: "Services", href: "/services", icon: "bell", width: 103.7, labelLeft: 48 },
 ];
 
 const ICON_BOX = 36;
@@ -21,16 +18,18 @@ const ICON_GAP = 8;
 /**
  * The tabs of capture A1: four boxes 35 px apart, each a 36 px picture and a 14 px medium
  * label; the active one dark with a 3 px bar 8 px under it. Box widths and label positions
- * are the captured ones, so the row sits where the original's does. The original's
- * pictures are its own artwork; ours are Lucide icons in the same 36 px box.
+ * are the captured ones, so the row sits where the original's does.
+ *
+ * The pictures are Microsoft Fluent Emoji in its 3D style (MIT licence, kept beside the
+ * files in public/icons): the original's pictures are its own artwork.
+ *
+ * The tabs are only shown on the home page, where "All" is the page being viewed.
  */
 export function HeaderTabs() {
-  const pathname = usePathname();
-
   return (
     <nav aria-label="Categories" className="flex h-12 gap-[35px]">
-      {TABS.map(({ label, href, icon: Icon, width, labelLeft }) => {
-        const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+      {TABS.map(({ label, href, icon, width, labelLeft }, index) => {
+        const active = index === 0;
         return (
           <Link
             key={href}
@@ -41,13 +40,14 @@ export function HeaderTabs() {
               active ? "text-ink" : "text-muted hover:text-ink"
             }`}
           >
-            <span
-              aria-hidden
-              style={{ left: labelLeft - ICON_GAP - ICON_BOX, width: ICON_BOX, height: ICON_BOX }}
-              className="absolute top-0 flex items-center justify-center"
-            >
-              <Icon size={26} strokeWidth={1.6} />
-            </span>
+            <Image
+              src={`/icons/${icon}.png`}
+              alt=""
+              width={ICON_BOX}
+              height={ICON_BOX}
+              style={{ left: labelLeft - ICON_GAP - ICON_BOX }}
+              className="absolute top-0 transition-transform group-hover:scale-110"
+            />
             <span style={{ left: labelLeft }} className="absolute top-[9px] whitespace-nowrap">
               {label}
             </span>

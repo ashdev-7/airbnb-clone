@@ -62,7 +62,7 @@ export function SectionNav({ listing }: Props) {
               onClick={() =>
                 reserve(() => document.getElementById("booking")?.scrollIntoView({ behavior: "smooth", block: "center" }))
               }
-              className="flex h-12 items-center rounded-full px-6 text-base font-medium text-white [background:var(--gradient-primary)]"
+              className="flex h-12 items-center rounded-full px-6 text-base leading-5 font-medium text-white [background:var(--gradient-primary)]"
             >
               Reserve
             </button>

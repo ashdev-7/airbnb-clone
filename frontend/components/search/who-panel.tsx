@@ -3,6 +3,7 @@
 import { Stepper } from "@/components/ui/stepper";
 import { useMeta } from "@/hooks/use-meta";
 import { GUEST_ROWS, maxFor, minFor, setGuests, type GuestCounts } from "@/lib/guests";
+import { ServiceAnimalLink } from "./service-animal";
 
 type Props = { value: GuestCounts; onChange: (value: GuestCounts) => void };
 
@@ -23,7 +24,11 @@ export function WhoPanel({ value, onChange }: Props) {
         >
           <div>
             <h3 className="text-base leading-5 font-medium">{label}</h3>
-            <p className="pt-1 text-sm leading-[18px] text-muted">{hint}</p>
+            {kind === "pets" ? (
+              <ServiceAnimalLink className="mt-1 text-sm leading-[18px] text-muted" />
+            ) : (
+              <p className="pt-1 text-sm leading-[18px] text-muted">{hint}</p>
+            )}
           </div>
           <Stepper
             label={label}

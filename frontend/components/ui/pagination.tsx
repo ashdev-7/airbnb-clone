@@ -10,7 +10,7 @@ type Props = {
   label: string;
 };
 
-const CELL = "flex size-8 items-center justify-center rounded-full text-sm font-medium";
+const CELL = "flex size-8 items-center justify-center rounded-full text-sm leading-[18px] font-medium";
 
 function Arrow({ href, label, back }: { href: string | null; label: string; back?: boolean }) {
   const Icon = back ? ChevronLeft : ChevronRight;

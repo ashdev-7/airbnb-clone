@@ -24,7 +24,7 @@ test.describe("the listing page (plan §6.6)", () => {
     await expect(heading(page)).toHaveText(listing.title);
     await expect(page.getByRole("button", { name: /^Photo \d of \d+/ })).toHaveCount(Math.min(5, listing.photos.length));
     await expect(page.getByRole("heading", { name: new RegExp(`^Entire .+ in ${listing.city}, India$`) })).toBeVisible();
-    await expect(page.getByText(listing.description.slice(0, 40))).toBeVisible();
+    await expect(page.getByRole("region", { name: "About this place" })).toContainText(listing.description.slice(0, 40));
     await expect(page.getByRole("heading", { name: `Hosted by ${listing.host.name}` })).toBeVisible();
     await expect(page.getByRole("heading", { name: "What this place offers" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Where you’ll be" })).toBeVisible();
@@ -181,6 +181,8 @@ test.describe("dates, guests and the price (R-LD-3, R-LD-4)", () => {
     // Dates: clearing removes the price; a longer stay costs what the server says.
     await card(page).getByRole("button", { name: /Check-in/ }).click();
     const panel = card(page).getByRole("dialog", { name: "Choose dates" });
+    const [, month, day] = checkIn.split("-").map(Number);
+    await expect(panel).toContainText(`${month}/${day}/${checkIn.slice(0, 4)}`);
     await panel.getByRole("button", { name: "Clear dates" }).click();
     await expect(page).not.toHaveURL(/check_in/);
     await expect(priceDetails(page)).toHaveCount(0);
@@ -241,5 +243,40 @@ test.describe("dates, guests and the price (R-LD-3, R-LD-4)", () => {
     const aside = listingPage.getByRole("complementary", { name: "Reserve this place" });
     await expect(aside).toContainText("2 guests");
     await expect(aside.getByLabel("Price details")).toContainText("3 nights x");
+  });
+
+  test("the same home opened again from a page without dates shows no dates, in the same tab", async ({
+    page,
+    context,
+  }) => {
+    // First from a search with dates: the listing opens in its tab with them.
+    await page.goto(`/s/Jaipur/homes?checkin=${daysFromNow(30)}&checkout=${daysFromNow(33)}&adults=2`);
+    const href = await cards(page).first().getByRole("link").getAttribute("href");
+    const id = href!.split("/rooms/")[1].split("?")[0];
+    const opened = context.waitForEvent("page");
+    await cards(page).first().getByRole("link").click();
+    const tab = await opened;
+    const aside = tab.getByRole("complementary", { name: "Reserve this place" });
+    await expect(aside.getByLabel("Price details")).toBeVisible();
+
+    // Then from a search without dates, and from the home page: the same tab, now without
+    // dates. Nothing carries over except what the link itself says.
+    for (const from of ["/s/Jaipur/homes", "/"]) {
+      await page.goto(from);
+      await page.getByRole("main").locator(`a[href="/rooms/${id}"]`).first().click();
+      await expect(tab).toHaveURL(new RegExp(`/rooms/${id}$`));
+      await expect(aside).toContainText("Add date");
+      await expect(aside).toContainText("1 guest");
+      await expect(aside.getByLabel("Price details")).toHaveCount(0);
+      await expect(aside.getByRole("button", { name: "Check availability" })).toBeVisible();
+      expect(context.pages()).toHaveLength(2);
+    }
+
+    // And a search with other dates replaces them.
+    await page.goto(`/s/Jaipur/homes?checkin=${daysFromNow(50)}&checkout=${daysFromNow(52)}&adults=3`);
+    await page.getByRole("main").locator(`a[href^="/rooms/${id}?"]`).first().click();
+    await expect(tab).toHaveURL(new RegExp(`check_in=${daysFromNow(50)}&check_out=${daysFromNow(52)}&adults=3$`));
+    await expect(aside.getByLabel("Price details")).toContainText("2 nights x");
+    expect(context.pages()).toHaveLength(2);
   });
 });

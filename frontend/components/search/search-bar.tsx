@@ -3,6 +3,7 @@
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { inOverlay, overlayOpen } from "@/components/ui/overlay";
 import { useCloseWhenHidden } from "@/components/ui/use-close-when-hidden";
 import { formatDateRange, formatDay } from "@/lib/format";
 import { guestSummary } from "@/lib/guests";
@@ -49,16 +50,17 @@ export function SearchBar({ initial, openField = null, onDismiss }: Props) {
     if (active === "where") whereInput.current?.focus();
     if (active === null) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) dismiss();
+      if (!root.current?.contains(event.target as Node) && !inOverlay(event.target)) dismiss();
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") dismiss();
+      if (event.key === "Escape" && !overlayOpen()) dismiss();
     };
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
+    // Capture phase, so this runs before an open modal handles the key and closes itself.
+    document.addEventListener("keydown", onKeyDown, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown, true);
     };
     // `dismiss` only wraps setters and the latest onDismiss; re-subscribing per render is not needed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
