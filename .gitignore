@@ -4,6 +4,7 @@ data/
 .env.local
 node_modules/
 .next/
+.next-e2e/
 __pycache__/
 .venv/
 *.db

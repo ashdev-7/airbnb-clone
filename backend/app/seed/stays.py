@@ -161,7 +161,7 @@ class StayBuilder:
 
     def _upcoming_stays(self) -> None:
         special = {FULLY_BOOKED_LISTING, BACK_TO_BACK_LISTING, *CURRENT_STAY_LISTINGS}
-        chosen = [n for n in range(0, len(self.listings), 3) if n not in special]
+        chosen = [n for n in range(0, len(self.listings), 6) if n not in special]
         for position, index in enumerate(chosen):
             check_in = self.today + timedelta(days=self.rng.randint(3, 45))
             guest = self._meera if position < 3 else self._other_guest()

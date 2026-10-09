@@ -37,7 +37,7 @@ export function MapCard({ listing, href, onClose }: Props) {
           </div>
           <div className="mt-0.5 truncate text-muted">{listing.title}</div>
           <div className="mt-2 text-muted">
-            <span className="font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span> night
+            <span className="font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span> per night
           </div>
         </div>
       </Link>

@@ -57,6 +57,9 @@ def db(database: Database) -> Iterator[Connection]:
         yield connection
 
 
+GOA_TOWNS = {"Candolim", "Anjuna", "Calangute", "Palolem"}
+
+
 def scalar(db: Connection, sql: str, *parameters: Any) -> Any:
     return db.exec_driver_sql(sql, parameters).scalar_one()
 
@@ -69,7 +72,7 @@ def column(db: Connection, sql: str, *parameters: Any) -> list[Any]:
 
 
 def test_users(db: Connection) -> None:
-    assert scalar(db, "SELECT count(*) FROM users") == 28
+    assert scalar(db, "SELECT count(*) FROM users") == 34
     assert scalar(db, "SELECT count(*) FROM users WHERE avatar_url IS NOT NULL") == 0
     demo = column(db, "SELECT name FROM users WHERE is_demo ORDER BY id")
     assert demo == [*DEMO_HOSTS, MEERA, ARJUN, ZOYA]
@@ -83,25 +86,26 @@ def test_property_types_and_amenities(db: Connection) -> None:
     assert scalar(db, "SELECT count(*) FROM amenities WHERE slug LIKE '%pet%'") == 0
 
 
-def test_listings_are_spread_over_about_twelve_hosts(db: Connection) -> None:
+def test_listings_are_spread_over_hosts_with_no_more_than_eight_each(db: Connection) -> None:
     counts = dict(
         tuple(row)
         for row in db.exec_driver_sql(
             "SELECT u.name, count(*) FROM listings l JOIN users u ON u.id = l.host_id GROUP BY u.id"
         )
     )
-    assert len(counts) == 12 and sum(counts.values()) == 60
+    assert len(counts) == 18 and sum(counts.values()) == 120
+    assert max(counts.values()) <= 8
     assert counts["Leela Nair"] == counts["Kabir Sethi"] == 1
     assert counts["Ananya Rao"] == counts["Vikram Mehta"] == 6
     others = [count for name, count in counts.items() if name not in DEMO_HOSTS]
-    assert len(others) == 8 and all(3 <= count <= 7 for count in others)
+    assert len(others) == 14 and all(7 <= count <= 8 for count in others)
     assert (
         scalar(
             db,
             "SELECT count(*) FROM users u WHERE NOT u.is_demo"
             " AND EXISTS (SELECT 1 FROM listings l WHERE l.host_id = u.id)",
         )
-        == 8
+        == 14
     )
 
 
@@ -116,7 +120,7 @@ def test_no_host_has_all_their_listings_in_one_city(db: Connection) -> None:
 
 
 def test_listings_cover_the_destinations_types_prices_and_sizes(db: Connection) -> None:
-    assert scalar(db, "SELECT count(*) FROM listings") == 60
+    assert scalar(db, "SELECT count(*) FROM listings") == 120
     assert scalar(db, "SELECT count(DISTINCT city) FROM listings") >= 10
     assert scalar(db, "SELECT count(DISTINCT property_type_id) FROM listings") == 8
     assert scalar(db, "SELECT count(*) FROM listings WHERE country <> 'India'") == 0
@@ -145,14 +149,14 @@ def test_listings_satisfy_the_host_form_rules(db: Connection) -> None:
         assert cleaning % 100 == 0 and 0 <= cleaning <= 2_500_000
         assert 1 <= guests <= 16 and 0 <= bedrooms <= 20 and 1 <= beds <= 30
         assert 1 <= bathrooms <= 20
-    assert scalar(db, "SELECT count(DISTINCT title) FROM listings") == 60
+    assert scalar(db, "SELECT count(DISTINCT title) FROM listings") == 120
 
 
 def test_photos(db: Connection) -> None:
     per_listing = column(
         db, "SELECT count(*) FROM listing_images GROUP BY listing_id ORDER BY listing_id"
     )
-    assert len(per_listing) == 60
+    assert len(per_listing) == 120
     assert sorted(per_listing)[:3] == [3, 3, 5] or sorted(per_listing)[:3] == [3, 3, 6]
     assert all(count >= 5 for count in sorted(per_listing)[2:])
     assert scalar(db, "SELECT count(*) FROM listing_images WHERE url NOT LIKE 'https://%'") == 0
@@ -176,9 +180,39 @@ def test_photos(db: Connection) -> None:
     )
 
 
+def test_every_cover_photo_belongs_to_one_listing_only(db: Connection) -> None:
+    """A cover is not the cover of another listing, nor in any other gallery."""
+    covers = column(db, "SELECT url FROM listing_images WHERE position = 0")
+    assert len(covers) == len(set(covers)) == 120
+    reused = scalar(
+        db,
+        "SELECT count(*) FROM listing_images g WHERE g.position > 0"
+        " AND g.url IN (SELECT url FROM listing_images WHERE position = 0)",
+    )
+    assert reused == 0
+
+
+def test_the_big_destinations_fill_more_than_one_page(db: Connection) -> None:
+    """Plan §12: a search for Goa, Manali or Jaipur must need pagination (18 a page)."""
+    by_state = dict(
+        tuple(row)
+        for row in db.exec_driver_sql("SELECT state, count(*) FROM listings GROUP BY state")
+    )
+    by_city = dict(
+        tuple(row)
+        for row in db.exec_driver_sql("SELECT city, count(*) FROM listings GROUP BY city")
+    )
+    assert by_state["Goa"] == 40
+    assert by_city["Manali"] == by_city["Jaipur"] == 20
+    small = [
+        count for city, count in by_city.items() if city not in GOA_TOWNS | {"Manali", "Jaipur"}
+    ]
+    assert len(small) == 9 and all(4 <= count <= 5 for count in small)
+
+
 def test_every_listing_has_amenities_and_some_allow_pets(db: Connection) -> None:
-    assert scalar(db, "SELECT count(DISTINCT listing_id) FROM listing_amenities") == 60
-    assert 8 <= scalar(db, "SELECT count(*) FROM listings WHERE pets_allowed") <= 30
+    assert scalar(db, "SELECT count(DISTINCT listing_id) FROM listing_amenities") == 120
+    assert 20 <= scalar(db, "SELECT count(*) FROM listings WHERE pets_allowed") <= 55
 
 
 # --- bookings and reviews ----------------------------------------------------------------
@@ -309,9 +343,9 @@ def test_review_counts_most_listings_rated_a_few_new(db: Connection) -> None:
         "SELECT count(r.id) FROM listings l LEFT JOIN bookings b ON b.listing_id = l.id"
         " LEFT JOIN reviews r ON r.booking_id = b.id GROUP BY l.id",
     )
-    assert len(counts) == 60 and max(counts) <= 40
+    assert len(counts) == 120 and max(counts) <= 40
     assert sum(1 for count in counts if count < 3) == 4
-    assert sum(1 for count in counts if count >= 3) == 56
+    assert sum(1 for count in counts if count >= 3) == 116
 
 
 def test_reviews_follow_completed_stays_within_the_window(db: Connection) -> None:

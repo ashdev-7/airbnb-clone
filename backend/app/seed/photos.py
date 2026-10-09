@@ -14,7 +14,7 @@ def photo_url(photo_id: str) -> str:
     return f"{_BASE}{photo_id}{_PARAMS}"
 
 
-# Cover photos: the outside of the place (for apartments, the main room), by property type.
+# Cover photos: the outside of the place, by property type.
 COVERS: dict[str, tuple[str, ...]] = {
     "house": (
         "1580587771525-78b9dba3b914",
@@ -125,7 +125,7 @@ COVERS: dict[str, tuple[str, ...]] = {
 }
 
 # The rest of a listing's gallery, in the order the rooms are shown.
-ROOMS: dict[str, tuple[str, ...]] = {
+_ROOM_PHOTOS: dict[str, tuple[str, ...]] = {
     "living": (
         "1724582586529-62622e50c0b3",
         "1600210492493-0946911123ea",
@@ -243,8 +243,24 @@ ROOMS: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# A listing's cover is never used by another listing, as a cover or in a gallery. There
+# are fewer outside views than listings, so some interior photos are set aside as covers
+# (for flats, guesthouses and homes, whose cover is often a room) and taken out of the
+# gallery pools.
+_COVER_ROOMS = ("living", "bedroom", "kitchen", "dining")
+_COVERS_PER_ROOM = 9
+INTERIOR_COVERS: tuple[str, ...] = tuple(
+    photo_id for room in _COVER_ROOMS for photo_id in _ROOM_PHOTOS[room][-_COVERS_PER_ROOM:]
+)
+
+# Gallery photos by room. They may repeat across listings, never within one.
+ROOMS: dict[str, tuple[str, ...]] = {
+    room: tuple(photo_id for photo_id in pool if photo_id not in INTERIOR_COVERS)
+    for room, pool in _ROOM_PHOTOS.items()
+}
+
 
 def all_photo_urls() -> list[str]:
     """Every URL the seed can use, without duplicates, in a stable order."""
-    ids = [photo_id for group in (*COVERS.values(), *ROOMS.values()) for photo_id in group]
+    ids = [photo_id for group in (*COVERS.values(), *_ROOM_PHOTOS.values()) for photo_id in group]
     return [photo_url(photo_id) for photo_id in dict.fromkeys(ids)]

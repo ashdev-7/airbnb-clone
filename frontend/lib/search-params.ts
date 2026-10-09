@@ -5,7 +5,8 @@
  *
  * Names on the search page: `checkin`, `checkout`, `adults` (capture B1) and `min_bedrooms`,
  * `min_beds`, `min_bathrooms` (capture B5). Names on the listing page: `check_in`,
- * `check_out`, `adults` (capture C2). The rest are ours until a capture shows them.
+ * `check_out`, `adults` (capture C2). The rest, `pets_allowed` among them, are ours until a
+ * capture shows them.
  */
 
 import { isIsoDate, type IsoDate } from "./dates";
@@ -20,6 +21,8 @@ export type Filters = {
   minBedrooms: number;
   minBeds: number;
   minBathrooms: number;
+  /** Only homes whose host allows pets, whether or not a pet is among the guests. */
+  petsAllowed: boolean;
 };
 
 export type SearchState = Filters & {
@@ -39,6 +42,7 @@ export const NO_FILTERS: Filters = {
   minBedrooms: 0,
   minBeds: 0,
   minBathrooms: 0,
+  petsAllowed: false,
 };
 
 export const EMPTY_SEARCH: SearchState = {
@@ -111,6 +115,7 @@ export function parseSearch(location: string | undefined, params: RawParams): Se
     minBedrooms: count(params.min_bedrooms, MAX_ROOMS) ?? 0,
     minBeds: count(params.min_beds, MAX_ROOMS) ?? 0,
     minBathrooms: count(params.min_bathrooms, MAX_ROOMS) ?? 0,
+    petsAllowed: first(params.pets_allowed) === "true",
     page: parsePage(params[PAGE_PARAM]),
   };
 }
@@ -143,6 +148,7 @@ export function searchHref(state: SearchState): string {
   setCount(query, "min_bedrooms", state.minBedrooms);
   setCount(query, "min_beds", state.minBeds);
   setCount(query, "min_bathrooms", state.minBathrooms);
+  if (state.petsAllowed) query.set("pets_allowed", "true");
   if (state.page > 1) query.set(PAGE_PARAM, String(state.page));
 
   const text = query.toString();
@@ -160,7 +166,9 @@ export function apiQuery(state: SearchState, withPage = true): string {
   setCount(query, "adults", state.guests.adults);
   setCount(query, "children", state.guests.children);
   setCount(query, "infants", state.guests.infants);
-  setCount(query, "pets", state.guests.pets);
+  // The API keeps homes that allow pets whenever a pet is asked for (plan §10.6), so the
+  // "Pets allowed" filter asks for one even when no pet is among the guests.
+  setCount(query, "pets", Math.max(state.guests.pets, state.petsAllowed ? 1 : 0));
   if (state.priceMin !== null) query.set("min_price_minor", String(state.priceMin * MINOR_PER_RUPEE));
   if (state.priceMax !== null) query.set("max_price_minor", String(state.priceMax * MINOR_PER_RUPEE));
   for (const slug of state.propertyTypes) query.append("property_type", slug);
@@ -173,8 +181,9 @@ export function apiQuery(state: SearchState, withPage = true): string {
 }
 
 export function filtersOf(state: SearchState): Filters {
-  const { priceMin, priceMax, propertyTypes, amenities, minBedrooms, minBeds, minBathrooms } = state;
-  return { priceMin, priceMax, propertyTypes, amenities, minBedrooms, minBeds, minBathrooms };
+  const { priceMin, priceMax, propertyTypes, amenities, minBedrooms, minBeds, minBathrooms, petsAllowed } =
+    state;
+  return { priceMin, priceMax, propertyTypes, amenities, minBedrooms, minBeds, minBathrooms, petsAllowed };
 }
 
 /** How many filters are on: the number beside the "Filters" button. */
@@ -185,7 +194,8 @@ export function activeFilterCount(filters: Filters): number {
     filters.amenities.length +
     (filters.minBedrooms > 0 ? 1 : 0) +
     (filters.minBeds > 0 ? 1 : 0) +
-    (filters.minBathrooms > 0 ? 1 : 0)
+    (filters.minBathrooms > 0 ? 1 : 0) +
+    (filters.petsAllowed ? 1 : 0)
   );
 }
 

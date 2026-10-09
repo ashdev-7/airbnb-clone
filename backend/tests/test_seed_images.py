@@ -4,7 +4,7 @@ The real check is `npm run seed -- --check-images`.
 """
 
 from app.seed.images import check_images, check_url
-from app.seed.photos import COVERS, all_photo_urls
+from app.seed.photos import COVERS, INTERIOR_COVERS, ROOMS, all_photo_urls
 
 RESPONSES = {
     "https://img.test/ok.jpg": (200, "image/jpeg"),
@@ -46,3 +46,11 @@ def test_the_pool_is_https_without_duplicates_and_covers_every_property_type() -
         "tiny-home",
         "treehouse",
     }
+
+
+def test_covers_and_gallery_photos_never_share_a_photo() -> None:
+    covers = [photo_id for pool in COVERS.values() for photo_id in pool] + list(INTERIOR_COVERS)
+    gallery = {photo_id for pool in ROOMS.values() for photo_id in pool}
+    assert len(covers) == len(set(covers)) >= 120
+    assert not gallery & set(covers)
+    assert all(len(pool) >= 8 for pool in ROOMS.values())

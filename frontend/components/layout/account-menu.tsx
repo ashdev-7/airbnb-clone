@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleHelp, Globe } from "lucide-react";
+import { CircleHelp, CircleUserRound, Globe, Heart, Luggage, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { User } from "@/types/api";
@@ -40,8 +40,11 @@ type Props = {
 };
 
 /**
- * The account menu. Signed out it follows capture A6. No capture shows it signed in, so
- * that list uses the same rows and dividers with the entries of plan §6.2.
+ * The account menu. Signed out it follows capture A6; signed in, capture G2: four medium
+ * rows with icons (Wishlists, Trips, Messages, Profile), then the general rows, the
+ * hosting row, and the way out. "Notifications", "Account settings", "Refer a host" and
+ * "Find a co-host" of the original are not in this project; "Switch account" is ours,
+ * because login is mocked (plan D4).
  */
 export function AccountMenu({
   user,
@@ -88,15 +91,24 @@ export function AccountMenu({
     <div className="w-[265px] py-3">
       {user ? (
         <>
-          <Row href="/trips" onSelect={onClose}>
-            Trips
-          </Row>
           <Row href="/wishlists" onSelect={onClose}>
-            Wishlists
+            <Heart size={16} aria-hidden />
+            <span className="font-medium">Wishlists</span>
+          </Row>
+          <Row href="/trips" onSelect={onClose}>
+            <Luggage size={16} aria-hidden />
+            <span className="font-medium">Trips</span>
           </Row>
           <Row href="/messages" onSelect={onClose}>
-            Messages
+            <MessageSquare size={16} aria-hidden />
+            <span className="font-medium">Messages</span>
           </Row>
+          <Row href="/users/profile" onSelect={onClose}>
+            <CircleUserRound size={16} aria-hidden />
+            <span className="font-medium">Profile</span>
+          </Row>
+          <Divider />
+          {general}
           {/* A placeholder row, not a page (plan §6.11). */}
           <Row onSelect={onClose}>
             <span className="flex-1">Verify your identity</span>
@@ -104,8 +116,6 @@ export function AccountMenu({
               Coming soon
             </span>
           </Row>
-          <Divider />
-          {general}
           <Divider />
           {hosting}
           <Divider />

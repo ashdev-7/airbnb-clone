@@ -3,8 +3,8 @@
 from typing import NamedTuple
 
 PROPERTY_TYPES: tuple[tuple[str, str], ...] = (
-    ("house", "House"),
-    ("apartment", "Apartment"),
+    ("house", "Home"),
+    ("apartment", "Flat"),
     ("guesthouse", "Guesthouse"),
     ("cabin", "Cabin"),
     ("villa", "Villa"),
@@ -67,9 +67,13 @@ class Destination(NamedTuple):
     longitude: float
     setting: str  # a phrase for descriptions
     location_amenity: str | None
+    # The property types the place suits, in the order they are handed out.
     property_types: tuple[str, ...]
+    listings: int
 
 
+# 120 listings: Goa has 40 over four towns, Manali and Jaipur 20 each, so that a search
+# for any of them fills more than one page; the other places have four or five.
 DESTINATIONS: tuple[Destination, ...] = (
     Destination(
         "Candolim",
@@ -79,6 +83,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "a short walk from the beach",
         "beach-access",
         ("villa", "house", "apartment", "guesthouse", "cottage"),
+        10,
     ),
     Destination(
         "Manali",
@@ -88,15 +93,27 @@ DESTINATIONS: tuple[Destination, ...] = (
         "among apple orchards and pines",
         "mountain-view",
         ("cabin", "cottage", "treehouse", "house", "tiny-home"),
+        20,
     ),
     Destination(
         "Jaipur",
         "Rajasthan",
         26.9124,
         75.7873,
-        "close to the old city's bazaars",
+        "close to the bazaars of the old city",
         None,
         ("house", "apartment", "villa", "guesthouse", "apartment"),
+        20,
+    ),
+    Destination(
+        "Anjuna",
+        "Goa",
+        15.5733,
+        73.7410,
+        "between the cliffs and the flea market",
+        "beach-access",
+        ("apartment", "villa", "guesthouse", "house", "apartment"),
+        10,
     ),
     Destination(
         "Udaipur",
@@ -106,6 +123,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "near the lakes and the old ghats",
         "lake-access",
         ("villa", "guesthouse", "house", "apartment", "villa"),
+        5,
     ),
     Destination(
         "Munnar",
@@ -115,6 +133,17 @@ DESTINATIONS: tuple[Destination, ...] = (
         "surrounded by tea estates",
         "mountain-view",
         ("cottage", "treehouse", "cabin", "villa", "tiny-home"),
+        4,
+    ),
+    Destination(
+        "Calangute",
+        "Goa",
+        15.5439,
+        73.7553,
+        "five minutes from the sand",
+        "beach-access",
+        ("guesthouse", "apartment", "house", "villa", "apartment"),
+        10,
     ),
     Destination(
         "Coorg",
@@ -124,6 +153,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "inside a working coffee plantation",
         "mountain-view",
         ("cottage", "villa", "treehouse", "cabin", "guesthouse"),
+        4,
     ),
     Destination(
         "Rishikesh",
@@ -133,6 +163,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "above the river in the foothills",
         "mountain-view",
         ("guesthouse", "cabin", "tiny-home", "cottage", "apartment"),
+        5,
     ),
     Destination(
         "Mumbai",
@@ -142,6 +173,17 @@ DESTINATIONS: tuple[Destination, ...] = (
         "minutes from cafés and the sea face",
         None,
         ("apartment", "apartment", "house", "guesthouse", "apartment"),
+        5,
+    ),
+    Destination(
+        "Palolem",
+        "Goa",
+        15.0100,
+        74.0232,
+        "behind the palms of a quiet bay",
+        "beach-access",
+        ("cottage", "guesthouse", "apartment", "house", "villa"),
+        10,
     ),
     Destination(
         "Bengaluru",
@@ -151,6 +193,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "on a leafy residential street",
         None,
         ("apartment", "house", "villa", "tiny-home", "apartment"),
+        5,
     ),
     Destination(
         "Darjeeling",
@@ -160,6 +203,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "on a ridge facing the mountains",
         "mountain-view",
         ("cottage", "cabin", "guesthouse", "house", "treehouse"),
+        4,
     ),
     Destination(
         "Shimla",
@@ -169,6 +213,7 @@ DESTINATIONS: tuple[Destination, ...] = (
         "on a quiet cedar-covered slope",
         "mountain-view",
         ("cottage", "cabin", "house", "tiny-home", "villa"),
+        4,
     ),
     Destination(
         "Alappuzha",
@@ -178,8 +223,12 @@ DESTINATIONS: tuple[Destination, ...] = (
         "beside the backwaters",
         "lake-access",
         ("villa", "house", "guesthouse", "cottage", "treehouse"),
+        4,
     ),
 )
+
+# Interior photos set aside as covers (seed/photos.py), by the property type that uses them.
+INTERIOR_COVER_SHARE = {"apartment": 16, "guesthouse": 10, "house": 10}
 
 COUNTRY = "India"
 
@@ -193,8 +242,8 @@ class TypeProfile(NamedTuple):
 
 
 TYPE_PROFILES: dict[str, TypeProfile] = {
-    "house": TypeProfile("house", (4_000, 25_000), (4, 10)),
-    "apartment": TypeProfile("apartment", (2_000, 9_000), (2, 6)),
+    "house": TypeProfile("home", (4_000, 25_000), (4, 10)),
+    "apartment": TypeProfile("flat", (2_000, 9_000), (2, 6)),
     "guesthouse": TypeProfile("guesthouse", (1_800, 6_000), (2, 4)),
     "cabin": TypeProfile("cabin", (3_000, 12_000), (2, 6)),
     "villa": TypeProfile("villa", (12_000, 58_000), (6, 12)),
@@ -262,14 +311,20 @@ DEMO_HOSTS = (
 )
 # Hosts who are not demo accounts: (name, bio, number of listings).
 SEEDED_HOSTS = (
-    ("Gauri Deshpande", "Retired teacher; my garden is my pride.", 7),
-    ("Naveen Shetty", "Coffee grower and host of a few hill homes.", 7),
-    ("Ritu Bansal", "Interior designer who cannot stop renovating.", 6),
-    ("Joseph Mathew", "I grew up on the backwaters and still live there.", 6),
-    ("Simran Gill", "Mountain guide in summer, host all year.", 6),
-    ("Harish Agarwal", "Family-run stays for three generations.", 5),
-    ("Pooja Saxena", "City host with a soft spot for old houses.", 5),
-    ("Tenzin Lama", "Tea, books and long views of the hills.", 4),
+    ("Gauri Deshpande", "Retired teacher; my garden is my pride.", 8),
+    ("Naveen Shetty", "Coffee grower and host of a few hill homes.", 8),
+    ("Ritu Bansal", "Interior designer who cannot stop renovating.", 8),
+    ("Joseph Mathew", "I grew up on the backwaters and still live there.", 8),
+    ("Simran Gill", "Mountain guide in summer, host all year.", 8),
+    ("Harish Agarwal", "Family-run stays for three generations.", 8),
+    ("Pooja Saxena", "City host with a soft spot for old houses.", 8),
+    ("Tenzin Lama", "Tea, books and long views of the hills.", 8),
+    ("Maria Pinto", "Born in Goa; I know every quiet beach.", 7),
+    ("Rajat Thakur", "Orchard keeper with a few rooms to share.", 7),
+    ("Shalini Rathore", "I look after old havelis and their stories.", 7),
+    ("Anil Naik", "Grew up on the boats; now a full-time host.", 7),
+    ("Deepa Krishnan", "Cook first, host second; breakfast is on me.", 7),
+    ("Yusuf Ali", "I build small homes and rent the ones I love most.", 7),
 )
 # Listings owned by each of the two main demo hosts; the other two own one each.
 MAIN_DEMO_HOST_LISTINGS = 6

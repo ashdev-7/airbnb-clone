@@ -29,6 +29,7 @@ const FULL: SearchState = {
   minBedrooms: 2,
   minBeds: 3,
   minBathrooms: 1,
+  petsAllowed: true,
   page: 3,
 };
 
@@ -137,6 +138,16 @@ describe("apiQuery", () => {
     expect(query.getAll("amenity")).toEqual(["pool", "wifi"]);
   });
 
+  it("asks for homes that allow pets when the filter is on, even with no pet among the guests", () => {
+    const state = { ...EMPTY_SEARCH, petsAllowed: true };
+    expect(apiQuery(state)).toBe("pets=1");
+    expect(searchHref(state)).toBe("/s/homes?pets_allowed=true");
+    expect(apiQuery({ ...state, guests: { adults: 2, children: 0, infants: 0, pets: 3 } })).toBe(
+      "adults=2&pets=3",
+    );
+    expect(apiQuery({ ...EMPTY_SEARCH, petsAllowed: false })).toBe("");
+  });
+
   it("is empty for an empty search, and can leave the page out", () => {
     expect(apiQuery(EMPTY_SEARCH)).toBe("");
     expect(new URLSearchParams(apiQuery(FULL, false)).has("page")).toBe(false);
@@ -146,7 +157,7 @@ describe("apiQuery", () => {
 describe("filters", () => {
   it("counts each active filter", () => {
     expect(activeFilterCount(NO_FILTERS)).toBe(0);
-    expect(activeFilterCount(filtersOf(FULL))).toBe(8); // price, 2 types, 2 amenities, 3 rooms
+    expect(activeFilterCount(filtersOf(FULL))).toBe(9); // price, 2 types, 2 amenities, 3 rooms, pets
     expect(activeFilterCount({ ...NO_FILTERS, priceMin: 1000 })).toBe(1);
   });
 

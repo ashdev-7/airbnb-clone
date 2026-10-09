@@ -31,7 +31,7 @@ function Price({ listing }: { listing: Listing }) {
   return (
     <>
       <span className="font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span>{" "}
-      night
+      per night
       {listing.stay_total_minor !== null && (
         <>
           <span aria-hidden className="px-1 text-faint">

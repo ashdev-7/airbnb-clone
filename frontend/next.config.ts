@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
+  // The end-to-end tests build into a folder of their own (frontend/e2e/stack.mjs), so a
+  // test run never replaces the build or the dev server of someone working on the app.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

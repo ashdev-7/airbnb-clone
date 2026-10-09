@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { getSavedIds, saveListing, unsaveListing } from "@/lib/api/wishlist";
 import type { WishlistIds } from "@/types/api";
 import { useCurrentUser } from "./use-current-user";
+import { useHydrated } from "./use-hydrated";
 import { useLoginGate } from "./use-login-gate";
 import { useToast } from "./use-toast";
 
@@ -45,7 +46,9 @@ export function useWishlist() {
   });
 
   const { mutate } = mutation;
-  const ids = saved.data?.ids;
+  // The server draws every heart as not saved; start from that (see useHydrated).
+  const hydrated = useHydrated();
+  const ids = hydrated ? saved.data?.ids : undefined;
 
   const isSaved = useCallback((listingId: number) => ids?.includes(listingId) ?? false, [ids]);
 

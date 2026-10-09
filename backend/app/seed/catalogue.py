@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime, timedelta
 
 from app.listings.models import Amenity, Listing, ListingAmenity, ListingImage, PropertyType
 from app.seed import data
-from app.seed.photos import COVERS, ROOMS, photo_url
+from app.seed.photos import COVERS, INTERIOR_COVERS, ROOMS, photo_url
 from app.users.models import User
 
 PETS_ALLOWED_SHARE = 0.3
@@ -103,10 +103,47 @@ def _amenity_slugs(rng: random.Random, type_slug: str, location: str | None) -> 
     return [slug for slug, _, _ in data.AMENITIES if slug in chosen]
 
 
-def _photos(index: int, type_slug: str) -> list[ListingImage]:
-    covers = COVERS[type_slug]
+def cover_pools() -> dict[str, list[str]]:
+    """The covers each property type may use: its outside views, then its share of the
+    interior photos set aside as covers. Each is handed out once."""
+    pools = {type_slug: list(covers) for type_slug, covers in COVERS.items()}
+    spare = iter(INTERIOR_COVERS)
+    for type_slug, share in data.INTERIOR_COVER_SHARE.items():
+        pools[type_slug].extend(next(spare) for _ in range(share))
+    return pools
+
+
+def plan_listings(covers: dict[str, list[str]]) -> list[tuple[data.Destination, str]]:
+    """The place and property type of every listing, in the order they are created.
+
+    Places take turns, so every page of results is varied. A place hands out its own
+    types in order; a type is skipped once it has no cover left, so that every listing
+    gets a cover of its own."""
+    left = {type_slug: len(pool) for type_slug, pool in covers.items()}
+    handed = dict.fromkeys(data.DESTINATIONS, 0)
+    plan: list[tuple[data.Destination, str]] = []
+    for turn in range(max(destination.listings for destination in data.DESTINATIONS)):
+        for destination in data.DESTINATIONS:
+            if turn >= destination.listings:
+                continue
+            types = destination.property_types
+            rotation = [
+                types[(handed[destination] + step) % len(types)] for step in range(len(types))
+            ]
+            type_slug = next(
+                (candidate for candidate in rotation if left[candidate] > 0),
+                max(left, key=lambda candidate: left[candidate]),
+            )
+            assert left[type_slug] > 0, "more listings than cover photos"
+            left[type_slug] -= 1
+            handed[destination] += 1
+            plan.append((destination, type_slug))
+    return plan
+
+
+def _photos(index: int, cover: str) -> list[ListingImage]:
     last_room = "outdoor" if index % 2 else "dining"
-    ids = [covers[(index // len(data.DESTINATIONS) + index) % len(covers)]]
+    ids = [cover]
     for offset, room in enumerate(("living", "bedroom", "kitchen", "bathroom", last_room)):
         pool = ROOMS[room]
         ids.append(pool[(index + offset * 3) % len(pool)])
@@ -141,60 +178,57 @@ def build_listings(
     property_types: dict[str, PropertyType],
     amenities: dict[str, Amenity],
 ) -> tuple[list[Listing], list[ListingAmenity]]:
-    """Five listings in each destination. Later listings are newer, and the destinations
-    are interleaved so that every page of results is varied.
+    """Every listing of plan §12. Later listings are newer, and the destinations take
+    turns so that every page of results is varied.
 
     The amenity links are returned separately, as rows in a fixed order: written through
     the `Listing.amenities` collection their order would differ from run to run."""
     listings: list[Listing] = []
     links: list[ListingAmenity] = []
     titles: set[str] = set()
-    slots = len(data.DESTINATIONS[0].property_types)
-    total = slots * len(data.DESTINATIONS)
+    covers = cover_pools()
+    plan = plan_listings(covers)
+    total = len(plan)
     hosts = listing_hosts(people)
     assert len(hosts) == total
 
-    for slot in range(slots):
-        for destination in data.DESTINATIONS:
-            index = len(listings)
-            type_slug = destination.property_types[slot]
-            profile = data.TYPE_PROFILES[type_slug]
+    for destination, type_slug in plan:
+        index = len(listings)
+        profile = data.TYPE_PROFILES[type_slug]
 
-            max_guests = rng.randint(*profile.max_guests)
-            bedrooms = 0 if max_guests == 1 else math.ceil(max_guests / 2)
-            nightly_rupees = rng.randrange(
-                profile.nightly_rupees[0], profile.nightly_rupees[1], 100
-            )
-            cleaning_rupees = (
-                0 if rng.random() < 0.2 else nightly_rupees * rng.randint(4, 12) // 100 // 100 * 100
-            )
-            title, description = _text(rng, profile.noun, destination.setting, titles)
-            created = moment(today - timedelta(days=800 + total - index))
+        max_guests = rng.randint(*profile.max_guests)
+        bedrooms = 0 if max_guests == 1 else math.ceil(max_guests / 2)
+        nightly_rupees = rng.randrange(profile.nightly_rupees[0], profile.nightly_rupees[1], 100)
+        cleaning_rupees = (
+            0 if rng.random() < 0.2 else nightly_rupees * rng.randint(4, 12) // 100 // 100 * 100
+        )
+        title, description = _text(rng, profile.noun, destination.setting, titles)
+        created = moment(today - timedelta(days=800 + total - index))
 
-            listing = Listing(
-                host=hosts[index],
-                property_type=property_types[type_slug],
-                title=title,
-                description=description,
-                city=destination.city,
-                state=destination.state,
-                country=data.COUNTRY,
-                latitude=round(destination.latitude + rng.uniform(-0.02, 0.02), 5),
-                longitude=round(destination.longitude + rng.uniform(-0.02, 0.02), 5),
-                price_per_night_minor=nightly_rupees * 100,
-                cleaning_fee_minor=cleaning_rupees * 100,
-                max_guests=max_guests,
-                bedrooms=bedrooms,
-                beds=max(1, bedrooms, math.ceil(max_guests / 2)),
-                bathrooms=max(1, bedrooms - rng.randint(0, 1)),
-                pets_allowed=rng.random() < PETS_ALLOWED_SHARE,
-                created_at=created,
-                updated_at=created,
-                images=_photos(index, type_slug),
-            )
-            listings.append(listing)
-            links.extend(
-                ListingAmenity(listing=listing, amenity=amenities[slug])
-                for slug in _amenity_slugs(rng, type_slug, destination.location_amenity)
-            )
+        listing = Listing(
+            host=hosts[index],
+            property_type=property_types[type_slug],
+            title=title,
+            description=description,
+            city=destination.city,
+            state=destination.state,
+            country=data.COUNTRY,
+            latitude=round(destination.latitude + rng.uniform(-0.02, 0.02), 5),
+            longitude=round(destination.longitude + rng.uniform(-0.02, 0.02), 5),
+            price_per_night_minor=nightly_rupees * 100,
+            cleaning_fee_minor=cleaning_rupees * 100,
+            max_guests=max_guests,
+            bedrooms=bedrooms,
+            beds=max(1, bedrooms, math.ceil(max_guests / 2)),
+            bathrooms=max(1, bedrooms - rng.randint(0, 1)),
+            pets_allowed=rng.random() < PETS_ALLOWED_SHARE,
+            created_at=created,
+            updated_at=created,
+            images=_photos(index, covers[type_slug].pop(0)),
+        )
+        listings.append(listing)
+        links.extend(
+            ListingAmenity(listing=listing, amenity=amenities[slug])
+            for slug in _amenity_slugs(rng, type_slug, destination.location_amenity)
+        )
     return listings, links

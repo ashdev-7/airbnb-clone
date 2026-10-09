@@ -11,10 +11,13 @@ import { formatRupees } from "@/lib/format";
 import { activeFilterCount, filtersOf, searchHref, toggled, type SearchState } from "@/lib/search-params";
 import { FiltersModal } from "./filters-modal";
 
-/** Quick filters (assignment O3): a price cap, property types and amenities. */
+/**
+ * Quick filters (assignment O3): a price cap, property types, amenities, and whether pets
+ * may come. Wifi is not offered: every seeded home has it, so it would filter nothing.
+ */
 const QUICK_PRICE_MAX = 5000;
 const QUICK_TYPES = ["villa", "apartment", "cabin"];
-const QUICK_AMENITIES = ["kitchen", "free-parking", "wifi", "air-conditioning", "pool"];
+const QUICK_AMENITIES = ["kitchen", "free-parking", "air-conditioning", "pool"];
 
 /**
  * The filter row of capture B1: a "Filters" button, a rule, then on/off chips, all 34 px
@@ -83,6 +86,9 @@ export function FilterRow() {
             </Chip>
           ),
         )}
+        <Chip selected={search.petsAllowed} onToggle={() => go({ petsAllowed: !search.petsAllowed })}>
+          Pets allowed
+        </Chip>
       </div>
       {modalOpen && <FiltersModal search={search} onClose={() => setModalOpen(false)} />}
     </div>

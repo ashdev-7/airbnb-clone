@@ -300,6 +300,36 @@ def test_pages_cover_every_listing_once(client: TestClient, build: Build) -> Non
     assert seen == sorted(expected, reverse=True)
 
 
+def test_pages_of_a_filtered_search_cover_every_match_once(
+    client: TestClient, build: Build
+) -> None:
+    """A filter that leaves several pages but not every listing: the pages hold exactly
+    the matches, each once, newest first."""
+    with build() as f:
+        host = f.user("Host")
+        matching: list[int] = []
+        for number in range(40):
+            pets = number % 3 != 0  # 26 of the 40 allow pets, mixed in with the others
+            listing = f.listing(host, city="Goa" if number % 2 else "Manali", pets_allowed=pets)
+            if pets:
+                matching.append(listing.id)
+
+    params = {"adults": 1, "pets": 1, "page_size": 10}
+    seen: list[int] = []
+    for page in (1, 2, 3):
+        body = client.get("/api/listings", params=params | {"page": page}).json()
+        assert (body["total"], body["total_pages"], body["page"]) == (26, 3, page)
+        assert all(item["pets_allowed"] for item in body["items"])
+        seen += [item["id"] for item in body["items"]]
+
+    assert len(seen) == len(set(seen)) == 26
+    assert seen == sorted(matching, reverse=True)
+    assert client.get("/api/listings", params=params | {"page": 4}).json()["items"] == []
+    assert (
+        client.get("/api/listings/summary", params={"adults": 1, "pets": 1}).json()["total"] == 26
+    )
+
+
 def test_a_page_past_the_end_is_empty(client: TestClient, catalogue: dict[str, int]) -> None:
     body = client.get("/api/listings", params={"page": 9}).json()
     assert body["items"] == [] and body["total"] == 4 and body["page"] == 9

@@ -77,9 +77,9 @@ export function UserNav({ hostingArea = false }: Props) {
       {hostLink}
 
       {user ? (
-        <span title={user.name} aria-label={`Signed in as ${user.name}`} className={DISC}>
+        <Link href="/users/profile" aria-label={`Profile: ${user.name}`} title={user.name} className={DISC}>
           <Avatar name={user.name} avatarUrl={user.avatar_url} />
-        </span>
+        </Link>
       ) : (
         <button
           type="button"
