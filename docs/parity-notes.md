@@ -32,7 +32,7 @@ At that point no screenshots were present; this section comes from the measureme
 | Minimum adults | The Adults "Decrease" button is enabled at 2 and at 16; no capture shows it at 1 | A5, C3 | Provisional: at least 1 adult |
 | Checkout path | — | D1 | Pending: Phase 8 |
 | Lines and wording of the price breakdown | The booking card shows "₹14,998 for 2 nights" with a "Show price breakdown" link | C3 | Pending: C11, D1 (Phase 7) |
-| Header on scroll, toast, colours, type scale, spacing | See "Phase 5" below | A2, E4, every file | Settled, except the toast's duration |
+| Header on scroll, toast, colours, type scale, spacing | See "Phase 5" below | A2, E3, every file | Settled, except the toast's duration |
 
 ## Constants set from these answers
 
@@ -69,8 +69,8 @@ Screenshots arrived on 2026-10-09 as 26 files named by time. In time order they 
 | A6 | Account menu open | Signed-out menu | Yes |
 | A7 | "Log in or sign up" modal | Yes; taken twice (`A7`, `A7-1`) | Yes |
 | E1 | Trips | Signed-in header (menu closed) on an empty Trips page. **The signed-in menu was not captured open** | Partly |
-| E3 / E4 | Heart confirmation / save dialog | The files are the other way round: `E3` holds a "Create wishlist" dialog and `E4` holds the confirmation toast | Yes, swapped |
-| F10 / F11 | (guide: F11 Today, F12 Listings) | The files are one number early: `F10` is Today and `F11` is Listings; there is no `F12` | Yes, shifted |
+| E3 / E4 | Heart confirmation / save dialog | The two files arrived the other way round and were **renamed on 2026-10-09**: `E3` now holds the confirmation toast and `E4` the "Create wishlist" dialog | Yes |
+| F11 / F12 | Hosting Today / Listings | The two files arrived one number early (as `F10`, `F11`) and were **renamed on 2026-10-09** to `F11` (Today) and `F12` (Listings). **`F10`, the final review step of the create flow, is missing.** The `captureId` field inside a renamed file still holds its old number | Yes; F10 missing |
 | D1 | Checkout | Path `/book/stays/{id}`; header measured | Yes |
 
 ### Typeface
@@ -93,11 +93,11 @@ The original uses its own family ("Airbnb Cereal VF", from `fonts`), which is no
 | `scrim` | `rgba(0,0,0,0.4)` | Modal backdrop (A7) |
 | Primary gradient | `#e61e4d` to `#e31c5f` to `#d70466`, left to right | "Continue" button (A7) |
 | Header gradient | white to `#f8f8f8`, top to bottom | A6 screenshot pixels (the measurement file does not see it) |
-| Radius | 12 (menus, buttons, inputs, toast), 20 (cards), 32 (modal), full (search bar, discs) | A6, A7, B1, E4 |
+| Radius | 12 (menus, buttons, inputs, toast), 20 (cards), 32 (modal), full (search bar, discs) | A6, A7, B1, E3 |
 | `shadow-menu` | `0 2px 16px rgba(0,0,0,.12)` | A6 |
 | `shadow-raised` | `0 0 0 1px rgba(0,0,0,.02), 0 8px 24px rgba(0,0,0,.1)` | A1 search bar, A7 modal |
 | `shadow-pill` | `0 1px 2px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05)` | A2 compact search |
-| `shadow-toast` | `0 6px 20px rgba(0,0,0,.2)` | E4 |
+| `shadow-toast` | `0 6px 20px rgba(0,0,0,.2)` | E3 |
 | `shadow-control` | `0 2px 4px rgba(0,0,0,.18)` | B1 photo arrows |
 | Gutter | 48 px | A1 header and footer padding |
 
@@ -107,27 +107,29 @@ Type scale in use (size / line / weight): 12/16/500 (search labels), 14/18/400 a
 
 | Element | Values | Capture |
 |---|---|---|
-| Main header, open | Bar 96 px; mark 102 x 32 at the 48 px gutter; tabs centred, 35 px apart, 14/18/500, active one dark with a 3 px bar; search bar 850 x 66 starting 6 px under the bar; 200 px in all, then a 1 px hairline | A1 |
+| Main header, open | Bar 96 px; mark 102 x 32 at the 48 px gutter; tabs centred in boxes 71, 98.5, 124.7 and 103.7 px wide, 35 px apart, each a 36 px picture box and a 14/18/500 label starting 44, 52, 44 and 48 px into its box; active one dark with a 3 px bar 44 px down; search bar 850 x 66 starting 6 px under the bar; 200 px in all, then a 1 px hairline | A1 |
 | Search bar | Three fields (278, 283, 278 px) split by 1 x 32 px rules; label 12/16/500 over hint 14/18 muted; 48 px round button 9 px from the right | A1 |
 | Main header, scrolled | 96 px bar only; a 46 px pill "Anywhere / Anytime / Add guests" with 1 x 24 px rules and a 32 px button | A2 |
 | Header right side | "Become a host" 40 px tall, 12 px padding, 14/18/500; two 40 px discs on `control`, 12 px apart | A1, E1 |
 | Account menu | 265 px wide, 12 px padding above and below; rows 36 px with 24 px side padding; 16 px icons; 1 px dividers with 8 px margins; 17 px under its button | A6 |
 | Modal | 480 px wide, 32 px corners, 64 px header with the close button on the right, 24 px side padding; 40 px mark above a 26 px heading | A7 |
 | Checkout header | 80 px tall, mark 24 px from the left, hairline below | D1 |
-| Hosting header | 96 px, three columns; centre links 40 px tall with 12 px padding, 8 px apart; the current one dark with a 1.5 px bar under its label; "Switch to travelling" on the right | F11 |
+| Hosting header | 96 px, three columns; centre links 40 px tall with 12 px padding, 8 px apart; the current one dark with a 1.5 px bar under its label; "Switch to travelling" on the right | F11, F12 |
 | Footer | Three equal columns from the gutter; heading 14/18/500 with 16 px below; links 16 px apart; 48 px padding above and below; a rule, then a bar with 24 px padding; 80 px below | A1 |
-| Card | Photo 4:3 with 20 px corners on `line`; text 12 px below, inset 4 px, 15/19; heart 32 px button holding a 24 px heart, 10 px from the top and 12 px from the right; arrows 32 px discs 12 px in; dots 6 px, 5 px apart, 12 px from the bottom | B1, B3 |
-| Card grid | Cards 328 px wide, 24 px between columns, 40 px between rows | B1 |
+| Home card | 181.7 px wide in the original; photo 20:19 with 20 px corners on `line`; text 8 px below, inset 4 px: first line 13/16/500, the rest 12/16 `muted`; price and rating share the last line, split by a `faint` dot, with an 8 px star; heart 8 px from the top and right | A1 (read from A6, the same page without the notice) |
+| Home grid | Inside 88 px page margins, 12 px between cards. Ours by decision: 6 columns (214 px cards at this window) so 18 cards fill three rows; 32 px between rows | A1; product owner |
+| Results card | Photo 4:3 with 20 px corners on `line`; text 12 px below, inset 4 px, 15/19; heart 32 px button holding a 24 px heart, 10 px from the top and 12 px from the right; arrows 32 px discs 12 px in; dots 6 px, 5 px apart, 12 px from the bottom | B1, B3 |
+| Results grid | Cards 328 px wide, two columns beside the map, 24 px between columns, 40 px between rows | B1 |
 | Pagination | 32 px discs 16 px apart; current one filled `ink` with white text; "Previous" disabled at half opacity; 74 px under the last row | B2 |
 | Stepper | 32 px round buttons on `control`, 12 px icons, value 16/20 between them | A5 |
-| Toast | Fixed, 32 px from the left and 60 px from the bottom; white, 12 px corners, 1 px `line` border; 14/18 text | E4 |
+| Toast | Fixed, 32 px from the left and 60 px from the bottom; white, 12 px corners, 1 px `line` border; 14/18 text | E3 |
 
 ### Questions of plan §6.14 settled here
 
 | Question | Answer | Read from |
 |---|---|---|
 | What the header does on scroll | It stays at the top and shrinks from 200 px to its 96 px bar; the tabs give way to a compact search pill | A1, A2 |
-| Toast position | Bottom left: 32 px from the left edge, 60 px from the bottom | E4 |
+| Toast position | Bottom left: 32 px from the left edge, 60 px from the bottom | E3 |
 | Toast duration | Not readable from a still capture. **Provisional: 4 seconds** | none |
 | Colours, type scale, spacing, radii, shadows | The tables above | every file |
 | Card wording | The India site uses both "Flat in ..." and "Apartment in ..." (A2 screenshot), so our property-type names stay as they are | A2 |
@@ -140,5 +142,6 @@ Type scale in use (size / line / weight): 12/16/500 (search labels), 14/18/400 a
 - The **body of the login modal** (account rows) and the **Languages & currency panel**: ours by plan (D4, §6.2).
 - The **avatar** when an account has no picture: the initial on a dark disc.
 - The moment the header collapses (after 40 px of scroll) and the 200 ms change.
-- Pagination shapes other than "page 1 of many", and the "per night" wording on cards (assignment O1; the original shows a stay total).
+- Pagination shapes other than "page 1 of many", and the "₹X night" wording on cards (assignment O1; product owner). The original shows a stay total.
+- A home card links like every other card, in a tab named after the listing (B1); the original's home cards use `_blank` (A1).
 - Tab icons, the heart shape and the social marks: Lucide or our own drawings in place of the original's artwork.

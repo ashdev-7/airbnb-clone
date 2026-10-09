@@ -4,7 +4,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const MAX_DOTS = 5;
-const SIZES = "(min-width: 1200px) 25vw, (min-width: 900px) 34vw, (min-width: 600px) 50vw, 100vw";
+/** How wide a card is drawn, so the browser asks for a fitting file. */
+const SIZES = {
+  home: "(min-width: 1200px) 16vw, (min-width: 700px) 25vw, 50vw",
+  results: "(min-width: 1200px) 25vw, (min-width: 640px) 50vw, 100vw",
+};
 
 /** The photos of a card, side by side; the track slides to the one at `index`. */
 export function CardPhotoTrack({
@@ -12,11 +16,13 @@ export function CardPhotoTrack({
   index,
   alt,
   eager,
+  size,
 }: {
   photos: string[];
   index: number;
   alt: string;
   eager: boolean;
+  size: keyof typeof SIZES;
 }) {
   return (
     <div
@@ -30,7 +36,7 @@ export function CardPhotoTrack({
             <ImageWithFallback
               src={photo}
               alt={position === 0 ? alt : ""}
-              sizes={SIZES}
+              sizes={SIZES[size]}
               eager={eager && position === 0}
             />
           )}

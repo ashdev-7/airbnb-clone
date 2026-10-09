@@ -8,14 +8,14 @@ import { pageHref, parsePage } from "@/lib/search-params";
 const HOME = "/";
 
 /**
- * Home: the explore view (plan §6.3, D10). The page number lives in the URL and the grid
+ * Home: the explore view (plan §6.3, D10), inside the 88 px margins of capture A1. The page number lives in the URL and the grid
  * is rendered on the server; the skeleton shows while the listings are on their way.
  */
 export default function HomePage({ searchParams }: PageProps<"/">) {
   return (
-    <main className="px-gutter pt-8 pb-12">
+    <main className="px-[88px] pt-8 pb-12">
       <h1 className="sr-only">Explore homes</h1>
-      <Suspense fallback={<ListingGridSkeleton />}>
+      <Suspense fallback={<ListingGridSkeleton size="home" />}>
         <Explore searchParams={searchParams} />
       </Suspense>
     </main>
@@ -43,7 +43,7 @@ async function Explore({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
 
   return (
     <>
-      <ListingGrid listings={results.items} />
+      <ListingGrid listings={results.items} size="home" />
       <div className="mt-[74px]">
         <Pagination
           page={results.page}

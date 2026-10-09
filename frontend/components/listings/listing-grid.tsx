@@ -1,45 +1,60 @@
 import type { ReactNode } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ListingCard as Listing } from "@/types/api";
-import { ListingCard } from "./listing-card";
+import { ListingCard, type CardSize } from "./listing-card";
 
-/** The first row is on screen at once, so its photos are loaded eagerly. */
-const EAGER_CARDS = 4;
-
-/**
- * Cards across the full width (plan §6.3). Card width and gaps follow capture B1: about
- * 328 px wide, 24 px between columns, 40 px between rows. The grid fits as many columns
- * of at least 270 px as the width allows, which gives four at the captured window.
+/*
+ * home: the small cards of capture A1, 12 px apart. Columns are at least 200 px wide, which
+ * gives six at the captured window, so a page of 18 fills three even rows (product owner,
+ * plan §19). The 32 px between rows is ours: the original shows these cards in single rows.
+ * results: the cards of capture B1 beside the map: two columns, 24 px apart, 40 px between
+ * rows.
  */
-function Grid({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(270px,1fr))] gap-x-6 gap-y-10">
-      {children}
-    </div>
-  );
+const GRID: Record<CardSize, string> = {
+  home: "grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-3 gap-y-8",
+  results: "grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2",
+};
+const EAGER_CARDS: Record<CardSize, number> = { home: 6, results: 4 };
+
+function Grid({ size, children }: { size: CardSize; children: ReactNode }) {
+  return <div className={`grid ${GRID[size]}`}>{children}</div>;
 }
 
-export function ListingGrid({ listings }: { listings: Listing[] }) {
+type Props = {
+  listings: Listing[];
+  size: CardSize;
+  /** The address of a listing's page; the caller adds the dates and guests of the search. */
+  hrefFor?: (listing: Listing) => string;
+};
+
+export function ListingGrid({ listings, size, hrefFor }: Props) {
   return (
-    <Grid>
+    <Grid size={size}>
       {listings.map((listing, index) => (
-        <ListingCard key={listing.id} listing={listing} eager={index < EAGER_CARDS} />
+        <ListingCard
+          key={listing.id}
+          listing={listing}
+          size={size}
+          href={hrefFor?.(listing)}
+          eager={index < EAGER_CARDS[size]}
+        />
       ))}
     </Grid>
   );
 }
 
 /** The loading state of the grid: cards of the same shape, without content. */
-export function ListingGridSkeleton({ count = 12 }: { count?: number }) {
+export function ListingGridSkeleton({ size, count = 18 }: { size: CardSize; count?: number }) {
+  const photo = size === "home" ? "aspect-[20/19]" : "aspect-[4/3]";
   return (
     <div role="status" aria-label="Loading homes">
-      <Grid>
+      <Grid size={size}>
         {Array.from({ length: count }, (_, index) => (
           <div key={index}>
-            <Skeleton className="aspect-[4/3] !rounded-card" />
-            <Skeleton className="mx-1 mt-3 h-[19px] w-2/3" />
-            <Skeleton className="mx-1 mt-1 h-[19px] w-5/6" />
-            <Skeleton className="mx-1 mt-2 h-[19px] w-1/3" />
+            <Skeleton className={`${photo} !rounded-card`} />
+            <Skeleton className="mx-1 mt-3 h-4 w-2/3" />
+            <Skeleton className="mx-1 mt-1 h-4 w-5/6" />
+            <Skeleton className="mx-1 mt-1 h-4 w-1/3" />
           </div>
         ))}
       </Grid>
