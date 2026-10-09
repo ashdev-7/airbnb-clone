@@ -1,18 +1,63 @@
 @import "tailwindcss";
 
-/* Design tokens are measured from the captures and added in Phase 5 (plan §5, §6.14). */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens. Every value is measured from the captures; docs/parity-notes.md names the
+ * capture each one was read from.
+ */
+@theme {
+  --font-sans: var(--font-brand), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-ink: #222222;
+  --color-muted: #6c6c6c;
+  --color-faint: #c1c1c1;
+  --color-line: #dddddd;
+  --color-line-soft: #ebebeb;
+  --color-surface: #f7f7f7;
+  --color-control: #f2f2f2;
+  --color-brand: #ff385c;
+  --color-action: #da1249;
+  --color-scrim: rgb(0 0 0 / 0.4);
+
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-modal: 32px;
+
+  --shadow-menu: 0 2px 16px rgb(0 0 0 / 0.12);
+  --shadow-raised: 0 0 0 1px rgb(0 0 0 / 0.02), 0 8px 24px rgb(0 0 0 / 0.1);
+  --shadow-pill: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.05);
+  --shadow-toast: 0 6px 20px rgb(0 0 0 / 0.2);
+  --shadow-control: 0 2px 4px rgb(0 0 0 / 0.18);
+
+  /* The page gutter and the heights of the three header states. */
+  --spacing-gutter: 48px;
+  --spacing-header: 96px;
+  --spacing-header-open: 200px;
+  --spacing-header-checkout: 80px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+:root {
+  --gradient-primary: linear-gradient(to right, #e61e4d 0%, #e31c5f 50%, #d70466 100%);
+  --gradient-header: linear-gradient(to bottom, #ffffff 40%, #f8f8f8 100%);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }

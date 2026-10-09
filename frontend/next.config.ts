@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    // Listing photos are free-licence files on the Unsplash CDN (plan §7.2); nothing else
+    // may be fetched through the image optimiser.
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/**" }],
+  },
   // Same-origin API: cookies stay first-party and no CORS configuration is needed.
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` }];
