@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { ProfileView } from "@/components/profile/profile-view";
 
 export const metadata: Metadata = { title: "Profile" };
 
-/** A placeholder until this part is built (plan §6.11, §15). */
+/** The signed-in user's profile, read-only (plan §6.15). */
 export default function ProfilePage() {
-  return <ComingSoon feature="Profile" note="Your profile page is on its way." />;
+  return <ProfileView />;
 }
