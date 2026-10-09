@@ -136,13 +136,12 @@ Type scale in use (size / line / weight): 12/16/500 (search labels), 14/18/400 a
 
 ### Built without a capture (ours, to be checked when one exists)
 
-- The **signed-in account menu**: rows and dividers of A6 with the entries of plan §6.2.
-- The label **"Switch to hosting"**: F11 shows "Switch to travelling" on the hosting side; the other side was captured only for a user who is not a host.
+- ~~The signed-in account menu~~ and ~~the label "Switch to hosting"~~: settled by captures G1 and G2 (see "Signed-in header" below).
 - **Hover and pressed states** of buttons, links and menu rows: a still capture does not show them.
 - The **body of the login modal** (account rows) and the **Languages & currency panel**: ours by plan (D4, §6.2).
-- The **avatar** when an account has no picture: the initial on a dark disc.
+- ~~The avatar when an account has no picture~~: settled by capture G1.
 - The moment the header collapses (after 40 px of scroll) and the 200 ms change.
-- Pagination shapes other than "page 1 of many", and the "₹X night" wording on cards (assignment O1; product owner). The original shows a stay total.
+- Pagination shapes other than "page 1 of many", and the "₹X per night" wording on cards (assignment O1; product owner). The original shows a stay total.
 - A home card links like every other card, in a tab named after the listing (B1); the original's home cards use `_blank` (A1).
 - Tab icons, the heart shape and the social marks: Lucide or our own drawings in place of the original's artwork.
 
@@ -199,10 +198,57 @@ Type scale in use (size / line / weight): 12/16/500 (search labels), 14/18/400 a
 - **The calendar has dates only**: no "Flexible" switch and no "± n days" chips (plan §6.4).
 - **The tint between the two ends of a date range**: A4 shows a single chosen day. Ours is `surface`.
 - **A chosen chip** (dark border, `surface` tint) and the **count beside "Filters"**: no capture shows a filter switched on.
-- **Quick filters in the row**: "Under ₹5,000", three property types and five amenities, in place of the recommended filters of the original (assignment O3).
+- **Quick filters in the row**: "Under ₹5,000", three property types, four amenities and "Pets allowed", in place of the recommended filters of the original (assignment O3). Wifi is not offered: every seeded home has it.
 - **Where suggestions** come from our own listings, with the number of homes as the second line; the original shows curated places and recent searches.
 - **The pets row** shows the captured text "Bringing a service animal?" as plain text; the original links it to a help page we do not have.
 - **The results heading** reads "23 homes in Goa"; the original reads "Over 1,000 homes".
 - **The map** is Leaflet with OpenStreetMap tiles, not a Google map, and does not search as it moves (a placeholder, plan §3). The card opens above its marker.
-- **Cards** read "₹X night", and "· ₹Y total" after it when the search has dates (assignment O1).
+- **Cards** read "₹X per night", and "· ₹Y total" after it when the search has dates (assignment O1; product owner).
 - The filter row of the home page sits under the header, above the grid; using it opens the search page.
+
+## Signed-in header (captures G1 and G2, added 2026-10-09)
+
+| Capture | Intended state | Found | OK |
+|---|---|---|---|
+| G1 | Profile page, signed in | `/users/profile`: "Profile" column with "About me" and "Connections"; a card with the initial, name and "Guest"; "Complete your profile" with "Get started"; "Show reviews I've written" | Yes |
+| G2 | The same page with the account menu open | Menu with four icon rows, four general rows, the hosting block, two host rows and "Log out" | Yes |
+
+| Element | Values | Capture |
+|---|---|---|
+| Avatar without a picture | 40 px disc `#fee5e7` with the initial in `#a21039` (read from the screenshot; the measurement file sees only an image). Tokens `avatar` and `avatar-ink` | G1 |
+| Avatar link | Goes to `/users/profile` | G1, G2: `link.path` |
+| Hosting link for a host | "Switch to hosting", 14/18/500, to `/hosting` | G1 |
+| Signed-in menu | 265 px wide, same rows as A6 (36 px, 24 px side padding, 16 px icons). First group 14/18/**500**: Wishlists, Trips, Messages, Profile. Second group 14/18/400: Notifications, Account settings, Languages & currency, Help Centre. Then the "Become a host" block, "Refer a host", "Find a co-host", and "Log out" | G2 |
+
+What we build from G2: the first group as captured; "Languages & currency" and "Help Centre" from the second; our "Verify your identity" placeholder (plan §6.11); the hosting row; "Switch account" (ours, because login is mocked) and "Log out".
+
+Property-type names on cards across all captures: "Flat" (170 cards), "Apartment" (82), "Home" (57), "Villa" (24), "Tiny home" (22), "Loft" (3); "Room" is out of scope. Ours: house is "Home", apartment is "Flat"; "Villa" and "Tiny home" as captured; Guesthouse, Cabin, Cottage and Treehouse do not appear in any capture and keep their names. B7 shows the "Property type" section of the filters closed, so the option labels inside it are not known; the card names are used there too.
+
+## Parity backlog
+
+Every known visual difference from a capture that is not a decision of the plan. To be closed, or accepted by the product owner, in Phase 10.
+
+| # | Where | Capture | Difference | Kind |
+|---|---|---|---|---|
+| 1 | Header tabs | A1 | Line icons in place of the original's coloured pictures; the row has the captured box sizes | Substitution (no artwork of our own) |
+| 2 | Compact search pill | A2, B1 | A line icon of a house in place of the small picture at its left | Substitution |
+| 3 | Mark and wordmark | A1 | Lucide house and "AirStay" in place of the original mark; same box (102 x 32) and colour | By plan §5.2 |
+| 4 | Typeface | all | Instrument Sans; widths within 1% on average, letterforms differ slightly | By plan §5.2 |
+| 5 | Hover, focus and pressed states | all | Ours throughout: stills do not show them | Needs a capture or acceptance |
+| 6 | Header collapse | A1 to A2 | The scroll distance (40 px) and the 200 ms change are ours | Needs a recording or acceptance |
+| 7 | Where panel | A3 | No "Recent searches"; tiles hold a line icon, not the original's pictures; second line is a count of homes | Partly by plan §6.4 |
+| 8 | Calendar | A4 | The tint between the two ends of a range is unverified; the arrows are 32 px discs where the original's are bare 12 px arrows | Fixable |
+| 9 | Who panel | A5 | "Bringing a service animal?" is plain text, not an underlined link | Fixable once there is somewhere to link |
+| 10 | Signed-out menu | A6 | No picture beside "Become a host"; no "Refer a host" or "Find a co-host" rows | Not in scope |
+| 11 | Signed-in menu | G2 | "Trips" has a luggage icon where the original uses its mark; no "Notifications", "Account settings", "Refer a host", "Find a co-host" | Substitution; not in scope |
+| 12 | Results card | B1 | No rooms line ("1 bedroom · 1 bed · 1 bathroom"), no "Free cancellation" tag, no struck-through earlier price, price not underlined; "Guest favourite" and "Superhost" badges are bonus B3 | Rooms line fixable; the rest have no data |
+| 13 | Results heading row | B1 | No "Prices include all fees" tag at the right of the heading | No data (our price is nightly) |
+| 14 | Photo dots | B1, B3 | Five dots of one size; the original shows more dots, shrinking towards the end | Fixable |
+| 15 | Map | B1, B4 | OpenStreetMap drawing and Leaflet's square zoom control in place of the Google map with round controls and an expand button; the pill padding and shadow of markers are estimated | Zoom control fixable; tiles by plan §7.2 |
+| 16 | Map card | B4 | One photo without arrows or dots; no rooms line; opens above the marker, not beside it | Fixable |
+| 17 | Filters modal | B5 | 30 histogram bars where the original has 47; the handles and the look of a chosen chip are unverified | Fixable; needs a capture of a chosen chip |
+| 18 | Toast | E3 | Text only: the original shows a thumbnail of the listing; the duration is provisional | Fixable; duration needs a recording |
+| 19 | Footer | A1 | Our own drawings of the three social marks | By plan §5.2 |
+| 20 | Home card | A1 | No "Guest favourite" badge (bonus B3); a second line with the listing title, which the original does not have | Title by the assignment (R-HS-1) |
+| 21 | Login modal | A7 | The accounts sit in a list that can scroll at this window height; the original's body is a single field | By plan D4 |
+

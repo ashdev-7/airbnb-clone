@@ -104,6 +104,7 @@ Non-negotiables:
 - Server-side validation, availability re-check and price calculation on every booking
 - Loading, empty and error states on every page (§6.13)
 - The parity elements that surround the core features on Airbnb's pages (header, footer, section chrome, modals), specified in §6
+- A read-only profile page at `/users/profile` (§6.15), added by the product owner on 2026-10-09: the header avatar and the account menu lead to it
 - Automated tests for booking, availability, search, listing CRUD and persistence (§13)
 - README
 
@@ -121,7 +122,7 @@ Non-negotiables:
 Messaging; identity verification; the Experiences and Services tabs; live map behaviours (search as the map moves, live pricing).
 
 ### OUT — not in the assignment, not built
-Real payments; real authentication (passwords, OAuth, phone); hotels; destination carousels; flexible-date and AI search; room and shared-room listings; request-to-book; cancelling or modifying a booking; unlisting/pausing a listing; drafts; host-blocked dates and custom pricing; profile and account pages; admin; multi-currency and translation; named wishlist collections; rate limiting; database migrations tooling.
+Real payments; real authentication (passwords, OAuth, phone); hotels; destination carousels; flexible-date and AI search; room and shared-room listings; request-to-book; cancelling or modifying a booking; unlisting/pausing a listing; drafts; host-blocked dates and custom pricing; editing a profile, account settings and notifications; admin; multi-currency and translation; named wishlist collections; rate limiting; database migrations tooling.
 
 ---
 
@@ -135,7 +136,7 @@ Real payments; real authentication (passwords, OAuth, phone); hotels; destinatio
 | D3 | Removing a listing | Airbnb's rule (REF-L1): a listing cannot be permanently removed while it has upcoming reservations. Otherwise it is removed. Stored as a soft delete so past trips and reviews keep their references. |
 | D4 | Login | **Mocked.** The assignment says, under "Mocked / Placeholder Sections": "Real user authentication may be simplified/mocked, but a notion of 'guest vs host' is needed". The login modal lists seeded accounts to continue as; sessions are real (signed, HttpOnly cookie). Why: authentication is not graded, a reviewer can switch between guest and host in two clicks, and no credentials are handled. |
 | D5 | Brand | **AirStay.** Mark: a free open-licence icon with the wordmark (§5.2). No Airbnb name, logo, typeface files or photos. No "demo project" notice in the UI. |
-| D6 | Scope | **The assignment only** (§3). The development-instructions document describes process; features it mentions that the assignment does not (admin, booking cancellation, listing drafts, a sort control, profile pages, rate limiting) are not built. |
+| D6 | Scope | **The assignment only** (§3), with one addition by the product owner: a read-only profile page (§6.15). The development-instructions document describes process; features it mentions that the assignment does not (admin, booking cancellation, listing drafts, a sort control, editable profiles, rate limiting) are not built. |
 | D7 | APIs | **Our own REST API is required** (Python backend mandated; "Backend / API Design" graded). **No third-party API**: the assignment says "you do not need to integrate with any real APIs". |
 | D8 | Local first | Everything runs on one machine. Hosting is decided in Phase 13. |
 | D10 | Home page | **`/` is the assignment's explore view:** search bar, filter row, grid of listing cards, pagination (R-HS-1 to R-HS-4). The current Airbnb home page is a set of destination carousels with no filters or pagination (REF-H3, REF-H8); the assignment overrides it. Search results reuse the same view with the search applied and a map beside it. |
@@ -242,7 +243,8 @@ The desktop baseline is the window width recorded in the captures (the product o
 | Search bar | "Where"; "When" with "Add dates"; "Who" with "Add guests"; search button | Labels REF-H2; layout CAP A1 |
 | "Become a host" | Goes to the create-listing flow | REF-H1, REF-L5 |
 | Account menu, signed out | "Log in or sign up", "Become a host", "Help Centre" (inert) | REF-I1; layout CAP A6 |
-| Account menu, signed in | Trips, Wishlists, Messages (placeholder), "Verify your identity" (placeholder), Switch account, Log out | Labels "Trips" REF-T1, "Wishlists" REF-W1; layout CAP E1; the rest OURS |
+| Account menu, signed in | Wishlists, Trips, Messages (placeholder) and Profile with icons; then "Languages & currency", "Help Centre" (inert) and "Verify your identity" (placeholder); the hosting row; Switch account, Log out | Rows, order and layout CAP G2; "Switch account" and the placeholder OURS |
+| Header avatar, signed in | The account's initial, dark pink on a pale pink disc; a link to `/users/profile` | CAP G1 |
 | "Languages & currency" | Button present; opens a small panel showing English (IN) and ₹ INR | Label REF-I1; values REF-I3; panel OURS |
 | Behaviour on scroll | As captured | CAP A2 |
 | Hosting header | "Today", "Listings", and whatever else F11 shows; entries we do not build lead to "Coming soon" | "Today" REF-T2; layout CAP F11 |
@@ -258,7 +260,7 @@ Carries R-HS-1 to R-HS-4 (D10).
 | Search bar | §6.4 | |
 | Filter row | "Filters" button with a count of active filters, and quick filters for price, property type and amenities | Assignment (O3); "Filters" label REF-S2; button and chip styling CAP B1, B5 |
 | Grid | Listing cards in a responsive grid, six columns at the captured window so a page of 18 fills three rows | Assignment; card size and gaps CAP A1 on the home page, CAP B1 on search results beside the map |
-| Card | Cover photo with the photo controls of B3; heart; "Guest favourite" badge (bonus B3); "{Property type} in {city}"; the listing title; price per night; rating | Anatomy, type and spacing CAP B1, B3; text form "{Property type} in {place}", badge, rating and the ₹ price format REF-I2; title and price per night from the assignment (O1) |
+| Card | Cover photo with the photo controls of B3; heart; "Guest favourite" badge (bonus B3); "{Property type} in {city}"; the listing title; "₹X per night", followed by "· ₹Y total" when dates are chosen; rating | Anatomy, type and spacing CAP B1, B3; text form "{Property type} in {place}", badge, rating and the ₹ price format REF-I2; title and price per night from the assignment (O1) |
 | Rating on a card | The average, shown once a listing has three reviews; "New" before that | Threshold REF-R1; "New" OURS |
 | Card click | Opens the listing page, carrying dates and guests if set | Same tab or new tab: `link.target` of the listing links in the B1 measurement file |
 | Heart | Toggles saved without navigating; signed out → login | REF-W1; confirmation CAP E3 |
@@ -356,6 +358,19 @@ Toasts: "Listing published", "Listing updated", "Listing removed" (OURS).
 | Identity verification | A row in the account menu |
 | Experiences, Services | Header tabs |
 | Any hosting navigation entry that F11 shows and §6.10 does not build | Its own "Coming soon" page |
+
+### 6.15 Profile (`/users/profile`)
+
+Added by the product owner on 2026-10-09; built in Phase 10 from capture G1. Read-only.
+
+| Element | What is built | Evidence |
+|---|---|---|
+| Left column | "Profile" with "About me" (current) and "Connections" ("Coming soon") | CAP G1 |
+| About me | The card with the user's initial, name and "Guest" or "Host"; "Edit" and "Get started" are "Coming soon" | CAP G1; Guest or Host from `is_host` |
+| Reviews | "Show reviews I've written" lists the reviews that user wrote, each with its listing | CAP G1; the list OURS |
+| Signed out | The login gate (§6.1) | OURS |
+
+Until Phase 10 the avatar and the menu's Profile row lead to the not-found page.
 
 ### 6.12 Toasts
 
@@ -924,10 +939,10 @@ FastAPI's generated `/docs` is the detailed reference; the README carries this o
 
 | Data | Amount and purpose |
 |---|---|
-| Users | 28. Seven demo accounts for the login modal: four hosts (two with six listings each, one with one, one with one nearly fully booked next month) and three guests (one with past and upcoming trips, one with only past trips, one with none). Eight further hosts who are not demo accounts, with 3–7 listings each. The remaining 13 only author past stays and reviews. `avatar_url` is empty for all of them |
+| Users | 34. Seven demo accounts for the login modal: four hosts (two with six listings each, one with one, one with one nearly fully booked next month) and three guests (one with past and upcoming trips, one with only past trips, one with none). Fourteen further hosts who are not demo accounts, with 7–8 listings each; no host owns more than 8. The remaining 13 only author past stays and reviews. `avatar_url` is empty for all of them |
 | Property types, amenities | 8 and about 30, spread over Airbnb's amenity groups (REF-S1) |
-| Listings | 60 (four pages at the default size of 18) across at least 10 Indian destinations with coordinates (for example Goa, Manali, Jaipur, Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling), every property type, prices about ₹1,500–₹60,000 a night, capacity 1–12; spread over 12 hosts, each host's homes in more than one city; about a third allow pets |
-| Photos | At least five per listing from a curated pool; two listings with three photos to exercise the gallery fallback |
+| Listings | 120 (seven pages at the default size of 18). Goa has 40 over four towns (Candolim, Anjuna, Calangute, Palolem), Manali and Jaipur 20 each, so a search for any of them needs pagination; nine other destinations have 4–5 each (Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling, Shimla, Alappuzha). Every property type, named as the India site names them on cards ("Home", "Flat", "Villa", "Tiny home", …), prices about ₹1,500–₹60,000 a night, capacity 1–12; spread over 18 hosts, each host's homes in more than one city; about a third allow pets |
+| Photos | At least five per listing from a curated pool; two listings with three photos to exercise the gallery fallback. Every listing has a cover of its own, used nowhere else: the outside views by property type, and 36 interior photos set aside as covers for flats, guesthouses and homes. Gallery photos may repeat across listings, never within one |
 | Past bookings and reviews | Most listings have 3–40 reviews; a few have fewer than three ("New") |
 | Upcoming bookings | About 30, including a back-to-back pair and one listing almost fully booked next month |
 | Cancelled booking | One, proving that cancelled stays do not block dates |
@@ -1049,8 +1064,10 @@ Hosting layout, Today (reservations), listings, create wizard, editor, removal.
 - [ ] Field-level validation messages; wizard state survives a refresh; removal blocked case is explained
 - [ ] **Sign-off:** capture set F
 
-### [ ] Phase 10 — Wishlists page, placeholders, states and toasts
+### [ ] Phase 10 — Wishlists page, profile page, placeholders, states and toasts
 - [ ] Wishlists page (J4); every placeholder in §6.11
+- [ ] Profile page (§6.15) from capture G1, with the reviews the user has written
+- [ ] Every entry of the parity backlog in `docs/parity-notes.md` closed or accepted by the product owner
 - [ ] Every cell of §6.13 and every toast of §6.12 verified
 - [ ] **Sign-off:** captures E2–E4
 
@@ -1118,6 +1135,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 6 decisions and amendments (product owner). (1) Cards read "₹X per night", and "₹X per night · ₹Y total" with dates (§6.3). (2) The quick filter "Wifi" (every home has it) is replaced by "Pets allowed", a filter of its own on the URL (`pets_allowed=true`) that asks the API for `pets=1`; property types are named as the India captures name them on cards: "Home" and "Flat" for our house and apartment (B1, A2). B7 shows the property-type section closed, so its option labels cannot be read; the card names are used there too. (3) Seed grown to 120 listings and 34 users (§12): Goa 40, Manali and Jaipur 20 each, nine places with 4–5; 18 hosts, none above 8; every cover photo unique, with 36 interior photos set aside as covers so no new photos had to be collected. (4) A backend test walks pagination under a filter that leaves several pages but not every listing. (5) **Playwright moved forward from Phase 11**: the browser checks of Phases 5 and 6 are committed tests (`frontend/e2e/`, `npm run e2e`), run on a stack of their own (ports 3100 and 8100, `backend/data/e2e.db`, build folder `.next-e2e` through `NEXT_DIST_DIR`); `npm run e2e` is run and reported at the end of every phase from now on (`CLAUDE.md`). Phase 11 keeps journeys J1–J5. (6) `docs/parity-notes.md` has a parity backlog, to be closed in Phase 10. (7) Captures G1 and G2 added: the signed-in avatar and menu follow them (§6.2). (8) **Scope change:** a read-only profile page at `/users/profile` (§3, §6.15), scheduled for Phase 10. Also fixed, found by the new tests: parts of a page that attach late could start from data already fetched in the browser and keep stale server attributes (a saved heart drawn unsaved, a hydration error in the header); hooks that read browser-fetched data now begin from the server's render (`hooks/use-hydrated.ts`). |
 | 2026-10-09 | Phase 6. Libraries of §7.3 installed at exact versions: react-day-picker and leaflet, with `@types/leaflet` (type definitions only, development). URL names: `min_bedrooms`, `min_beds`, `min_bathrooms` are confirmed by capture B5; price, property type, amenities, children, infants and pets stay ours because no capture shows them (§10.6). B5 shows a price histogram, so it is drawn (§10.6), with a two-handle slider. Using the search bar or a filter on `/` opens `/s/homes` with it applied, so one page owns filtered results (§6.3). `lib/dates.ts` and `lib/guests.ts` are in place as §7.4 names them; `lib/price-range.ts` is added for the arithmetic of the price filter. In a search, adults may be zero until a child, infant or pet is added, then at least one (§10.8, ours). Dates in a link that have passed are dropped with a note instead of an error. The results page calls `connection()` so it is rendered per request: it depends on the date of today. `useCloseWhenHidden` now ignores the extra effect run of development mode. Built without a capture or different by decision: listed in `docs/parity-notes.md`. |
 | 2026-10-09 | Phase 5 decisions (product owner). (1) The home grid takes its card from capture A1, not B1, in six columns at the captured window; B1's card is for search results beside the map (§6.3). (2) A card's price reads "₹X night". (3) Header tabs keep Lucide icons but use the box sizes and spacing of A1. (4) Capture files renamed to match their content: `E3` and `E4` swapped; Today and Listings are now `F11` and `F12`; `F10` (final review step) is missing. (5) Links to pages of later phases stay as they are. |
 | 2026-10-09 | Phase 5. Typeface: Instrument Sans (§5.2). Frontend libraries of §7.3 installed at exact versions: TanStack Query, Radix Dialog and Popover, lucide-react; none outside the table. `lib/session-handoff.ts` added to §7.4's `lib/`: because sign-in, switch and log-out end with a full page load, the action in progress (a save, a page to open) and the toast to show are carried across it in sessionStorage. The current-user context also owns the account picker, so the app still has two contexts. `lib/search-params.ts` starts here with the page number and the listing link; Phase 6 adds the rest. The frontend `typecheck` script now runs `next typegen` first, so route types are current before `tsc`. The search bar is drawn but its panels and the search itself are Phase 6; header links to pages of later phases lead to the 404 page until then. Capture files differ from the guide's numbering: `E3`/`E4` are swapped, and `F10`/`F11` hold what the guide calls F11/F12. Toast duration is provisional at 4 s. Built without a capture: listed in `docs/parity-notes.md`. |

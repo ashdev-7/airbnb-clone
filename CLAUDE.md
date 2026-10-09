@@ -34,7 +34,7 @@ Locale: it mirrors Airbnb's India site (airbnb.co.in): English (IN), prices in โ
 3. Restate the scope, list the files you will touch, and write the acceptance tests first.
 4. Implement.
 5. Run `npm run check`. Fix failures.
-6. Verify the acceptance criteria by running the app.
+6. Verify the acceptance criteria in a real browser, as Playwright tests in `frontend/e2e/`. Run `npm run e2e` at the end of every phase and report the result.
 7. Write the end-of-phase report (ยง16), including a plain-language walkthrough of the code.
 8. Commit, tick the phase in ยง15, add a line to ยง19 if anything in the plan changed.
 9. Stop and wait for sign-off. Do not start the next phase unasked.
@@ -67,6 +67,7 @@ Locale: it mirrors Airbnb's India site (airbnb.co.in): English (IN), prices in โ
   - Routes stay mounted but hidden after navigation. Modals, popovers, menus and toasts must close when their route is hidden; forms reset after a successful submit.
   - Sign in, switch account and log out end with a full page load.
   - Playwright: visibility-aware selectors only (`getByRole`, `getByLabel`).
+  - A hook that reads data fetched in the browser (the user, the wishlist, `/api/meta`) returns the server's answer until `useHydrated()` is true. Parts of a page attach at different moments; one that attaches after the data has arrived would otherwise differ from the server's HTML, and React keeps the stale attributes.
 - Read the installed version's docs for react-day-picker and for SQLAlchemy's SQLite transaction handling before writing against them.
 
 ## Commands (from the repository root)
@@ -78,7 +79,7 @@ Locale: it mirrors Airbnb's India site (airbnb.co.in): English (IN), prices in โ
 | `npm run dev` | Backend on :8000, frontend on :3000 |
 | `npm run test` | pytest and Vitest |
 | `npm run check` | Ruff, mypy, pytest, ESLint, `tsc --noEmit`, Vitest, `next build` |
-| `npm run e2e` | Playwright journeys |
+| `npm run e2e` | Seeds a separate database, builds the frontend into `.next-e2e`, runs the Playwright tests on ports 3100 and 8100. Safe to run while `npm run dev` is running |
 
 These scripts are created in Phase 1.
 

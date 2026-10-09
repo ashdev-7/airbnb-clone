@@ -35,7 +35,7 @@ Open http://localhost:3000.
 | `npm run test` | pytest and Vitest |
 | `npm run check` | Ruff, mypy, pytest, ESLint, `tsc --noEmit`, Vitest, `next build` |
 | `npm run seed` | Rebuild and seed the database (`-- --check-images` verifies the photo URLs instead) |
-| `npm run e2e` | End-to-end journeys _(to come)_ |
+| `npm run e2e` | End-to-end tests in a real browser (Playwright). Uses its own database, ports (3100, 8100) and build folder, so it can run beside `npm run dev`. The first run needs `npx playwright install chromium` in `frontend/` |
 
 ### Configuration
 
@@ -116,7 +116,7 @@ Design notes:
 
 ### Seed data
 
-`npm run seed` rebuilds the database and loads 28 users (seven demo accounts; 12 of the users are hosts), 8 property types, 34 amenities, 60 listings across 12 Indian destinations, and roughly a thousand bookings and reviews. Stays are placed relative to the day you run it, so there are always past, current and upcoming trips; running it twice on the same day produces identical data. `npm run seed -- --check-images` requests every photo URL.
+`npm run seed` rebuilds the database and loads 34 users (seven demo accounts; 18 of the users are hosts), 8 property types, 34 amenities, 120 listings across 15 Indian destinations (40 of them in Goa, 20 each in Manali and Jaipur, so that a city search needs pagination), and roughly two thousand bookings and reviews. Every listing has a cover photo no other listing uses. Stays are placed relative to the day you run it, so there are always past, current and upcoming trips; running it twice on the same day produces identical data. `npm run seed -- --check-images` requests every photo URL.
 
 ## API overview
 
