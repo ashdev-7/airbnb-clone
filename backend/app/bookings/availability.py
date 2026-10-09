@@ -8,14 +8,46 @@ The rule is written here twice, once for Python and once as the SQL the database
 triggers run, so the two can be read side by side.
 """
 
-from datetime import date
+from datetime import date, timedelta
+from typing import Any
+
+from sqlalchemy import ColumnElement, and_
+
+# Airbnb allows booking "up to 2 years in advance" (REF-A1).
+MAX_ADVANCE_DAYS = 730
+# The server accepts a check-in from one day before its own today, so a visitor in a
+# timezone behind India can still book their local today (plan §10.1).
+CHECK_IN_GRACE_DAYS = 1
 
 
 def overlaps(a_check_in: date, a_check_out: date, b_check_in: date, b_check_out: date) -> bool:
     return a_check_in < b_check_out and b_check_in < a_check_out
 
 
-# The same test in SQL, between an existing row `b` and the row being written, `NEW`.
+def overlap_condition(
+    existing_check_in: Any, existing_check_out: Any, check_in: date, check_out: date
+) -> ColumnElement[bool]:
+    """`overlaps` as a SQL condition on a table's date columns, for queries."""
+    return and_(existing_check_in < check_out, check_in < existing_check_out)
+
+
+def last_bookable_day(today: date) -> date:
+    return today + timedelta(days=MAX_ADVANCE_DAYS)
+
+
+def stay_error(check_in: date, check_out: date, today: date) -> str | None:
+    """Why these dates cannot be booked, or None when they can (plan §10.1): at least one
+    night, not in the past, and no further ahead than the booking window."""
+    if check_out <= check_in:
+        return "Check-out must be after check-in."
+    if check_in < today - timedelta(days=CHECK_IN_GRACE_DAYS):
+        return "Check-in cannot be in the past."
+    if check_out > last_bookable_day(today):
+        return f"Stays can be booked up to {MAX_ADVANCE_DAYS} days ahead."
+    return None
+
+
+# The same test in the triggers, between an existing row `b` and the row being written, `NEW`.
 _OVERLAP_SQL = """
     b.listing_id = NEW.listing_id
       AND b.status = 'confirmed'

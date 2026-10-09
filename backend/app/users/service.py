@@ -14,8 +14,8 @@ from app.users.schemas import UserOut
 
 
 class UserService:
-    def __init__(self, session: ReadSession) -> None:
-        self._session: Session = session
+    def __init__(self, session: Session) -> None:
+        self._session = session
 
     def _users(self, *conditions: object) -> list[UserOut]:
         is_host = exists().where(Listing.host_id == User.id, Listing.deleted_at.is_(None))
@@ -44,4 +44,8 @@ class UserService:
         return users[0]
 
 
-UserServiceDep = Annotated[UserService, Depends(UserService)]
+def _user_service(session: ReadSession) -> UserService:
+    return UserService(session)
+
+
+UserServiceDep = Annotated[UserService, Depends(_user_service)]

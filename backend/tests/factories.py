@@ -1,6 +1,7 @@
 """Builders for API tests: small, explicit data instead of the seed, so each test states
 exactly what it depends on. Everything is written through the models in one write session."""
 
+import uuid
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -166,3 +167,38 @@ def listing_body(**overrides: Any) -> dict[str, Any]:
         "amenities": ["wifi", "pool"],
     }
     return body | overrides
+
+
+def quote_total(client: TestClient, listing_id: int, check_in: date, check_out: date) -> int:
+    """The total the guest would be shown, or 0 when no quote can be given."""
+    response = client.get(
+        f"/api/listings/{listing_id}/quote",
+        params={"check_in": check_in.isoformat(), "check_out": check_out.isoformat()},
+    )
+    return int(response.json()["total_minor"]) if response.status_code == 200 else 0
+
+
+def book(
+    client: TestClient,
+    listing: int,
+    start: date,
+    nights: int = 2,
+    key: str | None = None,
+    **overrides: Any,
+) -> Any:
+    """POST /api/bookings as the signed-in user, with the total a guest would have seen
+    unless the test supplies another."""
+    check_out = start + timedelta(days=nights)
+    body: dict[str, Any] = {
+        "listing_id": listing,
+        "check_in": start.isoformat(),
+        "check_out": check_out.isoformat(),
+        "adults": 2,
+        "payment_method": "demo_card_ok",
+    }
+    body |= overrides
+    if "expected_total_minor" not in body:
+        body["expected_total_minor"] = quote_total(client, listing, start, check_out)
+    return client.post(
+        "/api/bookings", json=body, headers={"Idempotency-Key": key or str(uuid.uuid4())}
+    )

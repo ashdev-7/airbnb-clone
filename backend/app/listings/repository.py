@@ -4,11 +4,14 @@ a count, the page itself and its photos."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from datetime import date
 from typing import Any
 
 from sqlalchemy import ColumnElement, Row, Select, func, or_, select
 from sqlalchemy.orm import Session
 
+from app.bookings.availability import overlap_condition
+from app.bookings.models import STATUS_CONFIRMED, Booking
 from app.listings.models import Amenity, Listing, ListingAmenity, ListingImage, PropertyType
 from app.reviews.ratings import rating_summary
 from app.wishlist.models import WishlistItem
@@ -30,6 +33,8 @@ class ListingFilters:
     min_bedrooms: int = 0
     min_beds: int = 0
     min_bathrooms: int = 0
+    check_in: date | None = None
+    check_out: date | None = None
 
 
 def _contains(text: str) -> str:
@@ -80,6 +85,19 @@ def _conditions(filters: ListingFilters, *, with_price: bool = True) -> list[Col
                 .group_by(ListingAmenity.listing_id)
                 .having(func.count() == len(wanted))
             )
+        )
+    if filters.check_in and filters.check_out:
+        # Free for the whole stay: no confirmed booking overlaps it.
+        conditions.append(
+            ~select(Booking.id)
+            .where(
+                Booking.listing_id == Listing.id,
+                Booking.status == STATUS_CONFIRMED,
+                overlap_condition(
+                    Booking.check_in, Booking.check_out, filters.check_in, filters.check_out
+                ),
+            )
+            .exists()
         )
     conditions.append(Listing.bedrooms >= filters.min_bedrooms)
     conditions.append(Listing.beds >= filters.min_beds)
@@ -140,6 +158,11 @@ def saved_by(session: Session, user_id: int) -> Sequence[Row[Any]]:
 
 def one(session: Session, listing_id: int) -> Row[Any] | None:
     return session.execute(_cards().where(ACTIVE, Listing.id == listing_id)).one_or_none()
+
+
+def get(session: Session, listing_id: int) -> Listing | None:
+    """The listing itself, unless it is unknown or removed."""
+    return session.scalars(select(Listing).where(ACTIVE, Listing.id == listing_id)).one_or_none()
 
 
 def exists(session: Session, listing_id: int) -> bool:

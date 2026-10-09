@@ -114,6 +114,7 @@ def test_a_card_carries_everything_it_needs(client: TestClient, build: Build) ->
         "currency": "INR",
         "rating_average": 4.33,
         "review_count": 3,
+        "stay_total_minor": None,
     }
 
 

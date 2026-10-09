@@ -5,19 +5,29 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
+from app.core.deps import get_database
 from app.core.errors import unauthenticated
+from app.db.session import Database
 from app.users.schemas import UserOut
-from app.users.service import UserServiceDep
+from app.users.service import UserService
 
 SESSION_USER_KEY = "user_id"
 
 
-def current_user(request: Request, users: UserServiceDep) -> UserOut | None:
-    """The signed-in user, or None. A cookie naming a user that no longer exists is cleared."""
+def current_user(
+    request: Request, database: Annotated[Database, Depends(get_database)]
+) -> UserOut | None:
+    """The signed-in user, or None. A cookie naming a user that no longer exists is cleared.
+
+    The lookup uses a short read session of its own and gives the connection back at
+    once, so a request never holds two connections: identity is settled first (plan
+    §10.3 step 1), and only then does a mutating request take the write lock (step 3).
+    """
     user_id = request.session.get(SESSION_USER_KEY)
     if not isinstance(user_id, int):
         return None
-    user = users.get(user_id)
+    with database.read_session() as session:
+        user = UserService(session).get(user_id)
     if user is None:
         request.session.clear()
     return user

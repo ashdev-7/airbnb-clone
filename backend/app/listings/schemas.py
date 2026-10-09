@@ -1,6 +1,6 @@
 """Shapes of the listing API (plan §11). Money is integer paise; `currency` is always INR."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
@@ -47,6 +47,8 @@ class ListingCard(BaseModel):
     # None until the listing has three reviews; the card then shows "New".
     rating_average: float | None
     review_count: int
+    # The full price of the searched stay, fees included; None when no dates were given.
+    stay_total_minor: int | None = None
 
 
 class HostOut(BaseModel):
@@ -133,6 +135,8 @@ class SearchParams(BaseModel):
     """Query parameters of GET /api/listings and /api/listings/summary (plan §10.6)."""
 
     location: str | None = Field(None, max_length=200)
+    check_in: date | None = None
+    check_out: date | None = None
     adults: int = Field(0, ge=0, le=MAX_GUESTS)
     children: int = Field(0, ge=0, le=MAX_GUESTS)
     infants: int = Field(0, ge=0, le=MAX_INFANTS)
@@ -147,6 +151,8 @@ class SearchParams(BaseModel):
 
     @model_validator(mode="after")
     def _consistent(self) -> Self:
+        if (self.check_in is None) != (self.check_out is None):
+            raise ValueError("check_in and check_out must be given together")
         if self.adults + self.children > MAX_GUESTS:
             raise ValueError(f"At most {MAX_GUESTS} guests")
         if (

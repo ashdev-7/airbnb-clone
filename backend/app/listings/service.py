@@ -1,6 +1,7 @@
 """Reading the catalogue: search, detail, summary, suggestions and reference data."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from datetime import date
 from typing import Annotated, Any
 
 from fastapi import Depends
@@ -8,7 +9,9 @@ from sqlalchemy import Row, select
 from sqlalchemy.orm import Session
 
 from app.bookings import guests
-from app.core.deps import AppSettings, ReadSession
+from app.bookings.availability import stay_error
+from app.bookings.pricing import calculate_price
+from app.core.deps import AppSettings, ReadSession, Today
 from app.core.errors import AppError
 from app.core.pagination import offset, total_pages
 from app.listings import repository
@@ -39,9 +42,17 @@ def listing_not_found() -> AppError:
     return AppError("listing_not_found", 404, "This listing does not exist.")
 
 
-def to_filters(params: SearchParams) -> ListingFilters:
+def to_filters(params: SearchParams, today: date) -> ListingFilters:
+    """The search as the repository understands it. Dates are checked against the booking
+    window here, because that needs today's date."""
+    if params.check_in and params.check_out:
+        problem = stay_error(params.check_in, params.check_out, today)
+        if problem:
+            raise AppError("invalid_dates", 422, problem)
     return ListingFilters(
         location=params.location,
+        check_in=params.check_in,
+        check_out=params.check_out,
         guests=guests.counted_guests(params.adults, params.children),
         pets=params.pets,
         min_price_minor=params.min_price_minor,
@@ -77,10 +88,19 @@ def card_fields(row: Row[Any], photo_urls: list[str]) -> dict[str, Any]:
     }
 
 
-def to_cards(session: Session, rows: Sequence[Row[Any]]) -> list[ListingCard]:
-    """Cards for these rows, with one further statement for all their photos."""
+def to_cards(
+    session: Session, rows: Sequence[Row[Any]], stay_total: Callable[[Listing], int] | None = None
+) -> list[ListingCard]:
+    """Cards for these rows, with one further statement for all their photos. `stay_total`
+    prices the searched stay for each listing when dates were given."""
     photos = repository.photos(session, [row.Listing.id for row in rows])
-    return [ListingCard(**card_fields(row, photos[row.Listing.id])) for row in rows]
+    return [
+        ListingCard(
+            **card_fields(row, photos[row.Listing.id]),
+            stay_total_minor=stay_total(row.Listing) if stay_total else None,
+        )
+        for row in rows
+    ]
 
 
 def to_detail(session: Session, row: Row[Any]) -> ListingDetail:
@@ -124,18 +144,31 @@ def _histogram(prices: Sequence[int]) -> list[HistogramBucket]:
 
 
 class ListingService:
-    def __init__(self, session: ReadSession, settings: AppSettings) -> None:
+    def __init__(self, session: ReadSession, settings: AppSettings, today: Today) -> None:
         self._session: Session = session
         self._settings = settings
+        self._today = today
+
+    def _stay_total(self, filters: ListingFilters) -> Callable[[Listing], int] | None:
+        """The same pricing function a booking uses (plan §10.4), for the card's total."""
+        if not (filters.check_in and filters.check_out):
+            return None
+        nights = (filters.check_out - filters.check_in).days
+        fee_bps = self._settings.service_fee_bps
+        return lambda listing: (
+            calculate_price(
+                listing.price_per_night_minor, listing.cleaning_fee_minor, nights, fee_bps
+            ).total_minor
+        )
 
     def search(self, params: PagedSearchParams) -> ListingPage:
-        filters = to_filters(params)
+        filters = to_filters(params, self._today)
         total = repository.count(self._session, filters)
         rows = repository.search(
             self._session, filters, params.page_size, offset(params.page, params.page_size)
         )
         return ListingPage(
-            items=to_cards(self._session, rows),
+            items=to_cards(self._session, rows, self._stay_total(filters)),
             page=params.page,
             page_size=params.page_size,
             total=total,
@@ -145,7 +178,7 @@ class ListingService:
     def summary(self, params: SearchParams) -> ListingSummary:
         """`total` honours every filter; the price range and histogram ignore the price
         bounds, so the filter's slider always spans what is available."""
-        filters = to_filters(params)
+        filters = to_filters(params, self._today)
         prices = repository.prices(self._session, filters)
         return ListingSummary(
             total=repository.count(self._session, filters),
