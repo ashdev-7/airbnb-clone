@@ -7,3 +7,6 @@ export const SITE_TITLE = `${SITE_NAME}: Holiday Rentals, Cabins, Beach Houses, 
 export const API_BASE_PATH = "/api";
 
 export const API_TIMEOUT_MS = 10_000;
+
+/** The calendar of the business: "today" is the date here, wherever the visitor is (plan D2). */
+export const APP_TIME_ZONE = "Asia/Kolkata";

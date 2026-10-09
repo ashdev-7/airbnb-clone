@@ -61,3 +61,95 @@ button:disabled {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
+
+/*
+ * The two-handle price slider (capture B5): two range inputs laid over one track. Only
+ * the handles take the pointer, so either can be dragged where they overlap.
+ */
+.range-pair input[type="range"] {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.range-pair input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  background: #ffffff;
+  box-shadow: var(--shadow-control);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.range-pair input[type="range"]::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-line);
+  background: #ffffff;
+  box-shadow: var(--shadow-control);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.range-pair input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/*
+ * The results map. Leaflet draws these elements itself, so they are styled here.
+ * Price markers (capture B4): white pills with bold 14 px prices; the chosen one dark.
+ */
+.leaflet-container {
+  font-family: var(--font-sans);
+}
+
+.map-price span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 5px 10px;
+  border-radius: 28px;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 2px 4px rgb(0 0 0 / 0.18);
+}
+
+.map-price:hover,
+.map-price-selected {
+  z-index: 1000 !important;
+}
+
+.map-price-selected span {
+  background: var(--color-ink);
+  color: #ffffff;
+}
+
+/* The card a marker opens: only our card shows, without the bubble and tip of Leaflet. */
+.map-card .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-raised);
+}
+
+.map-card .leaflet-popup-content {
+  margin: 0;
+  width: 327px !important;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.map-card .leaflet-popup-tip-container {
+  display: none;
+}

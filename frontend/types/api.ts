@@ -57,3 +57,37 @@ export type ListingPage = {
 };
 
 export type WishlistIds = { ids: number[] };
+
+export type Amenity = { slug: string; name: string; category: string };
+
+export type HistogramBucket = { from_minor: number; to_minor: number; count: number };
+
+/** What the filters modal needs about a search: how many homes, and their prices. */
+export type ListingSummary = {
+  total: number;
+  price_min_minor: number | null;
+  price_max_minor: number | null;
+  currency: string;
+  histogram: HistogramBucket[];
+};
+
+/** A place suggestion. `label` is what is shown and what is sent back as the location. */
+export type LocationSuggestion = {
+  kind: "city" | "state" | "country";
+  label: string;
+  city: string | null;
+  state: string | null;
+  country: string;
+  listing_count: number;
+};
+
+export type Meta = {
+  property_types: PropertyType[];
+  amenities: Amenity[];
+  amenity_categories: string[];
+  service_fee_bps: number;
+  currency: string;
+  guest_limits: { min_adults: number; max_guests: number; max_infants: number; max_pets: number };
+  default_page_size: number;
+  max_page_size: number;
+};

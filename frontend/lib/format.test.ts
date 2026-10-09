@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatMoney, formatRating, listingHeadline } from "./format";
+import {
+  formatDateRange,
+  formatHomes,
+  formatMoney,
+  formatRating,
+  listingHeadline,
+  shortPlace,
+} from "./format";
 
 describe("formatMoney", () => {
   it("writes paise as whole rupees with Indian digit grouping", () => {
@@ -26,5 +33,29 @@ describe("formatRating", () => {
 describe("listingHeadline", () => {
   it("joins the property type and the city", () => {
     expect(listingHeadline("Villa", "Goa")).toBe("Villa in Goa");
+  });
+});
+
+describe("formatDateRange", () => {
+  it("shortens a range inside one month, as capture B1 does", () => {
+    expect(formatDateRange("2026-10-29", "2026-10-30")).toBe("29–30 Oct");
+  });
+
+  it("names both months otherwise", () => {
+    expect(formatDateRange("2026-10-29", "2026-11-02")).toBe("29 Oct – 2 Nov");
+    expect(formatDateRange("2026-12-30", "2027-01-02")).toBe("30 Dec – 2 Jan");
+  });
+});
+
+describe("formatHomes and shortPlace", () => {
+  it("counts homes", () => {
+    expect(formatHomes(1)).toBe("1 home");
+    expect(formatHomes(0)).toBe("0 homes");
+    expect(formatHomes(1234)).toBe("1,234 homes");
+  });
+
+  it("keeps the first part of a place", () => {
+    expect(shortPlace("Goa, India")).toBe("Goa");
+    expect(shortPlace("Manali")).toBe("Manali");
   });
 });

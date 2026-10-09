@@ -23,11 +23,11 @@ function Grid({ size, children }: { size: CardSize; children: ReactNode }) {
 type Props = {
   listings: Listing[];
   size: CardSize;
-  /** The address of a listing's page; the caller adds the dates and guests of the search. */
-  hrefFor?: (listing: Listing) => string;
+  /** The address of each listing page by id, when it carries the dates and guests of a search. */
+  hrefs?: Record<number, string>;
 };
 
-export function ListingGrid({ listings, size, hrefFor }: Props) {
+export function ListingGrid({ listings, size, hrefs }: Props) {
   return (
     <Grid size={size}>
       {listings.map((listing, index) => (
@@ -35,7 +35,7 @@ export function ListingGrid({ listings, size, hrefFor }: Props) {
           key={listing.id}
           listing={listing}
           size={size}
-          href={hrefFor?.(listing)}
+          href={hrefs?.[listing.id]}
           eager={index < EAGER_CARDS[size]}
         />
       ))}

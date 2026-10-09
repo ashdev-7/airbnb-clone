@@ -23,11 +23,23 @@ type Props = { listing: Listing; size: CardSize; eager?: boolean; href?: string 
 const PHOTO: Record<CardSize, string> = { home: "aspect-[20/19]", results: "aspect-[4/3]" };
 const HEART: Record<CardSize, string> = { home: "top-2 right-2", results: "top-2.5 right-3" };
 
+/**
+ * The price per night on every card; when the search has dates, the total for the stay
+ * follows it (assignment O1). Both numbers come from the server.
+ */
 function Price({ listing }: { listing: Listing }) {
   return (
     <>
       <span className="font-medium text-ink">{formatMoney(listing.price_per_night_minor)}</span>{" "}
       night
+      {listing.stay_total_minor !== null && (
+        <>
+          <span aria-hidden className="px-1 text-faint">
+            ·
+          </span>
+          {formatMoney(listing.stay_total_minor)} total
+        </>
+      )}
     </>
   );
 }

@@ -2,19 +2,26 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ListingGrid, ListingGridSkeleton } from "@/components/listings/listing-grid";
 import { Pagination } from "@/components/ui/pagination";
+import { FilterRow } from "@/components/search/filter-row";
 import { fetchListings } from "@/lib/api/listings";
 import { pageHref, parsePage } from "@/lib/search-params";
 
 const HOME = "/";
 
 /**
- * Home: the explore view (plan §6.3, D10), inside the 88 px margins of capture A1. The page number lives in the URL and the grid
- * is rendered on the server; the skeleton shows while the listings are on their way.
+ * Home: the explore view (plan §6.3, D10), inside the 88 px margins of capture A1. The
+ * page number lives in the URL and the grid is rendered on the server; the skeleton shows while the listings are on their way.
  */
 export default function HomePage({ searchParams }: PageProps<"/">) {
   return (
-    <main className="px-[88px] pt-8 pb-12">
+    <main className="px-[88px] pb-12">
       <h1 className="sr-only">Explore homes</h1>
+      {/* Using a filter here opens the search page with it applied (plan §6.3). */}
+      <div className="py-3">
+        <Suspense fallback={<div className="h-[54px]" />}>
+          <FilterRow />
+        </Suspense>
+      </div>
       <Suspense fallback={<ListingGridSkeleton size="home" />}>
         <Explore searchParams={searchParams} />
       </Suspense>
@@ -24,7 +31,7 @@ export default function HomePage({ searchParams }: PageProps<"/">) {
 
 async function Explore({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   const page = parsePage((await searchParams).page);
-  const results = await fetchListings(page);
+  const results = await fetchListings(page > 1 ? `page=${page}` : "");
 
   if (results.items.length === 0) {
     return (
