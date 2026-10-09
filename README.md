@@ -69,6 +69,7 @@ scripts/        setup, dev and uv helpers behind the npm commands
 
 ### Frontend
 
+- The home page shows rows of homes by destination; the "Homes" tab and each row heading open the search results, where the filter row, the full grid, the map and the pagination are.
 - Pages are rendered on the server and read their state from the URL; interactive parts (header, cards, modals) are client components.
 - The look is built from measurements of the original, recorded in `docs/parity-notes.md`; colours, radii and shadows are tokens in `frontend/app/globals.css`.
 - A search is its address: the place is in the path (`/s/Goa/homes`) and dates, guests, filters and page are query parameters. `frontend/lib/search-params.ts` is the one translator between that address and the API, so Back, reload and shared links all restore a search.

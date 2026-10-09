@@ -281,21 +281,110 @@ Property-type names on cards across all captures: "Flat" (170 cards), "Apartment
 - **Before dates are chosen** the card's button reads "Check availability" and the calendar heading "Select check-in date": no capture shows a listing without dates.
 - **The amenities icons** are Lucide's where one fits and a tick otherwise.
 
+## Phase 7 corrections round
+
+### Home page, rebuilt from A1
+
+| Element | Values | Capture |
+|---|---|---|
+| Rows | Inside 88 px page margins; 40 px above each row; heading 20/24/600 at -0.18 px with a 28 px round arrow beside it; a 14/18 `muted` line under it; seven cards across, 12 px apart (181.7 px each at the captured window); two 28 px round arrows at the right, the first greyed at the start | A1, A2 |
+| Card | Photo 20:19 with 20 px corners; 8 px below it the name 13/16/500, then one 12/16 `muted` line with the price and, after a `faint` dot, an 8 px star and the rating | A1 (read from A6) |
+| Wordmark | Lowercase, rounded (Nunito 800, 24 px), with the house mark, in the 102 × 32 box | A1 |
+| Tab pictures | 36 px, Fluent Emoji 3D: globe, house, balloon, bell | A1 (box); MIT licence |
+
+The card's two lines are as the measurement file has them: the price and the rating share the second line. The instruction for this round described the rating "on its own line"; the capture does not show that, so the capture was followed. It is a one-line change either way.
+
+Headings: "Popular homes in Goa", "Stay in Manali", "Homes in Jaipur", "Stay in Kerala", "Homes in Karnataka". The forms "Popular homes in …" and "Stay in …" are the capture's; the places are ours. The line under a heading is the number of homes; the original writes a phrase about the place.
+
+### Typography audit
+
+Fifty-two text roles on the home page, the search results and the listing page. "Capture" is the computed style in the measurement file (A6 for the home page, which is A1 without the notice over it; B1, B2 and B5; C1). "Ours" is the computed style of the same role in our pages, read in a browser at the captured window. Before the fixes ten roles differed: the line height of page numbers, of the three grey or pink buttons and of the two prices, the weight of the price in the booking card, and the colour of the booking card's field values. After them none does. The typeface itself differs by design (plan §5.2) and is not in the table.
+
+| Page | Text role | Capture (size/line/weight colour) | Ours | Match |
+|---|---|---|---|---|
+| home | Tab label, current | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| home | Tab label, other | 14/18/500 #6c6c6c | 14/18/500 #6c6c6c | yes |
+| home | Search field label | 12/16/500 #222222 | 12/16/500 #222222 | yes |
+| home | Search field hint | 14/18/400 #6c6c6c | 14/18/400 #6c6c6c | yes |
+| home | "Become a host" | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| home | Row heading | 20/24/600 #222222 | 20/24/600 #222222 | yes |
+| home | Row sub-heading | 14/18/400 #6c6c6c | 14/18/400 #6c6c6c | yes |
+| home | Card title | 13/16/500 #222222 | 13/16/500 #222222 | yes |
+| home | Card price line | 12/16/400 #6c6c6c | 12/16/400 #6c6c6c | yes |
+| home | Card rating | 12/16/400 #6c6c6c | 12/16/400 #6c6c6c | yes |
+| home | Footer column heading | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| home | Footer link | 14/18/400 #222222 | 14/18/400 #222222 | yes |
+| home | Footer copyright | 14/18/400 #222222 | 14/18/400 #222222 | yes |
+| home | Footer language | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| results | Search pill text | 14/22/500 #222222 | 14/22/500 #222222 | yes |
+| results | Filter chip | 12/16/400 #222222 | 12/16/400 #222222 | yes |
+| results | "Filters" button | 12/16/400 #222222 | 12/16/400 #222222 | yes |
+| results | Results heading | 20/24/600 #222222 | 20/24/600 #222222 | yes |
+| results | Card title | 15/19/500 #222222 | 15/19/500 #222222 | yes |
+| results | Card rating | 15/19/400 #222222 | 15/19/400 #222222 | yes |
+| results | Card listing name | 15/19/400 #6c6c6c | 15/19/400 #6c6c6c | yes |
+| results | Card price amount | 15/normal/500 #222222 | 15/normal/500 #222222 | yes |
+| results | Card price words | 15/19/400 #6c6c6c | 15/19/400 #6c6c6c | yes |
+| results | Page number, current | 14/18/500 #ffffff | 14/18/500 #ffffff | yes |
+| results | Page number, other | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| results | Map price | 14/18/700 #222222 | 14/18/700 #222222 | yes |
+| listing | Listing title | 26/30/500 #222222 | 26/30/500 #222222 | yes |
+| listing | "Share" | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| listing | Overview heading | 22/26/500 #222222 | 22/26/500 #222222 | yes |
+| listing | Rooms line | 16/20/400 #222222 | 16/20/400 #222222 | yes |
+| listing | "Hosted by" | 16/20/500 #222222 | 16/20/500 #222222 | yes |
+| listing | Host line | 14/18/400 #6c6c6c | 14/18/400 #6c6c6c | yes |
+| listing | Highlight title | 14/20/500 #222222 | 14/20/500 #222222 | yes |
+| listing | Highlight text | 14/20/400 #6c6c6c | 14/20/400 #6c6c6c | yes |
+| listing | Section heading | 22/26/500 #222222 | 22/26/500 #222222 | yes |
+| listing | Amenity | 16/20/400 #222222 | 16/20/400 #222222 | yes |
+| listing | "Show all amenities" | 16/20/500 #222222 | 16/20/500 #222222 | yes |
+| listing | Card price | 22/normal/500 #222222 | 22/normal/500 #222222 | yes |
+| listing | Card price words | 16/20/400 #222222 | 16/20/400 #222222 | yes |
+| listing | Field label | 10/12/700 #222222 | 10/12/700 #222222 | yes |
+| listing | Field value | 14/18/400 #000000 | 14/18/400 #000000 | yes |
+| listing | "Reserve" | 16/20/500 #ffffff | 16/20/500 #ffffff | yes |
+| listing | "You won't be charged yet" | 14/18/400 #222222 | 14/18/400 #222222 | yes |
+| listing | Calendar heading | 22/26/500 #222222 | 22/26/500 #222222 | yes |
+| listing | Calendar range | 14/18/400 #6c6c6c | 14/18/400 #6c6c6c | yes |
+| listing | Month name | 16/20/500 #222222 | 16/20/500 #222222 | yes |
+| listing | Reviewer name | 14/18/500 #222222 | 14/18/500 #222222 | yes |
+| listing | "Show all reviews" | 16/20/500 #222222 | 16/20/500 #222222 | yes |
+| listing | "Meet your host" | 22/26/500 #222222 | 22/26/500 #222222 | yes |
+| listing | Host details heading | 18/24/500 #222222 | 18/24/500 #222222 | yes |
+| listing | "Message host" | 16/20/500 #222222 | 16/20/500 #222222 | yes |
+| listing | Things to know text | 14/18/400 #6c6c6c | 14/18/400 #6c6c6c | yes |
+
+Not in the table, because no capture holds them or because they are ours: the search panels (measured in Phase 6), the filters modal (Phase 6), the photo views, the "Coming soon" pages, toasts.
+
+### Wishlists page (capture E2)
+
+| Element | Values |
+|---|---|
+| Page | 1280 px wide; heading "Wishlists" 32/36/600 at -0.96 px, 76 px under the header |
+| Tiles | 302 px wide, 24 px apart, 40 px between rows; photo 302 × 287 with 24 px corners and `0 6px 16px rgba(0,0,0,.12)`; name 14/18/500 12 px below; a 14/18 `muted` line under it |
+
+The original shows named lists ("Recently viewed", "Chandigarh"), each a tile; ours is one list (assignment O6), so each tile is a saved home.
+
+### Side-by-side images
+
+`reference/compare/home.png`, `search-results.png` and `listing.png`: the capture above, our page below, at the same window (1521 × 695 at 1.25). They are not committed (`reference/` is ignored).
+
 ## Parity backlog
 
 Every known visual difference from a capture that is not a decision of the plan. To be closed, or accepted by the product owner, in Phase 10.
 
 | # | Where | Capture | Difference | Kind |
 |---|---|---|---|---|
-| 1 | Header tabs | A1 | Line icons in place of the original's coloured pictures; the row has the captured box sizes | Substitution (no artwork of our own) |
-| 2 | Compact search pill | A2, B1 | A line icon of a house in place of the small picture at its left | Substitution |
-| 3 | Mark and wordmark | A1 | Lucide house and "AirStay" in place of the original mark; same box (102 x 32) and colour | By plan §5.2 |
+| 1 | Header tabs | A1 | Fluent Emoji 3D pictures in place of the original's own; same box sizes | Closed as far as it can be (substitution) |
+| 2 | Compact search pill | A2, B1 | The Fluent Emoji house in place of the original's picture | Closed as far as it can be (substitution) |
+| 3 | Mark and wordmark | A1 | Lucide house and a lowercase rounded "airstay" in place of the original mark; same box (102 x 32) and colour | By plan §5.2 |
 | 4 | Typeface | all | Instrument Sans; widths within 1% on average, letterforms differ slightly | By plan §5.2 |
 | 5 | Hover, focus and pressed states | all | Ours throughout: stills do not show them | Needs a capture or acceptance |
 | 6 | Header collapse | A1 to A2 | The scroll distance (40 px) and the 200 ms change are ours | Needs a recording or acceptance |
 | 7 | Where panel | A3 | No "Recent searches"; tiles hold a line icon, not the original's pictures; second line is a count of homes | Partly by plan §6.4 |
 | 8 | Calendar | A4 | The tint between the two ends of a range is unverified; the arrows are 32 px discs where the original's are bare 12 px arrows | Fixable |
-| 9 | Who panel | A5 | "Bringing a service animal?" is plain text, not an underlined link | Fixable once there is somewhere to link |
+| 9 | Who panel | A5 | ~~"Bringing a service animal?" is plain text~~ | Closed: an underlined link that opens an explanation |
 | 10 | Signed-out menu | A6 | No picture beside "Become a host"; no "Refer a host" or "Find a co-host" rows | Not in scope |
 | 11 | Signed-in menu | G2 | "Trips" has a luggage icon where the original uses its mark; no "Notifications", "Account settings", "Refer a host", "Find a co-host" | Substitution; not in scope |
 | 12 | Results card | B1 | No rooms line ("1 bedroom · 1 bed · 1 bathroom"), no "Free cancellation" tag, no struck-through earlier price, price not underlined; "Guest favourite" and "Superhost" badges are bonus B3 | Rooms line fixable; the rest have no data |
@@ -306,11 +395,11 @@ Every known visual difference from a capture that is not a decision of the plan.
 | 17 | Filters modal | B5 | 30 histogram bars where the original has 47; the handles and the look of a chosen chip are unverified | Fixable; needs a capture of a chosen chip |
 | 18 | Toast | E3 | Text only: the original shows a thumbnail of the listing; the duration is provisional | Fixable; duration needs a recording |
 | 19 | Footer | A1 | Our own drawings of the three social marks | By plan §5.2 |
-| 20 | Home card | A1 | No "Guest favourite" badge (bonus B3); a second line with the listing title, which the original does not have | Title by the assignment (R-HS-1) |
+| 20 | Home card | A1 | No "Guest favourite" badge (bonus B3); "per night" where the original writes the stay total | Bonus; by the assignment (O1) |
 | 21 | Login modal | A7 | The accounts sit in a list that can scroll at this window height; the original's body is a single field | By plan D4 |
 | 22 | Listing: reviews | C1, C8 | No large rating with laurels, rating bars, category scores or "Guests mention"; dates as month and year | No data; partly by plan §10.7 |
 | 23 | Listing: booking card | C2, C11 | Nightly price at the top where the original shows the stay total; breakdown inline, not in a popover; no "Free cancellation before …" strip | By the assignment (O1, O4); no data |
-| 24 | Listing: date fields | C4 | The two date fields at the top right of the date panel are not repeated inside it; no keyboard-entry icon | Fixable |
+| 24 | Listing: date fields | C4 | ~~The two date fields are not repeated in the date panel~~; no keyboard-entry icon | Fields closed; the icon has no function here |
 | 25 | Listing: gallery | C1 | Corner radius and hover tint estimated; the original's left photo is one image, ours too, but a seeded listing with three photos uses a three-tile grid | Fixable; data |
 | 26 | Listing: photo tour | C5 | No row of room thumbnails and no room headings (our photos have no room names); no Share and Save at the top right | No data; fixable |
 | 27 | Listing: single photo | C6 | Unverified: the capture shows the tour | Needs a capture |
@@ -318,3 +407,7 @@ Every known visual difference from a capture that is not a decision of the plan.
 | 29 | Listing: host card | C1 | No review count, rating or years beside the name; no "Superhost" line | No data; bonus B3 |
 | 30 | Listing: sticky bar | C8 | Price per night where the original shows the stay total and a review count | By the assignment (O1) |
 | 31 | Listing: share modal | C10 | One target ("Copy Link") where the original has nine | By plan §6.6 |
+| 32 | Home rows | A1 | No "Destinations for you" strip; the line under a heading is a count of homes, not a phrase; no "Guest favourite" badges | Not in scope; bonus B3 |
+| 33 | Home rows | A1 | Our rows scroll with snapping; the original pages them and counts ("showing 1–7 of 9") for screen readers | Fixable |
+| 34 | Wishlists | E2 | One list of homes where the original has named lists with four-photo tiles | By the assignment (O6) |
+| 35 | Hosting header | F11 | The mark goes to `/`, not `/hosting` | Product owner, 2026-10-09 |

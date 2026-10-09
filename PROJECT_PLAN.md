@@ -42,10 +42,10 @@ Non-negotiables:
 
 | ID | Assignment requirement | Specified in | Phase |
 |---|---|---|---|
-| R-HS-1 | Grid of listing cards: photo, title, location, price/night, rating | §6.3, §6.5 | 5, 6 |
+| R-HS-1 | Grid of listing cards: photo, title, location, price/night, rating | §6.3 (rows on `/`), §6.5 (grid on search results) | 5, 6 |
 | R-HS-2 | Search bar: location + date range + guests | §6.4, §10.6 | 6 |
-| R-HS-3 | Category / filter row: price range, property type, amenities | §6.3, §6.5, §10.6 | 6 |
-| R-HS-4 | Pagination or infinite scroll | §6.3, §10.6 | 5, 6 |
+| R-HS-3 | Category / filter row: price range, property type, amenities | §6.5 (search results, one click from `/` through the "Homes" tab or a row heading), §10.6 | 6 |
+| R-HS-4 | Pagination or infinite scroll | §6.5 (search results), §10.6 | 6 |
 | R-LD-1 | Photo gallery | §6.6 | 7 |
 | R-LD-2 | Title, description, location, amenities, host info | §6.6 | 7 |
 | R-LD-3 | Availability calendar / date-range picker | §6.6, §10.2 | 4 (API), 7 (UI) |
@@ -139,7 +139,7 @@ Real payments; real authentication (passwords, OAuth, phone); hotels; destinatio
 | D6 | Scope | **The assignment only** (§3), with one addition by the product owner: a read-only profile page (§6.15). The development-instructions document describes process; features it mentions that the assignment does not (admin, booking cancellation, listing drafts, a sort control, editable profiles, rate limiting) are not built. |
 | D7 | APIs | **Our own REST API is required** (Python backend mandated; "Backend / API Design" graded). **No third-party API**: the assignment says "you do not need to integrate with any real APIs". |
 | D8 | Local first | Everything runs on one machine. Hosting is decided in Phase 13. |
-| D10 | Home page | **`/` is the assignment's explore view:** search bar, filter row, grid of listing cards, pagination (R-HS-1 to R-HS-4). The current Airbnb home page is a set of destination carousels with no filters or pagination (REF-H3, REF-H8); the assignment overrides it. Search results reuse the same view with the search applied and a map beside it. |
+| D10 | Home page | **Changed 2026-10-09 (product owner): `/` follows capture A1.** Rows of homes by destination, each with a heading, seven cards across and row arrows; the search bar above them. No filter row and no pagination on `/`. The assignment's filter row, full grid, map and pagination (R-HS-1, R-HS-3, R-HS-4) are on the search results page, which the "Homes" tab and every row heading open. Before this date `/` was itself the explore view with grid, filter row and pagination. |
 | D11 | Pagination or infinite scroll | **Numbered pagination.** The assignment allows either; pages are addressable by URL, rendered on the server, and exactly testable. The control is styled from capture B2. |
 | D12 | Evidence | **Nothing about Airbnb is taken from memory.** Every such statement cites `REF-…` (`docs/AIRBNB_REFERENCE.md`) or a capture ID (`docs/CAPTURE_GUIDE.md`). |
 
@@ -148,7 +148,7 @@ Real payments; real authentication (passwords, OAuth, phone); hotels; destinatio
 | # | Current Airbnb (evidence) | Assignment | What is built |
 |---|---|---|---|
 | O1 | Cards show a stay total: "₹46,740 for 2 nights" (REF-I2, REF-P1) | Card shows "price/night" | Price per night on every card; the stay total follows it when dates are chosen |
-| O2 | Home is destination carousels (REF-H3); no filters, no pagination (REF-H8) | Home/explore view with grid, filter row, pagination | D10 |
+| O2 | Home is destination carousels (REF-H3); no filters, no pagination (REF-H8) | Home/explore view with grid, filter row, pagination | `/` keeps the original's rows (D10); the grid, filter row and pagination are the search results page, one click away |
 | O3 | Filters sit behind a "Filters" button, with an optional "row of recommended filters" (REF-S2) | "Category / filter row (price range, property type, amenities, etc.)" | A filter row: "Filters" button plus quick filters for price, property type and amenities |
 | O4 | "the details of the price can still be found in the price breakdown during checkout" (REF-P2) | Price breakdown on the listing detail page | Breakdown in the listing's booking card and again at checkout |
 | O5 | Price range "Filters by total price" (REF-S2) | "price range" | Filters the nightly price, consistent with O1 |
@@ -189,12 +189,12 @@ Airbnb's website source is not public, and its bundles, stylesheets, fonts, icon
 | The name, in any string | "AirStay" (`SITE_NAME` in `frontend/lib/config.ts`) |
 | Logo | The Lucide `house` icon (open-source, ISC licence) beside the wordmark "AirStay", placed, sized and coloured like the original mark (CAP A1). One SVG file, easy to swap |
 | Typeface (family names are in each measurement file's `fonts`) | **Instrument Sans**, the closest free family: chosen in Phase 5 by measuring rendered text against capture A1 (`docs/parity-notes.md`) |
-| Icons | Lucide, plus hand-drawn SVGs where no close match exists |
+| Icons | Lucide, plus hand-drawn SVGs where no close match exists. The header tabs and the search pill use Microsoft Fluent Emoji in its 3D style (MIT licence; the files and the licence are in `frontend/public/icons/`) |
 | Photos | Free-licence photos by URL |
 | Page title (REF-I4) | "AirStay: Holiday Rentals, Cabins, Beach Houses, Unique Homes & Experiences" |
 | Footer links that name Airbnb products (REF-I3): "AirCover", "Airbnb your home", "Airbnb your experience", "Airbnb your service", "AirCover for Hosts", "Airbnb.org emergency stays", "2026 Summer Release" | "Guest protection", "Host your home", "Host an experience", "Host a service", "Host protection", "Emergency stays", "Release notes" |
 | "© 2026 Airbnb, Inc." | "© 2026 AirStay" |
-| Social links | Icons only, not linked |
+| Social links | Our own drawings; they lead to "Coming soon", like every footer link without a page |
 
 Fixed whatever else changes: the Airbnb name and logo appear nowhere in the UI, and no field accepts a real password or card number (§1 point 4).
 
@@ -238,8 +238,8 @@ The desktop baseline is the window width recorded in the captures (the product o
 
 | Element | What is built | Evidence |
 |---|---|---|
-| Mark and wordmark | Link to `/` | §5.2; position and size CAP A1 |
-| Tabs | "All", "Homes", "Experiences", "Services". Experiences and Services open a "Coming soon" page | Labels REF-H1; active tab, icons, spacing CAP A1 |
+| Mark and wordmark | A plain link to `/` on every page: it always loads the home page afresh, so nothing typed or opened survives it. The wordmark is lowercase in a rounded face (Nunito), in the 102 × 32 box of the original | §5.2; position and size CAP A1 |
+| Tabs | "All", "Homes", "Experiences", "Services", shown on `/`. "Homes" opens the search results; Experiences and Services open a "Coming soon" page | Labels REF-H1; box sizes and spacing CAP A1; pictures Fluent Emoji 3D |
 | Search bar | "Where"; "When" with "Add dates"; "Who" with "Add guests"; search button | Labels REF-H2; layout CAP A1 |
 | "Become a host" | Goes to the create-listing flow | REF-H1, REF-L5 |
 | Account menu, signed out | "Log in or sign up", "Become a host", "Help Centre" (inert) | REF-I1; layout CAP A6 |
@@ -249,23 +249,23 @@ The desktop baseline is the window width recorded in the captures (the product o
 | Behaviour on scroll | As captured | CAP A2 |
 | Hosting header | "Today", "Listings", and whatever else F11 shows; entries we do not build lead to "Coming soon" | "Today" REF-T2; layout CAP F11 |
 | Checkout header | As captured | CAP D1 |
-| Footer | Columns "Support", "Hosting" and the company column with the links of REF-I3, renamed per §5.2; bottom bar with copyright, "English (IN)", "₹ INR", "Privacy", "Terms", "Company details". Links are inert except the hosting link | REF-I3; layout CAP A1 |
+| Footer | Columns "Support", "Hosting" and the company column with the links of REF-I3, renamed per §5.2; bottom bar with copyright, "English (IN)", "₹ INR", "Privacy", "Terms", "Company details". Every link leads somewhere: the hosting link to hosting, the rest to "Coming soon" | REF-I3; layout CAP A1 |
 
 ### 6.3 Home / explore (`/`)
 
-Carries R-HS-1 to R-HS-4 (D10).
+Follows capture A1 (D10, changed 2026-10-09). R-HS-1 is carried here and on the search results page; R-HS-3 and R-HS-4 on the search results page (§6.5).
 
 | Element | What is built | Evidence |
 |---|---|---|
 | Search bar | §6.4 | |
-| Filter row | "Filters" button with a count of active filters, and quick filters for price, property type and amenities | Assignment (O3); "Filters" label REF-S2; button and chip styling CAP B1, B5 |
-| Grid | Listing cards in a responsive grid, six columns at the captured window so a page of 18 fills three rows | Assignment; card size and gaps CAP A1 on the home page, CAP B1 on search results beside the map |
-| Card | Cover photo with the photo controls of B3; heart; "Guest favourite" badge (bonus B3); "{Property type} in {city}"; the listing title; "₹X per night", followed by "· ₹Y total" when dates are chosen; rating | Anatomy, type and spacing CAP B1, B3; text form "{Property type} in {place}", badge, rating and the ₹ price format REF-I2; title and price per night from the assignment (O1) |
+| Filter row | Not on `/`. It is on the search results page (§6.5): "Filters" button with a count of active filters, and quick filters for price, property type, amenities and pets | Assignment (O3); "Filters" label REF-S2; button and chip styling CAP B1, B5 |
+| Rows | One row per destination ("Popular homes in Goa", "Stay in Manali", "Homes in Jaipur", …): a heading that opens the search for the place, a count under it, seven cards across with arrows that move the row. The full grid is on the search results page | Heading forms, row layout, card size and gaps CAP A1, A2; the places OURS |
+| Card | On `/`, the small card of A1: cover photo with photo controls, heart, "{Property type} in {city}", then one line with "₹X per night" and the rating. On search results, the card of B1: the same plus the listing title, the rating with its count, and "· ₹Y total" when dates are chosen | Anatomy, type and spacing CAP B1, B3; text form "{Property type} in {place}", badge, rating and the ₹ price format REF-I2; title and price per night from the assignment (O1) |
 | Rating on a card | The average, shown once a listing has three reviews; "New" before that | Threshold REF-R1; "New" OURS |
-| Card click | Opens the listing page, carrying dates and guests if set | Same tab or new tab: `link.target` of the listing links in the B1 measurement file |
+| Card click | Opens the listing in the tab named after it (`listing_{id}`), reusing that tab if it is open, so a listing has one tab and it shows what the last click asked for. Dates and guests are carried only when the page clicked from has them in its URL | `link.target` of the listing links in the B1 measurement file |
 | Heart | Toggles saved without navigating; signed out → login | REF-W1; confirmation CAP E3 |
-| Pagination | Numbered pages; state in the URL (`page`) | D11; control CAP B2 |
-| Not built | "Destinations for you", "Popular homes in…", "Inspiration for future getaways", hotel sections | REF-H3; replaced by the grid (O2) |
+| Pagination | Not on `/`. On the search results page: numbered pages; state in the URL (`page`) | D11; control CAP B2 |
+| Not built | "Destinations for you", "Inspiration for future getaways", hotel sections, "Guest favourite" badges (bonus B3) | REF-H3 |
 
 ### 6.4 Search bar
 
@@ -357,6 +357,8 @@ Toasts: "Listing published", "Listing updated", "Listing removed" (OURS).
 | Messaging | `/messages`, linked from the account menu and from the host section of a listing |
 | Identity verification | A row in the account menu |
 | Experiences, Services | Header tabs |
+| Footer links and social icons without a page | `/coming-soon?about=…` |
+| Until their phase lands: Trips, the profile page, hosting (Today, Listings, Become a host) and checkout | A "Coming soon" page at their final address, so no link ends on the not-found page |
 | Any hosting navigation entry that F11 shows and §6.10 does not build | Its own "Coming soon" page |
 
 ### 6.15 Profile (`/users/profile`)
@@ -1064,8 +1066,8 @@ Hosting layout, Today (reservations), listings, create wizard, editor, removal.
 - [ ] Field-level validation messages; wizard state survives a refresh; removal blocked case is explained
 - [ ] **Sign-off:** capture set F
 
-### [ ] Phase 10 — Wishlists page, profile page, placeholders, states and toasts
-- [ ] Wishlists page (J4); every placeholder in §6.11
+### [ ] Phase 10 — Profile page, states and toasts
+- [x] Wishlists page (J4) and every placeholder in §6.11: built in the Phase 7 corrections round (§19)
 - [ ] Profile page (§6.15) from capture G1, with the reviews the user has written
 - [ ] Every entry of the parity backlog in `docs/parity-notes.md` closed or accepted by the product owner
 - [ ] Every cell of §6.13 and every toast of §6.12 verified
@@ -1135,6 +1137,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 7 corrections round (product owner). **Home changed (D10, §2, §4.2 O2, §6.3):** `/` follows capture A1 with rows of homes by destination, seven cards and row arrows, and no filter row or pagination; the assignment's filter row, grid, map and pagination are the search results page, opened by the "Homes" tab and by every row heading. **Pulled forward from Phase 10:** the Wishlists page (capture E2) and "Coming soon" pages, so that no link in the header, the account menu or the footer ends on the not-found page; footer links and social icons, inert until now (§5.2, §6.2), lead to `/coming-soon`. Trips, profile, hosting and checkout have a "Coming soon" page at their final address until Phases 8 to 10. A Playwright test follows every such link. **Header:** the mark is a plain link that always loads `/` afresh, from every page, the hosting pages included (the original's hosting mark goes to `/hosting`); the wordmark is lowercase Nunito in the original's box; the tabs and the search pill use Fluent Emoji 3D pictures (MIT). Each group of pages names its header in its layout (home, results, listing, plain), so the first HTML has the right header at its final height; before, every page began with a home-sized placeholder. **Bugs:** (1) a card opened a second tab for a listing that already had one, leaving the older tab with its earlier dates; a listing now has one tab, reused. (2) Leaving a page told every closed modal on it to close, and the listing's URL-backed modals answered by rewriting the address, pulling the visitor back to the listing after "Reserve". (3) A modal opened from a panel (the service-animal explanation) closed the panel under it. **Also:** favicon and a title for every page; "Bringing a service animal?" opens an explanation in our words; the date panel repeats the two date fields of C4 in the format of C2; a typography audit of 52 text roles against A1, B1 and C1 (`docs/parity-notes.md`), with ten mismatches fixed and none left. |
 | 2026-10-09 | Phase 7. The listing page's URL names live in `lib/stay-params.ts`, beside `lib/search-params.ts` for the search pages (§7.4): `check_in`, `check_out`, `adults` as captured (C2); `children`, `infants`, `pets` ours; `modal` (captured name, C5) with our values `photos`, `photo`, `amenities`, `reviews`, and `photo` for the photo on show. The original opens amenities and reviews at sub-paths (`/rooms/{id}/amenities`, `/reviews`, C7 and C8); ours are views over the one page, so Back closes them. The booking card shows the nightly price and, under "Reserve", the server's quote line by line (assignment O4), laid out like "Price details" in C11. The listing header is the 80 px bar and scrolls away; a bar with the page's sections takes its place (C9). An unknown listing shows the not-found page with a `noindex` mark; the HTTP status is 200 because the page is streamed (Cache Components, §19 2026-10-09), and the API answers 404. Changes to the stay build on the last state asked for, not on the address, which follows a moment later, so quick clicks each count. House rules, safety lines and the cancellation text are the same for every listing (ours: there is no data for them). No capture shows the single-photo view: built from existing parts and listed as pending. |
 | 2026-10-09 | Phase 6 decisions and amendments (product owner). (1) Cards read "₹X per night", and "₹X per night · ₹Y total" with dates (§6.3). (2) The quick filter "Wifi" (every home has it) is replaced by "Pets allowed", a filter of its own on the URL (`pets_allowed=true`) that asks the API for `pets=1`; property types are named as the India captures name them on cards: "Home" and "Flat" for our house and apartment (B1, A2). B7 shows the property-type section closed, so its option labels cannot be read; the card names are used there too. (3) Seed grown to 120 listings and 34 users (§12): Goa 40, Manali and Jaipur 20 each, nine places with 4–5; 18 hosts, none above 8; every cover photo unique, with 36 interior photos set aside as covers so no new photos had to be collected. (4) A backend test walks pagination under a filter that leaves several pages but not every listing. (5) **Playwright moved forward from Phase 11**: the browser checks of Phases 5 and 6 are committed tests (`frontend/e2e/`, `npm run e2e`), run on a stack of their own (ports 3100 and 8100, `backend/data/e2e.db`, build folder `.next-e2e` through `NEXT_DIST_DIR`); `npm run e2e` is run and reported at the end of every phase from now on (`CLAUDE.md`). Phase 11 keeps journeys J1–J5. (6) `docs/parity-notes.md` has a parity backlog, to be closed in Phase 10. (7) Captures G1 and G2 added: the signed-in avatar and menu follow them (§6.2). (8) **Scope change:** a read-only profile page at `/users/profile` (§3, §6.15), scheduled for Phase 10. Also fixed, found by the new tests: parts of a page that attach late could start from data already fetched in the browser and keep stale server attributes (a saved heart drawn unsaved, a hydration error in the header); hooks that read browser-fetched data now begin from the server's render (`hooks/use-hydrated.ts`). |
 | 2026-10-09 | Phase 6. Libraries of §7.3 installed at exact versions: react-day-picker and leaflet, with `@types/leaflet` (type definitions only, development). URL names: `min_bedrooms`, `min_beds`, `min_bathrooms` are confirmed by capture B5; price, property type, amenities, children, infants and pets stay ours because no capture shows them (§10.6). B5 shows a price histogram, so it is drawn (§10.6), with a two-handle slider. Using the search bar or a filter on `/` opens `/s/homes` with it applied, so one page owns filtered results (§6.3). `lib/dates.ts` and `lib/guests.ts` are in place as §7.4 names them; `lib/price-range.ts` is added for the arithmetic of the price filter. In a search, adults may be zero until a child, infant or pet is added, then at least one (§10.8, ours). Dates in a link that have passed are dropped with a note instead of an error. The results page calls `connection()` so it is rendered per request: it depends on the date of today. `useCloseWhenHidden` now ignores the extra effect run of development mode. Built without a capture or different by decision: listed in `docs/parity-notes.md`. |
