@@ -2,7 +2,17 @@
 
 A home-rental marketplace: browse and search homes, view a listing, book available dates through a mocked checkout, see the booking in Trips, and manage listings as a host.
 
-> This README is a skeleton. Sections marked _(to come)_ are completed as their phases land; the full specification is [`PROJECT_PLAN.md`](PROJECT_PLAN.md).
+The full specification is [`PROJECT_PLAN.md`](PROJECT_PLAN.md); measurements taken from the reference site are in [`docs/parity-notes.md`](docs/parity-notes.md).
+
+## Links
+
+| | |
+|---|---|
+| Repository | https://github.com/ashdev-7/airbnb-clone |
+| Live site (Vercel) | _add the Vercel URL after deploying_ |
+| API (Railway) | _add the Railway URL after deploying_; health check at `/api/health` |
+
+**Try it:** open the site, choose "Log in or sign up" and pick a seeded account. Meera Iyer is a guest with trips; Ananya Rao is a host with listings. Search a place (Goa, Manali and Jaipur have the most homes), open a home, pick dates, Reserve, and pay with the approving test card.
 
 ## Tech stack
 
@@ -172,6 +182,41 @@ Error shape:
 { "error": { "code": "not_found", "message": "Not found.", "details": {}, "request_id": "…" } }
 ```
 
-## Assumptions and limitations
+## Deployment
 
-_(to come)_
+**Backend (Railway, or any Docker host with a persistent disk).** Root directory `backend`; it builds from `backend/Dockerfile` and runs one Uvicorn worker on `0.0.0.0:$PORT`. Mount a volume at `/data` and set:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | `sqlite:////data/app.db` |
+| `SECRET_KEY` | a long random string (signs the session cookie) |
+| `COOKIE_SECURE` | `true` |
+| `SEED_ON_EMPTY` | `true`: loads the sample data once, when the database has no users |
+
+**Frontend (Vercel).** Root directory `frontend`, framework Next.js, Node 22. Set `BACKEND_URL` to the backend's public URL (no trailing slash). It is read at build time, because the `/api/*` rewrite is fixed when the site is built: redeploy after changing it. The frontend builds without the backend running.
+
+The browser only ever talks to the frontend's origin, which forwards `/api/*` to the backend, so the session cookie is first-party and no CORS setup is needed.
+
+## Assumptions
+
+- **Login is mocked**, as the assignment allows: an account picker over seeded users, with a real signed, HttpOnly session cookie. There are no passwords.
+- **Payment is mocked**: two saved test cards, one that approves and one that is always declined. No card number is ever typed or stored.
+- **Every listing is an entire place and books instantly.** A booking is confirmed at once or not made at all.
+- **Prices** are in rupees, stored as integer paise. The total is the nightly price times the nights, plus the cleaning fee, plus a 15% service fee rounded to a whole rupee. The server computes it; the browser only displays it.
+- **A stay** runs from check-in up to, not including, check-out, so one guest can arrive the day another leaves. Two confirmed stays on a listing can never overlap: the booking endpoint checks inside a write-locked transaction, and database triggers refuse it even for raw SQL.
+- **Dates** are calendar days in India time (`Asia/Kolkata`). Stays can be booked up to two years ahead.
+- **A host** is any user who owns a listing. A listing with upcoming reservations cannot be removed; removal is a soft delete so past trips keep their listing.
+- **One wishlist per user**, not named collections.
+- **Search** matches city, state or country by text; there is no geocoding. Listing photos are free-licence images loaded by URL.
+
+## Known limitations
+
+- **The home page shows rows by destination**, like the reference site; the filter row, the full grid, the map and the pagination are on the search results page, one click away ("Homes" tab or any row heading).
+- **Bookings cannot be cancelled or changed**, and there is no messaging, identity check, Experiences or Services: those lead to "Coming soon" pages.
+- **The host screens are simple**: one form to create and edit a listing, a list of listings and a list of reservations. There is no calendar or pricing by date.
+- **An unknown listing answers HTTP 200 with the not-found page** (the page is streamed; it is marked `noindex`, and the API answers 404).
+- **SQLite with one writer**: correct for this size, and the reason the backend runs as a single process. A busy write lock answers `503` and the client retries.
+- **The map** uses OpenStreetMap tiles and does not search as it moves. If tiles fail to load, the place name is shown instead.
+- **Reviews are read-only**: they come from the seed; guests cannot write one yet.
+- **Desktop first**: the layout is built for a laptop-width window and is only partly adapted to phones.
+- **Tests**: 480 backend tests and 97 frontend unit tests run in `npm run check`; the browser tests (`npm run e2e`) cover search, the listing page, wishlists, login and one smoke test each for booking and hosting.
