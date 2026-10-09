@@ -91,3 +91,8 @@ def test_every_request_is_logged_with_its_request_id(
     assert len(lines) == 1
     assert lines[0].request_id == "trace-me"  # type: ignore[attr-defined]
     assert "GET /api/health 200" in lines[0].getMessage()
+
+
+def test_api_responses_are_never_cached(client: TestClient) -> None:
+    assert client.get("/api/health").headers["Cache-Control"] == "no-store"
+    assert client.get("/api/nowhere").headers["Cache-Control"] == "no-store"

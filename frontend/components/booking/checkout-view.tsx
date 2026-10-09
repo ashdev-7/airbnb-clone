@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -38,6 +38,7 @@ const H2 = "text-[22px] leading-[26px] font-medium";
  */
 export function CheckoutView() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const toast = useToast();
   const hydrated = useHydrated();
   const { user, isLoading } = useCurrentUser();
@@ -90,6 +91,9 @@ export function CheckoutView() {
         },
         key,
       );
+      // The listing page may still be mounted: its calendar and price must not offer these nights.
+      void queryClient.invalidateQueries({ queryKey: ["availability", listingId] });
+      void queryClient.invalidateQueries({ queryKey: ["quote", listingId] });
       toast.show("Booking confirmed");
       router.replace(`/trips/${booking.id}`);
       return;
@@ -101,6 +105,8 @@ export function CheckoutView() {
         setKey(crypto.randomUUID());
       } else if (code === "dates_unavailable") {
         setProblem({ text: "Those dates were just booked by someone else.", backToListing: true });
+        void queryClient.invalidateQueries({ queryKey: ["availability", listingId] });
+        void queryClient.invalidateQueries({ queryKey: ["quote", listingId] });
       } else if (code === "price_changed") {
         setProblem({ text: "The price changed. Review the new total and confirm again." });
         setKey(crypto.randomUUID());

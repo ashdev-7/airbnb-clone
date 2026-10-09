@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { expect, type Browser, type Locator, type Page } from "@playwright/test";
 
 /*
  * Selectors go through roles and labels (CLAUDE.md): with Cache Components the page a
@@ -75,3 +75,30 @@ export async function walkPages(page: Page, nav: string): Promise<number[][]> {
 export function daysFromNow(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
 }
+
+/** Day `day` of next month, as the URL writes it: always inside the two months a calendar opens on. */
+export function nextMonth(day: number): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, day)).toISOString().slice(0, 10);
+}
+
+/** A page in a browser session of its own, signed in as `name`: a second person. */
+export async function signedIn(browser: Browser, name: string): Promise<Page> {
+  const page = await (await browser.newContext()).newPage();
+  await page.goto("/");
+  await signIn(page, name);
+  return page;
+}
+
+/** The first of `ids` that can be booked from `checkIn` to `checkOut`. */
+export async function freeListing(page: Page, ids: number[], checkIn: string, checkOut: string): Promise<number> {
+  for (const id of ids) {
+    const response = await page.request.get(
+      `/api/listings/${id}/quote?check_in=${checkIn}&check_out=${checkOut}&adults=1`,
+    );
+    if (response.ok()) return id;
+  }
+  throw new Error("no free listing in the seed");
+}
+
+export const rupees = (minor: number) => `₹${(minor / 100).toLocaleString("en-IN")}`;

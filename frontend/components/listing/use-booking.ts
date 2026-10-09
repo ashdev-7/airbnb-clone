@@ -39,15 +39,18 @@ export function useBooking(listing: BookableListing) {
   const availability = useQuery({
     queryKey: ["availability", listing.id],
     queryFn: () => getAvailability(listing.id),
-    staleTime: 30_000,
+    // Another guest can book at any moment: ask again whenever the page is come back to.
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
+  // Several parts of the page use this hook, and they attach at different moments: one
+  // that attaches late must still start from what the server drew (see useHydrated),
+  // or its booked days would keep the server's enabled buttons.
+  const hydrated = useHydrated();
+  const ranges = hydrated ? availability.data?.booked : undefined;
   const booked: Stay[] = useMemo(
-    () =>
-      (availability.data?.booked ?? []).map((range) => ({
-        checkIn: range.check_in,
-        checkOut: range.check_out,
-      })),
-    [availability.data],
+    () => (ranges ?? []).map((range) => ({ checkIn: range.check_in, checkOut: range.check_out })),
+    [ranges],
   );
 
   const query = quoteQuery(stay);
@@ -59,9 +62,6 @@ export function useBooking(listing: BookableListing) {
     retry: false,
   });
 
-  // Several parts of the page use this hook, and they attach at different moments: one
-  // that attaches late must still start from what the server drew (see useHydrated).
-  const hydrated = useHydrated();
   const priced = hydrated && query !== null ? quote.data : undefined;
 
   const router = useRouter();

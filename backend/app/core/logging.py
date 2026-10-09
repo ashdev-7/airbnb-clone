@@ -79,7 +79,11 @@ class RequestIdMiddleware:
             if message["type"] == "http.response.start":
                 status = message["status"]
                 response_started = True
-                MutableHeaders(scope=message)[REQUEST_ID_HEADER] = request_id
+                headers = MutableHeaders(scope=message)
+                headers[REQUEST_ID_HEADER] = request_id
+                # Availability, prices and the session change at any moment: no browser
+                # or proxy in front of the API may answer from a copy.
+                headers.setdefault("Cache-Control", "no-store")
             await send(message)
 
         try:
