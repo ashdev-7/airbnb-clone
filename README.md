@@ -22,7 +22,10 @@ npm run setup   # installs backend and frontend dependencies, creates the .env f
 npm run dev     # backend on http://localhost:8000, frontend on http://localhost:3000
 ```
 
-Open http://localhost:3000. The API is reachable at http://localhost:3000/api (the frontend forwards it) and its generated reference is at http://localhost:8000/api/docs.
+Open http://localhost:3000.
+
+- The browser calls the API through the frontend, at `http://localhost:3000/api/*` (for example http://localhost:3000/api/health).
+- The backend itself listens on http://localhost:8000 and serves only paths under `/api`; its generated reference is at http://localhost:8000/api/docs.
 
 | Command | Purpose |
 |---|---|
