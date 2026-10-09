@@ -428,7 +428,7 @@ Nothing in the core workflows depends on an external service being up.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | Next.js 16.x (App Router, Turbopack), React 19, TypeScript strict, Node ≥ 20.9 | Mandated; 16.x is the Active LTS line |
+| Frontend | Next.js 16.x (App Router, Turbopack), React 19, TypeScript strict, Node ≥ 22.12 | Mandated; 16.x is the Active LTS line. Node floor set by Vitest 5 (§19) |
 | Styling | Tailwind CSS v4; tokens as CSS variables | Precise control for pixel matching |
 | Server state | TanStack Query | Caching, de-duplication, retries, optimistic wishlist |
 | Calendar | react-day-picker (bundles date-fns) | Maintained, accessible range picker with disabled days; restyled to match |
@@ -982,11 +982,11 @@ Acceptance criteria and test names are written before each phase's implementatio
 
 One phase at a time: restate scope → write acceptance tests → implement → `npm run check` → verify by hand → report (§16) → commit → tick the box here. Backend phases 1–4 need no captures; UI phases 5–9 each end with a side-by-side sign-off by the product owner.
 
-### [ ] Phase 1 — Foundation
+### [x] Phase 1 — Foundation
 Repository layout (`frontend/`, `backend/`, root scripts, `.gitignore` including `reference/` and `data/`); FastAPI app factory, settings, engine with pragmas and `BEGIN` control, read and write sessions, error envelope, request-id logging, `/api/health`; Next.js scaffold with TypeScript strict, Tailwind, ESLint flat config, the `/api` rewrite, both API clients; README skeleton.
-- [ ] `npm run setup`, `dev` and `check` work from a clean clone
-- [ ] `GET /api/health` answers on `:8000` and through `:3000`
-- [ ] Tests: pragmas set; a write session holds the write lock (a second writer waits, then gets 503 after the timeout); unknown route and unhandled exception both return the envelope
+- [x] `npm run setup`, `dev` and `check` work from a clean clone
+- [x] `GET /api/health` answers on `:8000` and through `:3000`
+- [x] Tests: pragmas set; a write session holds the write lock (a second writer waits, then gets 503 after the timeout); unknown route and unhandled exception both return the envelope
 
 ### [ ] Phase 2 — Schema and seed
 - [ ] Every table, constraint, index and trigger in §8
@@ -1113,6 +1113,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 1. Node floor raised from 20.9 to 22.12 (Vitest 5 requires it). Test-only dependency `httpx2` added (Starlette's `TestClient` needs it; `httpx` is deprecated there). `cacheComponents` and `partialPrefetching` are on, as create-next-app 16.4 generates them, with `@tailwindcss/turbopack` as its Tailwind loader. Added outside the §7.4/§7.5 trees: `backend/app/health/` (router and service for `/api/health`), `frontend/lib/api/request.ts` (the fetch logic shared by `client.ts` and `server.ts`), `scripts/` (setup, dev, and a helper that finds uv on PATH or as `python -m uv`). `core/clock.py` is deferred to the first phase that needs today's date. |
 | 2026-10-09 | v0.1 — first draft. |
 | 2026-10-09 | v1.2 — Locale set to India: mirrors airbnb.co.in, English (IN), ₹ INR; money stored in paise with every amount a whole rupee; business date in `Asia/Kolkata`; Indian destinations in the seed; India-site labels (REF-I1 to REF-I4). Captures are taken on airbnb.co.in in a maximised window with a one-click bookmark; the baseline width is whatever the captures record. Money fields renamed from `_cents` to `_minor`. |
 | 2026-10-09 | v1.1 — Brand set to AirStay with a free icon as its mark; no demo notice in the UI. Home page is now the assignment's explore view: search bar, filter row, grid, numbered pagination (D10, D11). Every statement about Airbnb now cites `docs/AIRBNB_REFERENCE.md` or a capture; statements from memory removed (D12). Added `docs/CAPTURE_GUIDE.md` and `tools/measure.js`. Booking window 730 days, review window 14 days, rating shown from three reviews, badge criteria and amenity groups taken from Airbnb's Help Center. `/api/home` removed. Page size and guest limits are provisional constants until their captures are read. |
