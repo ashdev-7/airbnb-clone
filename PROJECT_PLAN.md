@@ -522,6 +522,7 @@ Rules:
 | `SERVICE_FEE_BPS` | backend | `1500` |
 | `APP_TIMEZONE` | backend | `Asia/Kolkata` |
 | `SEED_ON_EMPTY` | backend | `false` locally (seed is an explicit command) |
+| `COOKIE_SECURE` | backend | `false` locally; `true` in production, so the session cookie is sent over HTTPS only |
 | `BACKEND_URL` | frontend, server side only | `http://localhost:8000` |
 
 `.env` files are git-ignored; `.env.example` is committed. `SECRET_KEY` is the only secret.
@@ -824,14 +825,14 @@ The 15% rate is OURS; for comparison, Airbnb's guest fee under its split-fee str
 | `property_type` | Repeatable slug; any of (OR) |
 | `amenity` | Repeatable slug; listing must have all (AND) |
 | `min_bedrooms`, `min_beds`, `min_bathrooms` | Lower bounds |
-| `page`, `page_size` | 1-based; default 24 (provisional, OURS, until the count in captures B1 and B2 is read), maximum 50. A page past the end returns an empty `items` list |
+| `page`, `page_size` | 1-based; default 18 (captures B1 and B2), maximum 50 (OURS). A page past the end returns an empty `items` list |
 
 - Filter groups combine with AND. Contradictory filters return 200 with no items.
 - Order is fixed and total: newest first (`id DESC`), so pages never overlap or skip.
-- Response: `{ items, page, page_size, total, total_pages }`. Each item carries everything a card needs (cover and up to five photos, property type, city, title, beds, bedrooms, price, rating average, review count, coordinates, and `stay_total_minor` when dates are given) from **one query plus one photos query**, never one query per card.
+- Response: `{ items, page, page_size, total, total_pages }`. Each item carries everything a card needs (cover and up to five photos, property type, city, title, beds, bedrooms, price, rating average, review count, coordinates, and `stay_total_minor` when dates are given) from **one query plus one photos query** (after a count for `total`), never one query per card.
 - `GET /api/listings/summary` takes the same filters and returns `{ total, price_min_minor, price_max_minor, histogram }` for the filters modal. `total` honours every filter; the histogram ignores the price bounds, and the UI draws it only if capture B5 shows one.
 - `GET /api/locations?q=` returns up to eight distinct places with listing counts for the Where panel.
-- `lib/search-params.ts` is the single translator between the page URL and the API. Page-URL parameter names are provisional (`check_in`, `check_out`, `adults`, `children`, `infants`, `pets`, `price_min`, `price_max`, `property_type`, `amenities`, `min_bedrooms`, `min_beds`, `min_bathrooms`, `page`) and are aligned with the B1 measurement file when it arrives; only this module changes.
+- `lib/search-params.ts` is the single translator between the page URL and the API. Page-URL parameter names follow the captures where they are known: on the search page `checkin`, `checkout` and `adults` (CAP B1); on the listing page `check_in`, `check_out` and `adults` (CAP C2). The rest stay provisional until B5–B7 are read (`children`, `infants`, `pets`, `price_min`, `price_max`, `property_type`, `amenities`, `min_bedrooms`, `min_beds`, `min_bathrooms`), and `page` is ours (D11). The API's own parameter names do not change; only this module translates.
 
 ### 10.7 Reviews and ratings
 
@@ -843,7 +844,7 @@ The 15% rate is OURS; for comparison, Airbnb's guest fee under its split-fee str
 
 - Categories: adults, children, infants, pets (REF-G1).
 - `guests = adults + children`. Children count toward a listing's maximum (REF-G1).
-- **Provisional (OURS) until captures A5 and C3 are read:** infants and pets do not count toward the maximum; at most 5 infants and 5 pets; pets only where the listing's `pets_allowed` is true.
+- From the captures (`docs/parity-notes.md`): at most 16 guests in a search (CAP A5); infants do not count toward a listing's maximum (CAP C3); at most 5 infants (CAP A5). Still provisional (OURS), because no capture shows them: at most 5 pets; pets do not count toward the maximum; at least one adult. Pets only where the listing's `pets_allowed` is true.
 - Valid when `adults ≥ 1`, `guests ≤ listing.max_guests` and the limits above hold.
 - The limits are named constants in one module on each side (`bookings/guests.py`, authoritative; `lib/guests.ts`, to disable steppers) and are served by `/api/meta`, so the captures change values, not code.
 
@@ -925,7 +926,7 @@ FastAPI's generated `/docs` is the detailed reference; the README carries this o
 |---|---|
 | Users | 28. Seven demo accounts for the login modal: four hosts (two with six listings each, one with one, one with one nearly fully booked next month) and three guests (one with past and upcoming trips, one with only past trips, one with none). Eight further hosts who are not demo accounts, with 3–7 listings each. The remaining 13 only author past stays and reviews. `avatar_url` is empty for all of them |
 | Property types, amenities | 8 and about 30, spread over Airbnb's amenity groups (REF-S1) |
-| Listings | 60 (three pages at the default size) across at least 10 Indian destinations with coordinates (for example Goa, Manali, Jaipur, Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling), every property type, prices about ₹1,500–₹60,000 a night, capacity 1–12; spread over 12 hosts, each host's homes in more than one city; about a third allow pets |
+| Listings | 60 (four pages at the default size of 18) across at least 10 Indian destinations with coordinates (for example Goa, Manali, Jaipur, Udaipur, Munnar, Coorg, Rishikesh, Mumbai, Bengaluru, Darjeeling), every property type, prices about ₹1,500–₹60,000 a night, capacity 1–12; spread over 12 hosts, each host's homes in more than one city; about a third allow pets |
 | Photos | At least five per listing from a curated pool; two listings with three photos to exercise the gallery fallback |
 | Past bookings and reviews | Most listings have 3–40 reviews; a few have fewer than three ("New") |
 | Upcoming bookings | About 30, including a back-to-back pair and one listing almost fully booked next month |
@@ -998,11 +999,11 @@ Repository layout (`frontend/`, `backend/`, root scripts, `.gitignore` including
 - [x] `npm run seed` produces §12; two runs on the same day are identical; seed tests pass; image check passes
 - [x] README schema section with the ER diagram
 
-### [ ] Phase 3 — Identity, catalogue, host CRUD, wishlist API
+### [x] Phase 3 — Identity, catalogue, host CRUD, wishlist API
 Auth endpoints and dependencies; `/api/meta`; `/api/locations`; `GET /api/listings` (all filters except dates); `/api/listings/summary`; listing detail; reviews read; create, update, remove; `/api/hosting/listings`; wishlist endpoints.
-- [ ] Tests for every rule in §10.5, §10.6 (minus dates), §10.9, §10.10 and the matching edge cases in §13
-- [ ] Query-count test: a page of search results issues a fixed, small number of queries
-- [ ] Page size and guest limits are single named constants, set from captures A5, B1 and B2 if they have arrived
+- [x] Tests for every rule in §10.5, §10.6 (minus dates), §10.9, §10.10 and the matching edge cases in §13
+- [x] Query-count test: a page of search results issues a fixed, small number of queries
+- [x] Page size and guest limits are single named constants, set from captures A5, B1 and B2 if they have arrived
 
 ### [ ] Phase 4 — Availability, pricing, booking, trips, reservations
 Overlap rule; availability; quote; search by dates; `POST /api/bookings` exactly as §10.3; `GET /api/bookings`, `/api/bookings/{id}`, `/api/hosting/reservations`.
@@ -1117,6 +1118,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 3. Captures A5, B1, B2, C2 and C3 read; answers in `docs/parity-notes.md`. Set from them: default page size 18 (was 24, provisional); 16 guests and 5 infants at most; infants do not count toward capacity (§10.6, §10.8, §12). Listing cards open in a new tab on Airbnb (named `target` per listing), to be applied in Phase 5. Search-page URL names are `checkin`/`checkout`, listing-page names `check_in`/`check_out` (§10.6). Dependency `itsdangerous` added: Starlette's `SessionMiddleware` (§7.3) requires it. New setting `COOKIE_SECURE` (§7.6). API details decided here: listing input uses `price_per_night_minor` and `cleaning_fee_minor` in paise, whole rupees only; unknown body fields are refused (so `host_id` cannot be sent); `rating_average` is null until three reviews; cards carry up to five photos; `/api/meta` and `/api/locations` live in the listings module; signing in with a non-demo or unknown id answers 404 `demo_account_not_found`; changing someone else's listing answers 403 `not_listing_owner`; the search summary's histogram has 30 equal-width buckets. Search costs three statements (count, page, photos) rather than the two named in §10.6, because the total is needed even for a page past the end. |
 | 2026-10-09 | Phase 2 amendments (product owner). (1) Listings are spread over 12 hosts: the two main demo hosts own 6 each, the other two demo hosts 1 each, and eight seeded non-demo hosts 3–7 each; 28 users in all (§12). (2) `pets-allowed` is no longer an amenity: `listings.pets_allowed` (BOOLEAN NOT NULL DEFAULT false) replaces it (§8.1, §10.5, §10.6, §10.8, §12); 34 amenities remain. (3) Every integer column with a range or comparison CHECK also has `CHECK (typeof(col) = 'integer')`, with a raw-SQL test per table (§8.1). (4) `avatar_url` stays empty for seeded users; revisited in Phase 7 against the listing-page capture (set C). (5) README states that the API-side overlap check arrives in Phase 4. Ctrl+C on `npm run dev` confirmed working by the product owner. |
 | 2026-10-09 | Phase 2. Dependency `tzdata` added (Python's `zoneinfo` has no timezone database on Windows). `bookings/pricing.py`, the overlap predicate and trigger SQL in `bookings/availability.py`, and `core/clock.py` were created in this phase rather than Phase 4, because §12 requires the seed to use the pricing module and to place stays relative to today; Phase 4 extends them. The schema is created at application start (`create_all`, a no-op when it exists). Amenity links are written as `listing_amenities` rows and `Listing.amenities` is read-only, so row order is deterministic. Seed specifics: 12 destinations × 5 listings; demo hosts own 29, 29, 1 and 1 listings; 35 amenities, with `pets-allowed` filed under `parking_facilities` because §8.1 has no booking-options category; `avatar_url` is empty for every seeded user (initials are shown until the product owner decides otherwise). Photo URLs were collected from Unsplash's free-licence search pages and all 193 pass `--check-images`. |
 | 2026-10-09 | Decision: **Cache Components and Partial Prefetching stay on** (the Next.js 16.4 default; both become mandatory in the next major release, so turning them off would only postpone the work). Consequences for Phases 5–10, from the bundled guides `08-caching.md` and `preserving-ui-state.md`: (1) data that changes — availability, bookings, quotes and prices, wishlist, the current user, search results — is never marked `"use cache"`; every API call stays `cache: "no-store"` (§7.4 rule 6). (2) A Server Component that reads uncached data, `cookies()`, `headers()`, `params` or `searchParams` sits inside a `<Suspense>` boundary whose fallback is the page's skeleton (§6.13); `next build` fails otherwise, so `npm run check` enforces it. (3) Routes are hidden, not unmounted, on navigation (up to three are kept), so component state survives: modals, popovers, menus and toasts must close when their route is hidden (`useLayoutEffect` cleanup, or open state derived from the URL), and forms reset after a successful submit. (4) Signing in, switching account and logging out do a full page load, so no state from one account is shown to another. (5) Playwright uses visibility-aware selectors (`getByRole`, `getByLabel`), because hidden routes stay in the DOM. |

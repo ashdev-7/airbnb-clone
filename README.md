@@ -46,6 +46,7 @@ Open http://localhost:3000.
 | `SERVICE_FEE_BPS` | backend | `1500` |
 | `APP_TIMEZONE` | backend | `Asia/Kolkata` |
 | `SEED_ON_EMPTY` | backend | `false` |
+| `COOKIE_SECURE` | backend | `false` (set `true` behind HTTPS) |
 | `BACKEND_URL` | frontend, server side only | `http://localhost:8000` |
 
 ## Architecture
@@ -109,11 +110,29 @@ Design notes:
 
 ## API overview
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/health` | Liveness, including a database query |
+Identity is a signed session cookie; "user" below means a signed-in demo account.
 
-_(the remaining endpoints to come)_
+| Method | Path | Who | Purpose |
+|---|---|---|---|
+| GET | `/api/health` | anyone | Liveness, including a database query |
+| GET | `/api/meta` | anyone | Property types, amenities, fee rate, guest limits, page size |
+| GET | `/api/auth/demo-accounts` | anyone | Accounts offered in the login modal |
+| POST | `/api/auth/login` | anyone | Start a session as a demo account: `{ "user_id": 5 }` |
+| POST | `/api/auth/logout` | anyone | End the session |
+| GET | `/api/auth/me` | anyone | `{ user }` with `is_host`, or `{ user: null }` |
+| GET | `/api/locations?q=` | anyone | Up to eight places with listing counts |
+| GET | `/api/listings` | anyone | Search: `location`, `adults`, `children`, `infants`, `pets`, `min_price_minor`, `max_price_minor`, `property_type` (repeatable, any), `amenity` (repeatable, all), `min_bedrooms`, `min_beds`, `min_bathrooms`, `page`, `page_size` |
+| GET | `/api/listings/summary` | anyone | Count, price range and histogram for the same filters |
+| GET | `/api/listings/{id}` | anyone | Detail: photos, amenities, host, rating |
+| GET | `/api/listings/{id}/reviews` | anyone | Paginated reviews |
+| POST | `/api/listings` | user | Create a listing; the host is the signed-in user |
+| PATCH | `/api/listings/{id}` | owner | Partial update |
+| DELETE | `/api/listings/{id}` | owner | Remove; refused while reservations are upcoming |
+| GET | `/api/hosting/listings` | user | The caller's listings |
+| GET | `/api/wishlist`, `/api/wishlist/ids` | user | Saved listings as cards; their ids |
+| PUT / DELETE | `/api/wishlist/{listing_id}` | user | Save / unsave (idempotent) |
+
+Search by dates, availability, quotes, bookings and reservations arrive in Phase 4. Money is always integer paise with `currency: "INR"`; dates are `YYYY-MM-DD`.
 
 Error shape:
 
