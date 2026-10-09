@@ -21,6 +21,8 @@ const COMPACT_AFTER_PX = 40;
  * controls, and under it the search bar; 200 px in all. Scrolled (capture A2): the bar
  * alone, with the search shrunk to a pill where the tabs were.
  * Search results (capture B1): always the compact form, with the filter row under it.
+ * A listing (capture C1): the compact form, 80 px tall, and it scrolls away with the page;
+ * the listing's own bar takes its place (components/listing/section-nav.tsx).
  * Clicking the pill opens the full search bar again, on the part that was clicked.
  *
  * The header is fixed and a spacer holds its resting height, so the page under it does
@@ -30,6 +32,7 @@ export function MainHeader() {
   const pathname = usePathname();
   const search = useSearchState();
   const onResults = pathname.startsWith("/s/");
+  const onListing = pathname.startsWith("/rooms/");
   const [scrolled, setScrolled] = useState(false);
   /** Set while the full bar is open over the compact form; `field` is the panel to show. */
   const [reopened, setReopened] = useState<{ field: SearchField } | null>(null);
@@ -44,16 +47,22 @@ export function MainHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const compact = (onResults || scrolled) && reopened === null;
-  const barHeight = compact ? "h-header" : "h-header-open";
+  const compact = (onResults || onListing || scrolled) && reopened === null;
+  const row = onListing && compact ? "h-20" : "h-header";
+  const barHeight = compact ? row : "h-header-open";
+  const spacer = onListing ? "h-[81px]" : onResults ? "h-[151px]" : "h-[201px]";
 
   return (
-    <div className={onResults ? "h-[151px]" : "h-[201px]"}>
-      <header className="fixed inset-x-0 top-0 z-[100] border-b border-line-soft [background:var(--gradient-header)]">
+    <div className={spacer}>
+      <header
+        className={`inset-x-0 top-0 z-[100] border-b border-line-soft [background:var(--gradient-header)] ${
+          onListing ? "absolute" : "fixed"
+        }`}
+      >
         <div className={`relative transition-[height] duration-200 ${barHeight}`}>
-          <div className="relative flex h-header items-center justify-between px-gutter">
+          <div className={`relative flex items-center justify-between px-gutter ${row}`}>
             <BrandMark />
-            <div className="absolute inset-x-0 top-0 flex h-header justify-center">
+            <div className={`absolute inset-x-0 top-0 flex justify-center ${row}`}>
               {compact ? (
                 <div className="flex items-center">
                   <CompactSearch search={search} onOpen={(field) => setReopened({ field })} />

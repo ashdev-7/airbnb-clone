@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { cards, heading, profileNav, signIn } from "./helpers";
+import { cards, daysFromNow, heading, profileNav, signIn } from "./helpers";
 
 /*
  * React reports an error when its first render in the browser differs from the HTML the
@@ -19,6 +19,15 @@ test.describe("pages attach to the server HTML without errors", () => {
       expect(errors).toEqual([]);
     });
   }
+
+  test("signed out: a listing with dates", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    await page.goto(`/rooms/40?check_in=${daysFromNow(120)}&check_out=${daysFromNow(123)}&adults=2`);
+    await expect(page.getByLabel("Price details")).toContainText("Total");
+    await page.waitForLoadState("networkidle");
+    expect(errors).toEqual([]);
+  });
 
   test("signed in, with a saved home: the header and the hearts are right after every load", async ({
     page,
@@ -43,6 +52,15 @@ test.describe("pages attach to the server HTML without errors", () => {
     await expect(heading(page)).toHaveText(/homes$/);
     await expect(cards(page).getByRole("button", { name: /^Remove from wishlist/ })).toHaveCount(1);
 
+    // The listing page too: its price is there after every load, and "Saved" on the title.
+    const saved = (await (await page.request.get("/api/wishlist/ids")).json()).ids[0];
+    for (let load = 0; load < 3; load++) {
+      await page.goto(`/rooms/${saved}?check_in=${daysFromNow(130)}&check_out=${daysFromNow(132)}&adults=1`);
+      await expect(page.getByLabel("Price details")).toContainText("Total");
+      await expect(page.getByRole("button", { name: "Saved" })).toHaveAttribute("aria-pressed", "true");
+    }
+
+    await page.goto("/");
     await cards(page).first().getByRole("button", { name: /^Remove from wishlist/ }).click();
     await expect(page.getByText("Removed from Wishlist")).toBeVisible();
     await page.waitForLoadState("networkidle");

@@ -19,9 +19,9 @@ type Props = {
   /** Stays already booked; their nights cannot be chosen (plan §10.2). */
   booked?: readonly Stay[];
   months?: 1 | 2;
+  /** "search": the 51.5 px cells of capture A4. "listing": the 44 px cells of C1 and C4. */
+  size?: "search" | "listing";
 };
-
-const CELL = "size-[51.5px]";
 
 /*
  * Measured from capture A4: 51.5 px cells, 2 px between weeks, 16 px medium month names
@@ -29,10 +29,8 @@ const CELL = "size-[51.5px]";
  * a dark disc with white text; a day that cannot be chosen is grey. The tint between the
  * two ends of a range is ours: A4 shows a single chosen day.
  */
-const CLASS_NAMES = {
+const SHARED = {
   root: "relative",
-  months: "flex justify-center gap-[54px]",
-  month: "w-[360.5px]",
   month_caption: "flex h-16 items-center justify-center",
   caption_label: "text-base leading-5 font-medium",
   nav: "pointer-events-none absolute inset-x-0 top-0 z-[1] flex h-16 items-center justify-between",
@@ -42,10 +40,6 @@ const CLASS_NAMES = {
     "pointer-events-auto flex size-8 items-center justify-center rounded-full hover:bg-control disabled:opacity-30",
   chevron: "size-3 fill-current",
   month_grid: "border-separate border-spacing-x-0 border-spacing-y-[2px]",
-  weekday: "h-[28px] w-[51.5px] pb-[11px] text-xs leading-[17px] font-medium text-muted",
-  day: `${CELL} p-0 text-center`,
-  day_button: `${CELL} rounded-full border border-transparent text-sm font-medium enabled:hover:border-ink`,
-  disabled: "text-faint [&>button]:cursor-not-allowed",
   hidden: "invisible",
   range_start: "rounded-l-full bg-surface [&>button]:bg-ink [&>button]:text-white",
   range_end: "rounded-r-full bg-surface [&>button]:bg-ink [&>button]:text-white",
@@ -53,11 +47,33 @@ const CLASS_NAMES = {
   selected: "",
 };
 
+const BUTTON = "rounded-full border border-transparent text-sm font-medium enabled:hover:border-ink";
+
+/* In the listing calendar a day that cannot be chosen is also struck through (capture C4). */
+const SIZES = {
+  search: {
+    months: "flex justify-center gap-[54px]",
+    month: "w-[360.5px]",
+    weekday: "h-[28px] w-[51.5px] pb-[11px] text-xs leading-[17px] font-medium text-muted",
+    day: "size-[51.5px] p-0 text-center",
+    day_button: `size-[51.5px] ${BUTTON}`,
+    disabled: "text-faint [&>button]:cursor-not-allowed",
+  },
+  listing: {
+    months: "flex justify-center gap-[26px]",
+    month: "w-[308px]",
+    weekday: "h-[28px] w-[44px] pb-[11px] text-xs leading-[17px] font-medium text-muted",
+    day: "size-[44px] p-0 text-center",
+    day_button: `size-[44px] ${BUTTON}`,
+    disabled: "text-faint line-through [&>button]:cursor-not-allowed",
+  },
+};
+
 /**
  * A check-in / check-out picker. react-day-picker draws the months and handles the
  * keyboard; which days may be chosen, and what a click means, come from lib/dates.ts.
  */
-export function DateRangeCalendar({ value, onChange, booked = [], months = 2 }: Props) {
+export function DateRangeCalendar({ value, onChange, booked = [], months = 2, size = "search" }: Props) {
   const todayDate = today();
   const { checkIn, checkOut } = value;
   const choosingCheckOut = checkIn !== null && checkOut === null;
@@ -86,7 +102,7 @@ export function DateRangeCalendar({ value, onChange, booked = [], months = 2 }: 
       formatters={{
         formatWeekdayName: (date) => date.toLocaleDateString("en-IN", { weekday: "narrow" }),
       }}
-      classNames={CLASS_NAMES}
+      classNames={{ ...SHARED, ...SIZES[size] }}
     />
   );
 }

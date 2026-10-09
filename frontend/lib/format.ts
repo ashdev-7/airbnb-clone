@@ -49,6 +49,30 @@ export function formatDateRange(checkIn: IsoDate, checkOut: IsoDate): string {
   return `${formatDay(checkIn)} – ${formatDay(checkOut)}`;
 }
 
+const longDay = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
+const monthYear = new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric", timeZone: "UTC" });
+
+/** "29 Oct 2026" (capture C4). */
+export function formatLongDay(date: IsoDate): string {
+  return longDay.format(toLocalDate(date));
+}
+
+/** "October 2026", from a date or a timestamp of the API. */
+export function formatMonthYear(value: string): string {
+  return monthYear.format(new Date(value));
+}
+
+/** "10/29/2026": the date fields of the booking card write dates this way (capture C2). */
+export function formatFieldDate(date: IsoDate): string {
+  const [year, month, day] = date.split("-");
+  return `${Number(month)}/${Number(day)}/${year}`;
+}
+
+/** "1 night", "3 nights", "2 guests": a count with its noun. */
+export function plural(count: number, one: string, many = `${one}s`): string {
+  return `${count.toLocaleString("en-IN")} ${count === 1 ? one : many}`;
+}
+
 /** "1 home", "23 homes" */
 export function formatHomes(count: number): string {
   return `${count.toLocaleString("en-IN")} ${count === 1 ? "home" : "homes"}`;

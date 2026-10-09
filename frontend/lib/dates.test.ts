@@ -117,3 +117,29 @@ describe("selectDay", () => {
     expect(selectDay(done, "2026-10-20")).toEqual({ checkIn: "2026-10-20", checkOut: null });
   });
 });
+
+describe("the fixture table of plan §10.1: a stay booked from day 10 to day 15", () => {
+  const day = (offset: number) => addDays(TODAY, offset);
+  const booked: Stay[] = [{ checkIn: day(10), checkOut: day(15) }];
+
+  it.each([
+    [15, 20, true, "starts on the check-out day"],
+    [5, 10, true, "ends on the check-in day"],
+    [14, 16, false, "starts on the last booked night"],
+    [9, 11, false, "ends after the first booked night"],
+    [11, 13, false, "lies inside"],
+    [8, 18, false, "surrounds"],
+    [30, 32, true, "far away"],
+  ])("a stay from day %i to day %i is %s (%s)", (start, end, allowed) => {
+    expect(isValidStay(day(start), day(end), TODAY, booked)).toBe(allowed);
+  });
+
+  it("with a back-to-back pair, the shared day is a check-out and never a check-in", () => {
+    const pair: Stay[] = [...booked, { checkIn: day(15), checkOut: day(18) }];
+    expect(isSelectableCheckOut(day(10), day(8), TODAY, pair)).toBe(true);
+    expect(isSelectableCheckIn(day(15), TODAY, pair)).toBe(false);
+    expect(isSelectableCheckIn(day(18), TODAY, pair)).toBe(true);
+    expect(isValidStay(day(18), day(20), TODAY, pair)).toBe(true);
+    expect(isValidStay(day(14), day(19), TODAY, pair)).toBe(false);
+  });
+});

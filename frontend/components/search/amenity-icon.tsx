@@ -8,7 +8,11 @@ import {
   Flower2,
   Laptop,
   Mountain,
+  PawPrint,
+  Refrigerator,
+  ShieldCheck,
   Tv,
+  Utensils,
   WashingMachine,
   Waves,
   Wifi,
@@ -32,7 +36,16 @@ const ICONS: Record<string, LucideIcon> = {
   garden: Flower2,
   "mountain-view": Mountain,
   "beach-access": Waves,
+  "lake-access": Waves,
+  "pets-allowed": PawPrint,
+  refrigerator: Refrigerator,
+  "dining-table": Utensils,
+  "smoke-alarm": ShieldCheck,
 };
+
+export function hasAmenityIcon(slug: string): boolean {
+  return slug in ICONS;
+}
 
 export function AmenityIcon({ slug, size = 20 }: { slug: string; size?: number }) {
   const Icon = ICONS[slug];

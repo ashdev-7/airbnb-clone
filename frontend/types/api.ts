@@ -91,3 +91,61 @@ export type Meta = {
   default_page_size: number;
   max_page_size: number;
 };
+
+export type Host = {
+  id: number;
+  name: string;
+  avatar_url: string | null;
+  bio: string | null;
+  joined_at: string;
+  listing_count: number;
+};
+
+export type ListingDetail = ListingCard & {
+  description: string;
+  cleaning_fee_minor: number;
+  amenities: Amenity[];
+  host: Host;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Review = {
+  id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  author: { name: string; avatar_url: string | null };
+};
+
+export type ReviewPage = {
+  items: Review[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+  /** Null until the listing has three reviews. */
+  rating_average: number | null;
+};
+
+/** Confirmed stays on a listing. It never says who booked. */
+export type Availability = {
+  listing_id: number;
+  start: string;
+  end: string;
+  booked: { check_in: string; check_out: string }[];
+};
+
+/** The price of a stay, computed by the server (plan §10.4). */
+export type Quote = {
+  check_in: string;
+  check_out: string;
+  nights: number;
+  nightly_price_minor: number;
+  nights_total_minor: number;
+  cleaning_fee_minor: number;
+  service_fee_minor: number;
+  service_fee_bps: number;
+  total_minor: number;
+  currency: string;
+};

@@ -110,7 +110,7 @@ export function ResultsMap({ listings, hrefs, placeLabel }: Props) {
   const selected = listings.find((listing) => listing.id === selectedId);
 
   return (
-    <div className="relative h-full w-full bg-[#e5e3df]">
+    <div className="relative isolate h-full w-full bg-[#e5e3df]">
       <div ref={container} className="h-full w-full" role="region" aria-label={`Map of homes in ${placeLabel}`} />
       {tilesFailed && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-control p-6 text-center text-muted">

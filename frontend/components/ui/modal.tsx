@@ -12,8 +12,8 @@ type Props = {
   title: string;
   titleHidden?: boolean;
   description?: string;
-  /** 480 px (capture A7) or 568 px (the filters modal, capture B5). */
-  size?: "sm" | "lg";
+  /** 480 px (capture A7), 568 px (the filters modal, B5) or 780 px (the listing page, C7). */
+  size?: "sm" | "lg" | "xl";
   /** A bar fixed under the scrolling body, as in capture B5. */
   footer?: ReactNode;
   children: ReactNode;
@@ -23,7 +23,7 @@ type Props = {
  * The modal shell of captures A7 and B5: 32 px corners, a 64 px header with the title in
  * the middle and the close button on the right, a body that scrolls, an optional footer. Radix supplies the focus trap, Escape and the scroll lock.
  */
-const WIDTHS = { sm: "w-[480px]", lg: "w-[568px]" };
+const WIDTHS = { sm: "w-[480px]", lg: "w-[568px]", xl: "w-[780px]" };
 
 export function Modal({
   open,

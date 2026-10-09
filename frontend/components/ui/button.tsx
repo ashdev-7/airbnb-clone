@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "dark" | "outline" | "ghost";
+type Variant = "primary" | "dark" | "outline" | "ghost" | "soft";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
@@ -13,6 +13,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
  * dark: the solid button of capture A1 ("Got it").
  * outline: the bordered buttons of capture A7.
  * ghost: the text button of the header ("Become a host", capture A1).
+ * soft: the grey button of the listing page ("Show all 10 amenities", capture C7).
  */
 const VARIANTS: Record<Variant, string> = {
   primary:
@@ -21,6 +22,7 @@ const VARIANTS: Record<Variant, string> = {
   outline:
     "h-12 rounded-control border border-line bg-white px-6 text-sm font-medium text-ink hover:bg-surface",
   ghost: "h-10 rounded-full px-3 text-sm leading-[18px] font-medium text-ink hover:bg-control",
+  soft: "h-12 rounded-control bg-control px-6 text-base font-medium text-ink hover:bg-line-soft",
 };
 
 export function Button({

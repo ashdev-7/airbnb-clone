@@ -4,8 +4,10 @@ import {
   NO_GUESTS,
   countedGuests,
   guestSummary,
+  listingLimits,
   maxFor,
   minFor,
+  minForBooking,
   sanitizeGuests,
   setGuests,
 } from "./guests";
@@ -99,5 +101,25 @@ describe("guestSummary", () => {
     expect(guestSummary({ adults: 1, children: 0, infants: 0, pets: 0 })).toBe("1 guest");
     expect(guestSummary({ adults: 1, children: 1, infants: 1, pets: 1 })).toBe("2 guests, 1 infant, 1 pet");
     expect(guestSummary({ adults: 2, children: 0, infants: 0, pets: 2 })).toBe("2 guests, 2 pets");
+  });
+});
+
+describe("booking one listing", () => {
+  it("is limited by the capacity of the listing and whether pets may come", () => {
+    const small = listingLimits(LIMITS, { max_guests: 3, pets_allowed: false });
+    expect(small).toMatchObject({ max_guests: 3, max_pets: 0, max_infants: 5 });
+    const party = { adults: 2, children: 0, infants: 0, pets: 0 };
+    expect(maxFor("adults", party, small)).toBe(3);
+    expect(maxFor("children", party, small)).toBe(1);
+    expect(maxFor("pets", party, small)).toBe(0);
+    expect(setGuests(party, "children", 5, small)).toEqual({ ...party, children: 1 });
+
+    const huge = listingLimits(LIMITS, { max_guests: 40, pets_allowed: true });
+    expect(huge).toMatchObject({ max_guests: 16, max_pets: 5 });
+  });
+
+  it("always keeps one adult", () => {
+    expect(minForBooking("adults", LIMITS)).toBe(1);
+    expect(minForBooking("children", LIMITS)).toBe(0);
   });
 });

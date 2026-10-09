@@ -102,3 +102,32 @@ export function guestSummary(counts: GuestCounts): string | null {
   if (counts.pets > 0) parts.push(plural(counts.pets, "pet", "pets"));
   return parts.length > 0 ? parts.join(", ") : null;
 }
+
+/** The age text of the booking card differs for adults (capture C3). */
+export const BOOKING_HINTS: Record<GuestKind, string> = {
+  adults: "Age 13+",
+  children: "Ages 2–12",
+  infants: "Under 2",
+  pets: "Bringing a service animal?",
+};
+
+/**
+ * The limits for booking one listing: its own capacity, never above the general limit,
+ * and no pets unless the host allows them (plan §10.8).
+ */
+export function listingLimits(
+  limits: GuestLimits,
+  listing: { max_guests: number; pets_allowed: boolean },
+): GuestLimits {
+  return {
+    ...limits,
+    max_guests: Math.min(limits.max_guests, listing.max_guests),
+    max_pets: listing.pets_allowed ? limits.max_pets : 0,
+  };
+}
+
+/** A booking, unlike a search, always has an adult. */
+export function minForBooking(kind: GuestKind, limits: GuestLimits): number {
+  return kind === "adults" ? limits.min_adults : 0;
+}
+

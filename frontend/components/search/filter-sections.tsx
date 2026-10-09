@@ -52,7 +52,7 @@ export function RoomsSection({ filters, onChange }: SectionProps) {
 }
 
 /** Group names: REF-S1, in the India site's spelling. */
-const CATEGORY_NAMES: Record<string, string> = {
+export const CATEGORY_NAMES: Record<string, string> = {
   bathroom: "Bathroom",
   bedroom_laundry: "Bedroom and laundry",
   entertainment: "Entertainment",

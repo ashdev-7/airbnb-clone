@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   formatDateRange,
+  formatFieldDate,
   formatHomes,
+  formatLongDay,
+  formatMonthYear,
   formatMoney,
   formatRating,
   listingHeadline,
+  plural,
   shortPlace,
 } from "./format";
 
@@ -57,5 +61,21 @@ describe("formatHomes and shortPlace", () => {
   it("keeps the first part of a place", () => {
     expect(shortPlace("Goa, India")).toBe("Goa");
     expect(shortPlace("Manali")).toBe("Manali");
+  });
+});
+
+describe("dates and counts on the listing page", () => {
+  it("writes days as the captures do", () => {
+    expect(formatLongDay("2026-10-29")).toBe("29 Oct 2026");
+    expect(formatFieldDate("2026-10-09")).toBe("10/9/2026");
+    expect(formatMonthYear("2026-10-01")).toBe("October 2026");
+    expect(formatMonthYear("2023-03-14T06:30:00Z")).toBe("March 2023");
+  });
+
+  it("counts things", () => {
+    expect(plural(1, "night")).toBe("1 night");
+    expect(plural(3, "night")).toBe("3 nights");
+    expect(plural(1, "bedroom")).toBe("1 bedroom");
+    expect(plural(0, "review")).toBe("0 reviews");
   });
 });
