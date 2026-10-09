@@ -19,6 +19,7 @@ Requirements: Node.js ≥ 22.12, Python ≥ 3.12 and [uv](https://docs.astral.sh
 
 ```bash
 npm run setup   # installs backend and frontend dependencies, creates the .env files
+npm run seed    # builds the database and loads the sample data
 npm run dev     # backend on http://localhost:8000, frontend on http://localhost:3000
 ```
 
@@ -33,7 +34,7 @@ Open http://localhost:3000.
 | `npm run dev` | Run backend and frontend together |
 | `npm run test` | pytest and Vitest |
 | `npm run check` | Ruff, mypy, pytest, ESLint, `tsc --noEmit`, Vitest, `next build` |
-| `npm run seed` | Rebuild and seed the database _(to come)_ |
+| `npm run seed` | Rebuild and seed the database (`-- --check-images` verifies the photo URLs instead) |
 | `npm run e2e` | End-to-end journeys _(to come)_ |
 
 ### Configuration
@@ -66,7 +67,44 @@ scripts/        setup, dev and uv helpers behind the npm commands
 
 ## Database schema
 
-_(to come)_
+```mermaid
+erDiagram
+    users ||--o{ listings : hosts
+    users ||--o{ bookings : "books as guest"
+    users ||--o{ wishlist_items : saves
+    property_types ||--o{ listings : classifies
+    listings ||--o{ listing_images : has
+    listings ||--o{ listing_amenities : offers
+    amenities ||--o{ listing_amenities : "offered by"
+    listings ||--o{ bookings : receives
+    listings ||--o{ wishlist_items : "saved in"
+    bookings ||--o| reviews : "reviewed by"
+```
+
+| Table | Holds | Notable rules enforced by the database |
+|---|---|---|
+| `users` | People. A host is simply a user who owns a listing | Unique email; non-empty name |
+| `property_types`, `amenities` | Reference data | Unique slugs; amenity category from a fixed list |
+| `listings` | Homes | Price > 0; fees ≥ 0; guests, beds, bathrooms ≥ 1; coordinates both set or both empty; `deleted_at` marks a removed listing |
+| `listing_images` | Photo URLs in order; position 0 is the cover | Unique `(listing_id, position)`; deleted with the listing |
+| `listing_amenities` | Which listing offers which amenity | Composite primary key |
+| `bookings` | Stays, with a snapshot of what was charged | Valid ISO dates; `check_out > check_in`; `total = nightly × nights + cleaning + service`; unique confirmation code; unique `(guest_id, idempotency_key)` |
+| `reviews` | One review per stay | Unique `booking_id`; rating 1–5 |
+| `wishlist_items` | Saved listings | Composite primary key `(user_id, listing_id)` |
+
+Design notes:
+
+- **No double booking, guaranteed by the database.** Two triggers on `bookings` (insert and update) abort any write that would make two confirmed stays on one listing overlap. A stay is the half-open range `[check_in, check_out)`, so one guest can arrive on the day another leaves. The API checks the same rule first to give a clean error; the triggers make it impossible for any other code path, script or manual SQL to break it.
+- **Money is an integer number of paise** (₹1 = 100). No floating point touches money, and every amount is a whole rupee, so displayed lines always add up.
+- **Nothing derived is stored.** Ratings, review counts, "upcoming / past" and host status are computed when read. The one deliberate exception is the price snapshot on a booking: it records what was charged, and a CHECK keeps its lines and total consistent.
+- **Dates are ISO text** (`YYYY-MM-DD`), which sorts and compares correctly; a CHECK rejects malformed values.
+- **Soft delete only for listings**, so past trips and reviews keep their references. Everything else uses real foreign keys with `RESTRICT` or `CASCADE`.
+- **Indexes** serve the queries the app makes: listings by host, city, property type and price; amenity lookups; a partial index on confirmed bookings by `(listing_id, check_in, check_out)` for availability; bookings by guest for Trips.
+- The schema is created from the models; there is one version and no migration tooling.
+
+### Seed data
+
+`npm run seed` rebuilds the database and loads 20 users (seven demo accounts), 8 property types, 35 amenities, 60 listings across 12 Indian destinations, about 1,060 bookings and 970 reviews. Stays are placed relative to the day you run it, so there are always past, current and upcoming trips; running it twice on the same day produces identical data. `npm run seed -- --check-images` requests every photo URL.
 
 ## API overview
 

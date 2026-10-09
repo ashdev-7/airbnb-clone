@@ -988,11 +988,11 @@ Repository layout (`frontend/`, `backend/`, root scripts, `.gitignore` including
 - [x] `GET /api/health` answers on `:8000` and through `:3000`
 - [x] Tests: pragmas set; a write session holds the write lock (a second writer waits, then gets 503 after the timeout); unknown route and unhandled exception both return the envelope
 
-### [ ] Phase 2 — Schema and seed
-- [ ] Every table, constraint, index and trigger in §8
-- [ ] Database tests for each constraint and both triggers (raw SQL inserts)
-- [ ] `npm run seed` produces §12; two runs on the same day are identical; seed tests pass; image check passes
-- [ ] README schema section with the ER diagram
+### [x] Phase 2 — Schema and seed
+- [x] Every table, constraint, index and trigger in §8
+- [x] Database tests for each constraint and both triggers (raw SQL inserts)
+- [x] `npm run seed` produces §12; two runs on the same day are identical; seed tests pass; image check passes
+- [x] README schema section with the ER diagram
 
 ### [ ] Phase 3 — Identity, catalogue, host CRUD, wishlist API
 Auth endpoints and dependencies; `/api/meta`; `/api/locations`; `GET /api/listings` (all filters except dates); `/api/listings/summary`; listing detail; reviews read; create, update, remove; `/api/hosting/listings`; wishlist endpoints.
@@ -1113,6 +1113,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 2. Dependency `tzdata` added (Python's `zoneinfo` has no timezone database on Windows). `bookings/pricing.py`, the overlap predicate and trigger SQL in `bookings/availability.py`, and `core/clock.py` were created in this phase rather than Phase 4, because §12 requires the seed to use the pricing module and to place stays relative to today; Phase 4 extends them. The schema is created at application start (`create_all`, a no-op when it exists). Amenity links are written as `listing_amenities` rows and `Listing.amenities` is read-only, so row order is deterministic. Seed specifics: 12 destinations × 5 listings; demo hosts own 29, 29, 1 and 1 listings; 35 amenities, with `pets-allowed` filed under `parking_facilities` because §8.1 has no booking-options category; `avatar_url` is empty for every seeded user (initials are shown until the product owner decides otherwise). Photo URLs were collected from Unsplash's free-licence search pages and all 193 pass `--check-images`. |
 | 2026-10-09 | Decision: **Cache Components and Partial Prefetching stay on** (the Next.js 16.4 default; both become mandatory in the next major release, so turning them off would only postpone the work). Consequences for Phases 5–10, from the bundled guides `08-caching.md` and `preserving-ui-state.md`: (1) data that changes — availability, bookings, quotes and prices, wishlist, the current user, search results — is never marked `"use cache"`; every API call stays `cache: "no-store"` (§7.4 rule 6). (2) A Server Component that reads uncached data, `cookies()`, `headers()`, `params` or `searchParams` sits inside a `<Suspense>` boundary whose fallback is the page's skeleton (§6.13); `next build` fails otherwise, so `npm run check` enforces it. (3) Routes are hidden, not unmounted, on navigation (up to three are kept), so component state survives: modals, popovers, menus and toasts must close when their route is hidden (`useLayoutEffect` cleanup, or open state derived from the URL), and forms reset after a successful submit. (4) Signing in, switching account and logging out do a full page load, so no state from one account is shown to another. (5) Playwright uses visibility-aware selectors (`getByRole`, `getByLabel`), because hidden routes stay in the DOM. |
 | 2026-10-09 | §9.3 row 9 corrected to match §9.4: idempotent requests are retried twice with backoff, not once. |
 | 2026-10-09 | Phase 1. Node floor raised from 20.9 to 22.12 (Vitest 5 requires it). Test-only dependency `httpx2` added (Starlette's `TestClient` needs it; `httpx` is deprecated there). `cacheComponents` and `partialPrefetching` are on, as create-next-app 16.4 generates them, with `@tailwindcss/turbopack` as its Tailwind loader. Added outside the §7.4/§7.5 trees: `backend/app/health/` (router and service for `/api/health`), `frontend/lib/api/request.ts` (the fetch logic shared by `client.ts` and `server.ts`), `scripts/` (setup, dev, and a helper that finds uv on PATH or as `python -m uv`). `core/clock.py` is deferred to the first phase that needs today's date. |
