@@ -1,0 +1,11 @@
+reference/
+data/
+.env
+.env.local
+node_modules/
+.next/
+__pycache__/
+.venv/
+*.db
+*.db-wal
+*.db-shm
