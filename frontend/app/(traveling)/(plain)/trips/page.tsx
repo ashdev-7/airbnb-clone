@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { ComingSoon } from "@/components/layout/coming-soon";
+import { TripsView } from "@/components/trips/trips-view";
 
 export const metadata: Metadata = { title: "Trips" };
 
-/** A placeholder until this part is built (plan §6.11, §15). */
+/** Trips (plan §6.8): the signed-in user's reservations. */
 export default function TripsPage() {
-  return <ComingSoon feature="Trips" note="Your reservations will be listed here once booking is available." />;
+  return (
+    <main className="mx-auto w-full max-w-[1120px] flex-1 px-6 py-10">
+      <h1 className="text-[32px] leading-9 font-semibold tracking-[-0.96px]">Trips</h1>
+      <TripsView />
+    </main>
+  );
 }
