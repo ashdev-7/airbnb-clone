@@ -105,8 +105,9 @@ export function CheckoutView() {
         setKey(crypto.randomUUID());
       } else if (code === "dates_unavailable") {
         setProblem({ text: "Those dates were just booked by someone else.", backToListing: true });
+        // The listing's calendar must show them taken. (The price here is left as it is:
+        // asking again would replace this message with the page's own refusal.)
         void queryClient.invalidateQueries({ queryKey: ["availability", listingId] });
-        void queryClient.invalidateQueries({ queryKey: ["quote", listingId] });
       } else if (code === "price_changed") {
         setProblem({ text: "The price changed. Review the new total and confirm again." });
         setKey(crypto.randomUUID());

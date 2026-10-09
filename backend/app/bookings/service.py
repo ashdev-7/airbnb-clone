@@ -29,6 +29,7 @@ from app.bookings.schemas import (
     BookingGuest,
     BookingListing,
     BookingOut,
+    BookingReview,
     Period,
     QuoteOut,
 )
@@ -38,6 +39,9 @@ from app.core.errors import AppError
 from app.listings import repository as listings
 from app.listings.models import Listing
 from app.listings.service import listing_not_found
+from app.reviews import service as reviews
+from app.reviews.models import Review
+from app.reviews.rules import review_error
 
 logger = logging.getLogger("app.bookings")
 _CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I
@@ -283,11 +287,15 @@ class BookingService:
         return self._outs([row])[0]
 
     def _outs(self, rows: Sequence[BookingRow]) -> list[BookingOut]:
-        """Bookings with one further statement for all their cover photos."""
+        """Bookings with one further statement for all their cover photos, and one for
+        all their reviews."""
         covers = listings.photos(self._session, [row.Listing.id for row in rows], per_listing=1)
-        return [self._to_out(row, covers[row.Listing.id]) for row in rows]
+        written = reviews.by_booking(self._session, [row.Booking.id for row in rows])
+        return [
+            self._to_out(row, covers[row.Listing.id], written.get(row.Booking.id)) for row in rows
+        ]
 
-    def _to_out(self, row: BookingRow, cover: list[str]) -> BookingOut:
+    def _to_out(self, row: BookingRow, cover: list[str], review: Review | None) -> BookingOut:
         booking, listing, guest, host = row.Booking, row.Listing, row.guest, row.host
         nights = (booking.check_out - booking.check_in).days
         return BookingOut(
@@ -320,6 +328,14 @@ class BookingService:
                 removed=listing.deleted_at is not None,
             ),
             guest=BookingGuest(id=guest.id, name=guest.name, avatar_url=guest.avatar_url),
+            review=(
+                BookingReview(
+                    rating=review.rating, comment=review.comment, created_at=review.created_at
+                )
+                if review
+                else None
+            ),
+            can_review=review is None and review_error(booking, self._today) is None,
         )
 
 

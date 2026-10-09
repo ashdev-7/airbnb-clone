@@ -11,6 +11,7 @@ import { useHydrated } from "@/hooks/use-hydrated";
 import { getBooking } from "@/lib/api/bookings";
 import { ApiError } from "@/lib/api/errors";
 import { formatMoney } from "@/lib/format";
+import { TripReview } from "./review-form";
 import { StatusTag, tripDates, tripGuests } from "./trip-parts";
 
 /**
@@ -90,6 +91,8 @@ export function ReservationView() {
           </div>
         ))}
       </dl>
+      {/* Only the guest reviews a stay; the host reads the same page without the form. */}
+      {trip.guest.id === user.id && <TripReview trip={trip} />}
       <Link href="/trips" className="mt-6 inline-block text-base leading-5 font-medium underline">
         All trips
       </Link>

@@ -37,6 +37,23 @@ export type Booking = {
     removed: boolean;
   };
   guest: { id: number; name: string; avatar_url: string | null };
+  /** The guest's review of this stay, once written. */
+  review: { rating: number; comment: string; created_at: string } | null;
+  /** Decided by the server: the stay has ended, the window is open, no review yet. */
+  can_review: boolean;
+};
+
+/** The body of POST /api/bookings/{id}/review. */
+export type ReviewRequest = { rating: number; comment: string };
+
+/** A review with the listing it is about, as its author sees it. */
+export type MyReview = {
+  id: number;
+  booking_id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  listing: { id: number; title: string; city: string; removed: boolean };
 };
 
 /** The body of POST /api/bookings. The guest is the signed-in user, never sent. */

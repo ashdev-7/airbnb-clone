@@ -25,6 +25,8 @@ CURRENT_STAY_LISTINGS = (12, 25)
 FEW_REVIEW_LISTINGS = (5, 17, 33, 48)  # fewer than three reviews: shown as "New"
 MEERA_PAST_LISTINGS = range(2, 6)  # the first demo guest: past, current and upcoming trips
 ARJUN_PAST_LISTINGS = range(6, 10)  # the second demo guest: past trips only
+# The latest stay of each demo guest here has no review yet, so one can be written (B2).
+UNREVIEWED_LISTINGS = (MEERA_PAST_LISTINGS[0], ARJUN_PAST_LISTINGS[0])
 REVIEW_WINDOW_DAYS = 14
 
 _CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I
@@ -138,6 +140,10 @@ class StayBuilder:
             if number < review_count:
                 rating = self.rng.choices(ratings, weights)[0]
                 written = check_out + timedelta(days=self.rng.randint(1, REVIEW_WINDOW_DAYS - 1))
+                if number == 0 and index in UNREVIEWED_LISTINGS:
+                    # Left for the demo guest to review: the stay ended within the window.
+                    check_out = check_in - timedelta(days=self.rng.randint(0, 12))
+                    continue
                 self.reviews.append(
                     Review(
                         booking=booking,

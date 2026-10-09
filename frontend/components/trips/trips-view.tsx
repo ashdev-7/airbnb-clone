@@ -38,6 +38,7 @@ function TripRow({ booking }: { booking: Booking }) {
           <span className="block pt-1 text-muted">
             {tripGuests(booking)} · {formatMoney(booking.total_minor)} total
           </span>
+          {booking.can_review && <span className="block pt-1 font-medium text-ink underline">Write a review</span>}
         </span>
       </Link>
     </li>

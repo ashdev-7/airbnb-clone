@@ -76,6 +76,12 @@ class BookingGuest(BaseModel):
     avatar_url: str | None
 
 
+class BookingReview(BaseModel):
+    rating: int
+    comment: str
+    created_at: datetime
+
+
 class BookingOut(BaseModel):
     id: int
     confirmation_code: str
@@ -97,6 +103,9 @@ class BookingOut(BaseModel):
     created_at: datetime
     listing: BookingListing
     guest: BookingGuest
+    # The guest's review of this stay, and whether one may be written today (plan §10.7).
+    review: BookingReview | None
+    can_review: bool
 
 
 class BookingList(BaseModel):

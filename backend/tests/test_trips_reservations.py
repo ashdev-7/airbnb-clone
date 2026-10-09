@@ -108,7 +108,7 @@ def test_trips_cost_the_same_statements_however_many_there_are(
     with counted(database) as statements:
         assert len(items(client.get("/api/bookings"))) == 5
     # The signed-in user, the bookings with listing, guest and host, the cover photos.
-    assert len(statements) == 3
+    assert len(statements) == 4  # one more than before: the reviews of those stays
 
 
 # --- reservation detail ------------------------------------------------------------------
