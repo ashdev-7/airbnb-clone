@@ -130,10 +130,11 @@ test.describe("filters and results (plan §6.5)", () => {
 
     await page.goBack();
     await expect(page).toHaveURL(/\?amenities=pool$/);
-    expect(await homesFound(page)).toBe(withPool);
+    // The results of the address gone back to arrive a moment after the address changes.
+    await expect.poll(() => homesFound(page)).toBe(withPool);
     await page.goBack();
     await expect(page).toHaveURL(/\/s\/Goa\/homes$/);
-    expect(await homesFound(page)).toBe(before);
+    await expect.poll(() => homesFound(page)).toBe(before);
     expect(await cardLinks(page)).toEqual(firstPage);
     await expect(filterRow(page).getByRole("checkbox", { checked: true })).toHaveCount(0);
   });

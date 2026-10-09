@@ -9,8 +9,8 @@ The full specification is [`PROJECT_PLAN.md`](PROJECT_PLAN.md); measurements tak
 | | |
 |---|---|
 | Repository | https://github.com/ashdev-7/airbnb-clone |
-| Live site (Vercel) | _add the Vercel URL after deploying_ |
-| API (Railway) | _add the Railway URL after deploying_; health check at `/api/health` |
+| Live site (Vercel) | https://airstay-pi.vercel.app |
+| API (Railway) | https://airbnb-clone-production-d368.up.railway.app (health check at [`/api/health`](https://airbnb-clone-production-d368.up.railway.app/api/health), reference at [`/api/docs`](https://airbnb-clone-production-d368.up.railway.app/api/docs)) |
 
 **Try it:** open the site, choose "Log in or sign up" and pick a seeded account. Meera Iyer is a guest with trips; Ananya Rao is a host with listings. Search a place (Goa, Manali and Jaipur have the most homes), open a home, pick dates, Reserve, and pay with the approving test card.
 
