@@ -62,9 +62,17 @@ Browser ──► Next.js (:3000) ──rewrite /api/*──► FastAPI (:8000) 
 
 ```
 backend/app/    core/ (settings, errors, logging, dependencies) · db/ (engine, sessions) · one folder per feature
-frontend/       app/ (routes) · lib/api/ (the only code that calls fetch) · lib/config.ts
+frontend/       app/ (routes, in groups by header) · components/ui (primitives) · components/layout (headers, menu, login, footer)
+                components/listings (card, grid) · hooks/ · lib/api/ (the only code that calls fetch) · lib/ (formatting, URL parameters)
 scripts/        setup, dev and uv helpers behind the npm commands
 ```
+
+### Frontend
+
+- Pages are rendered on the server and read their state from the URL; interactive parts (header, cards, modals) are client components.
+- The look is built from measurements of the original, recorded in `docs/parity-notes.md`; colours, radii and shadows are tokens in `frontend/app/globals.css`.
+- Login is mocked: the "Log in or sign up" modal lists the seeded accounts. Choosing one sets a signed, HttpOnly session cookie; there is no password field anywhere.
+- The typeface (Instrument Sans) is fetched from Google Fonts when the frontend is built or first run in development, then served from our own origin. Listing photos are loaded from the Unsplash CDN through the Next.js image optimiser.
 
 ## Database schema
 

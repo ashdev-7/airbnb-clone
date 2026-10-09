@@ -187,7 +187,7 @@ Airbnb's website source is not public, and its bundles, stylesheets, fonts, icon
 |---|---|
 | The name, in any string | "AirStay" (`SITE_NAME` in `frontend/lib/config.ts`) |
 | Logo | The Lucide `house` icon (open-source, ISC licence) beside the wordmark "AirStay", placed, sized and coloured like the original mark (CAP A1). One SVG file, easy to swap |
-| Typeface (family names are in each measurement file's `fonts`) | The closest free family, chosen in Phase 5 by overlaying text on capture A1 |
+| Typeface (family names are in each measurement file's `fonts`) | **Instrument Sans**, the closest free family: chosen in Phase 5 by measuring rendered text against capture A1 (`docs/parity-notes.md`) |
 | Icons | Lucide, plus hand-drawn SVGs where no close match exists |
 | Photos | Free-licence photos by URL |
 | Page title (REF-I4) | "AirStay: Holiday Rentals, Cabins, Beach Houses, Unique Homes & Experiences" |
@@ -1015,11 +1015,11 @@ Overlap rule; availability; quote; search by dates; `POST /api/bookings` exactly
 
 *The backend now covers every MUST. Captures (§5.3) are required from here on.*
 
-### [ ] Phase 5 — Design system, shell, home
+### [x] Phase 5 — Design system, shell, home
 Tokens and typeface from the captures; `ui/` primitives (button, modal, popover, toast, stepper, skeleton, image with fallback); the three headers, account menu, login modal, footer; the explore grid of §6.3 with the listing card, wishlist heart and pagination.
-- [ ] Sign in, switch account and log out work; the header reflects guest vs host
-- [ ] Card shows photo, title, location, price per night and rating (R-HS-1); opens the listing per §6.3
-- [ ] `docs/parity-notes.md` records the measured tokens
+- [x] Sign in, switch account and log out work; the header reflects guest vs host
+- [x] Card shows photo, title, location, price per night and rating (R-HS-1); opens the listing per §6.3
+- [x] `docs/parity-notes.md` records the measured tokens
 - [ ] **Sign-off:** side-by-side with capture set A
 
 ### [ ] Phase 6 — Search
@@ -1118,6 +1118,7 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Phase 5. Typeface: Instrument Sans (§5.2). Frontend libraries of §7.3 installed at exact versions: TanStack Query, Radix Dialog and Popover, lucide-react; none outside the table. `lib/session-handoff.ts` added to §7.4's `lib/`: because sign-in, switch and log-out end with a full page load, the action in progress (a save, a page to open) and the toast to show are carried across it in sessionStorage. The current-user context also owns the account picker, so the app still has two contexts. `lib/search-params.ts` starts here with the page number and the listing link; Phase 6 adds the rest. The frontend `typecheck` script now runs `next typegen` first, so route types are current before `tsc`. The search bar is drawn but its panels and the search itself are Phase 6; header links to pages of later phases lead to the 404 page until then. Capture files differ from the guide's numbering: `E3`/`E4` are swapped, and `F10`/`F11` hold what the guide calls F11/F12. Toast duration is provisional at 4 s. Built without a capture: listed in `docs/parity-notes.md`. |
 | 2026-10-09 | Phase 4. API details decided here: every booking carries a derived `period` (`upcoming`, `current`, `past`, `cancelled`; a stay that checks out today is `past`), and the `status` filter of `/api/hosting/reservations` takes the same four values. Reservations include those on listings the host has since removed, with `listing.removed: true`, and the endpoint answers an empty list for a user with no listings (product owner). The availability window is `from`/`to`; a booking not visible to the caller answers 404 `booking_not_found`. Idempotency step 4 compares the stored booking with the request (listing, dates, guest counts, total), since no request payload is stored. The session user is now looked up in a short read session of its own, released before the write lock is taken, so a request never holds two connections. The concurrency tests use a payment gateway that pauses inside the transaction: without it eight threads rarely overlap and the tests passed even with the write lock removed. |
 | 2026-10-09 | Phase 3 amendment (product owner): `/api/locations` matches each suggestion on its own displayed name by word prefix and returns cities, states and countries as separate suggestions with `kind` and `label` (§10.6). The search filter itself is unchanged. |
 | 2026-10-09 | Phase 3. Captures A5, B1, B2, C2 and C3 read; answers in `docs/parity-notes.md`. Set from them: default page size 18 (was 24, provisional); 16 guests and 5 infants at most; infants do not count toward capacity (§10.6, §10.8, §12). Listing cards open in a new tab on Airbnb (named `target` per listing), to be applied in Phase 5. Search-page URL names are `checkin`/`checkout`, listing-page names `check_in`/`check_out` (§10.6). Dependency `itsdangerous` added: Starlette's `SessionMiddleware` (§7.3) requires it. New setting `COOKIE_SECURE` (§7.6). API details decided here: listing input uses `price_per_night_minor` and `cleaning_fee_minor` in paise, whole rupees only; unknown body fields are refused (so `host_id` cannot be sent); `rating_average` is null until three reviews; cards carry up to five photos; `/api/meta` and `/api/locations` live in the listings module; signing in with a non-demo or unknown id answers 404 `demo_account_not_found`; changing someone else's listing answers 403 `not_listing_owner`; the search summary's histogram has 30 equal-width buckets. Search costs three statements (count, page, photos) rather than the two named in §10.6, because the total is needed even for a page past the end. |
