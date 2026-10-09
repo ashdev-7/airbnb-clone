@@ -700,7 +700,7 @@ Implementation: two session dependencies, `read_session` (deferred) and `write_s
 | 6 | Heart clicked twice quickly | `PUT`/`DELETE` are idempotent on the composite primary key |
 | 7 | Two reviews for one stay | UNIQUE (booking_id) → 409 |
 | 8 | Host edits one listing in two tabs | Last write wins per field; photo and amenity sets are replaced atomically. Accepted and documented |
-| 9 | Write lock not obtained within the busy timeout | 503 `busy` with `Retry-After: 1`; the client retries idempotent requests once |
+| 9 | Write lock not obtained within the busy timeout | 503 `busy` with `Retry-After: 1`; the client retries idempotent requests twice with backoff (§9.4) |
 | 10 | Process dies mid-transaction | WAL recovery discards the uncommitted transaction on the next open |
 
 ### 9.4 Failure handling
@@ -1113,6 +1113,8 @@ Target: frontend on Vercel (`BACKEND_URL` → backend); backend as one instance 
 
 | Date | Change |
 |---|---|
+| 2026-10-09 | Decision: **Cache Components and Partial Prefetching stay on** (the Next.js 16.4 default; both become mandatory in the next major release, so turning them off would only postpone the work). Consequences for Phases 5–10, from the bundled guides `08-caching.md` and `preserving-ui-state.md`: (1) data that changes — availability, bookings, quotes and prices, wishlist, the current user, search results — is never marked `"use cache"`; every API call stays `cache: "no-store"` (§7.4 rule 6). (2) A Server Component that reads uncached data, `cookies()`, `headers()`, `params` or `searchParams` sits inside a `<Suspense>` boundary whose fallback is the page's skeleton (§6.13); `next build` fails otherwise, so `npm run check` enforces it. (3) Routes are hidden, not unmounted, on navigation (up to three are kept), so component state survives: modals, popovers, menus and toasts must close when their route is hidden (`useLayoutEffect` cleanup, or open state derived from the URL), and forms reset after a successful submit. (4) Signing in, switching account and logging out do a full page load, so no state from one account is shown to another. (5) Playwright uses visibility-aware selectors (`getByRole`, `getByLabel`), because hidden routes stay in the DOM. |
+| 2026-10-09 | §9.3 row 9 corrected to match §9.4: idempotent requests are retried twice with backoff, not once. |
 | 2026-10-09 | Phase 1. Node floor raised from 20.9 to 22.12 (Vitest 5 requires it). Test-only dependency `httpx2` added (Starlette's `TestClient` needs it; `httpx` is deprecated there). `cacheComponents` and `partialPrefetching` are on, as create-next-app 16.4 generates them, with `@tailwindcss/turbopack` as its Tailwind loader. Added outside the §7.4/§7.5 trees: `backend/app/health/` (router and service for `/api/health`), `frontend/lib/api/request.ts` (the fetch logic shared by `client.ts` and `server.ts`), `scripts/` (setup, dev, and a helper that finds uv on PATH or as `python -m uv`). `core/clock.py` is deferred to the first phase that needs today's date. |
 | 2026-10-09 | v0.1 — first draft. |
 | 2026-10-09 | v1.2 — Locale set to India: mirrors airbnb.co.in, English (IN), ₹ INR; money stored in paise with every amount a whole rupee; business date in `Asia/Kolkata`; Indian destinations in the seed; India-site labels (REF-I1 to REF-I4). Captures are taken on airbnb.co.in in a maximised window with a one-click bookmark; the baseline width is whatever the captures record. Money fields renamed from `_cents` to `_minor`. |

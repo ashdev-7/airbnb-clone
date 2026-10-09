@@ -61,6 +61,12 @@ Locale: it mirrors Airbnb's India site (airbnb.co.in): English (IN), prices in โ
 ## Version-sensitive facts
 
 - Next.js 16: `params`, `searchParams`, `cookies()` and `headers()` are async; `middleware.ts` is `proxy.ts`; there is no `next lint`; remote images need `images.remotePatterns`. Read the bundled docs in `frontend/node_modules/next/dist/docs/` before using a Next.js API.
+- Cache Components and Partial Prefetching are on (plan ยง19, 2026-10-09) and stay on:
+  - Never put `"use cache"` on data that changes: availability, bookings, quotes, prices, wishlist, the current user, search results.
+  - A Server Component that reads the API, `cookies()`, `headers()`, `params` or `searchParams` goes inside `<Suspense>` with the page's skeleton as fallback.
+  - Routes stay mounted but hidden after navigation. Modals, popovers, menus and toasts must close when their route is hidden; forms reset after a successful submit.
+  - Sign in, switch account and log out end with a full page load.
+  - Playwright: visibility-aware selectors only (`getByRole`, `getByLabel`).
 - Read the installed version's docs for react-day-picker and for SQLAlchemy's SQLite transaction handling before writing against them.
 
 ## Commands (from the repository root)
