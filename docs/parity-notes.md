@@ -24,7 +24,7 @@ At that point no screenshots were present; this section comes from the measureme
 | How many results per page? | **18.** 18 elements with `data-testid="card-container"`; the pagination reads "Page 1 of 15" | B1, B2 | Settled |
 | Search URL parameter names | Path `/s/{location}/homes`. Dates are **`checkin`** and **`checkout`** (no underscore); guests **`adults`**. Also present and not built: `date_picker_type`, `flexible_trip_dates[]`, `flexible_trip_lengths[]`, `refinement_paths[]`, `search_type` | B1: `page.path`, `page.params` | Settled for location, dates and adults. The search only had adults, so the names for children, infants and pets stay provisional (`children`, `infants`, `pets`) |
 | Pagination parameter | Airbnb's page links carry `cursor` and `pagination_search`: its pagination is cursor-based. We use a numbered `page` parameter (plan D11) | B1: params of the `/s/Goa/homes` links | Settled: ours differs by decision |
-| Filter parameter names (price, property type, amenities, rooms) | Not in these files; no filter was applied | — | Pending: B5–B7 |
+| Filter parameter names (price, property type, amenities, rooms) | Rooms: `min_bedrooms`, `min_beds`, `min_bathrooms`. The others are not readable from B5 to B7 (see "Phase 6") | B5 | Rooms settled; the rest stay ours |
 | Listing URL parameter names | Path `/rooms/{id}`. Dates are **`check_in`** and **`check_out`** (with underscore, unlike the search page); guests **`adults`** and **`guests`**. Also present and not built: `photo_id`, `source_impression_id`, `previous_page_section_name` | C2: `page.params`; B1: params of the listing links (`check_in`, `check_out`, `adults`) | Settled for dates and adults |
 | Guest age text | Search panel: Adults "Ages 13 or above"; Children "Ages 2–12"; Infants "Under 2"; Pets "Bringing a service animal?" (a link). Booking card: Adults "Age 13+"; Children "Ages 2–12"; Infants "Under 2"; Pets "Bringing a service animal?" | A5, C3 | Settled |
 | Limit of each stepper | **Adults + children: 16 in total.** With 16 adults, the "Increase" buttons of both Adults and Children are disabled. **Infants: 5.** With 5 infants its "Increase" button is disabled. **Pets: not shown.** The capture has 0 pets, so its limit cannot be read | A5: `control.disabled` of the stepper buttons | Guests and infants settled; pets stays provisional at 5 |
@@ -145,3 +145,64 @@ Type scale in use (size / line / weight): 12/16/500 (search labels), 14/18/400 a
 - Pagination shapes other than "page 1 of many", and the "₹X night" wording on cards (assignment O1; product owner). The original shows a stay total.
 - A home card links like every other card, in a tab named after the listing (B1); the original's home cards use `_blank` (A1).
 - Tab icons, the heart shape and the social marks: Lucide or our own drawings in place of the original's artwork.
+
+## Phase 6: search
+
+### Capture check
+
+| Capture | Intended state | Found | OK |
+|---|---|---|---|
+| A3 | "Where" panel open | 425 px panel under the left of the bar; "Suggested destinations" rows | Yes |
+| A4 | Calendar open, one check-in day chosen | 850 px panel, two months, one dark day; "Dates / Flexible" switch and "Exact dates ± n days" chips also shown | Yes |
+| A5 | Guest panel, every row at its maximum | Yes (read in Phase 3); the screenshot was taken at zero | Yes |
+| B1 | Results, top of page | Header with pill and filter row, heading, two columns of cards, map | Yes |
+| B3 | A card hovered | Photo arrow visible on the hovered card | Yes |
+| B4 | A map marker clicked | Chosen marker dark; card with photo, close and heart | Yes |
+| B5 | Filters modal, top | "Recommended for you", "Type of place", "Price range" with histogram, slider and two boxes, "Rooms and beds" | Yes |
+| B6 | Filters modal, middle | "Amenities" chips with "Show more", "Booking options" | Yes |
+| B7 | Filters modal, bottom | "Standout stays"; "Property type", "Accessibility features", "Host language" as closed headings | Yes |
+
+### Questions of plan §6.14 settled here
+
+| Question | Answer | Read from |
+|---|---|---|
+| Filter parameter names: rooms | `min_bedrooms`, `min_beds`, `min_bathrooms` | B5: test ids `stepper-filter-item-min_bedrooms-…` |
+| Filter parameter names: price, property type, amenities | **Not readable**: no filter was applied in B5 to B7, and the address carries only `price_filter_input_type` and `price_filter_num_nights`. Ours stay `price_min`, `price_max`, `property_type`, `amenities` | B5 to B7: `page.params` |
+| Guest parameter names beyond `adults` | Not shown (the captured search had adults only). Ours stay `children`, `infants`, `pets` | B1 |
+| Is there a price histogram? | **Yes**: 47 bars of #e31c5f, 7.5 px wide, above a two-handle slider. Built | B5 |
+| Stepper limit for pets | Still not shown. Provisional 5 | none |
+
+### Measured layout
+
+| Element | Values | Capture |
+|---|---|---|
+| Search bar, in use | The bar turns `line-soft` (#ebebeb); the part in use is lifted on white with `0 3px 12px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.08)`; the button widens to show "Search" | A3, A4, A5 |
+| Panels | Start 12 px under the bar; white, 32 px corners, `shadow-raised` | A3 to A5 |
+| Where panel | 425 px wide, left; 24 px padding above and below; a 12/16 heading; rows of a 56 px tile (12 px corners, #f4f4f4), a 14/18/500 name and a 14/18 `muted` line 2 px under it; rows 72 px apart | A3 |
+| Calendar | 850 px wide; two months 54 px apart; cells 51.5 px, weeks 2 px apart; month name 16/20/500 in a 64 px band; weekday initials 12/500 `muted`; day numbers 14/500; chosen day a dark disc with white text; days that cannot be chosen `faint` | A4 |
+| Who panel | 425 px wide, right; 40 px side padding; rows 90 px apart split by rules; name 16/20/500, age line 14/18 `muted` 4 px under it | A5 |
+| Results header | The 96 px bar with the compact pill, then a 54 px filter row; 151 px with its hairline | B1 |
+| Filter row | Buttons 34 px tall, 24 px corners, 12 px side padding, 12/16 text, hairline `line` border, 8 px apart; a 1 px rule after "Filters" | B1 |
+| Results | Heading 20/24/600 at -0.18 px, 32 px under the header; cards 32 px under it in a 680 px column; map 48 px to the right, 20 px corners, stays in view 40 px under the header | B1 |
+| Map marker | White pill, 14/18/700 price; the chosen one dark with white text | B4 |
+| Map card | 327 px wide, photo about 209 px tall, round 32 px close button at the top right | B4 |
+| Filters modal | 568 px wide; 64 px header with the title centred (16/20/600); sections headed 18/24/500 and split by rules; footer with a 0 -2px 16px shadow, 24 px padding, "Clear all" on the left and a dark button on the right | B5 to B7 |
+| Price boxes | 48 px tall pills with an inset 1 px `line` border; 12/16/500 `muted` labels "Minimum" and "Maximum" above | B5 |
+| Rooms and beds | Rows 56 px apart, 16/20 labels, steppers showing "Any" at zero | B5 |
+| Amenity chips | 48 px tall, 28 px corners, 16 px side padding, 14/18 text, an icon before the name; "Show more" 16/20/500 underlined | B6 |
+| Property type | A closed heading with a chevron on the right | B7 |
+
+### Built without a capture, or different by decision
+
+- **Sections of the modal not built** (plan §6.5): Recommended for you, Type of place, Booking options, Standout stays, Accessibility features, Host language. There is no data behind them.
+- **The price filter is the nightly price** (assignment O5); the original filters the trip total ("Trip price, includes all fees"). Our note reads "Nightly price, before fees".
+- **The calendar has dates only**: no "Flexible" switch and no "± n days" chips (plan §6.4).
+- **The tint between the two ends of a date range**: A4 shows a single chosen day. Ours is `surface`.
+- **A chosen chip** (dark border, `surface` tint) and the **count beside "Filters"**: no capture shows a filter switched on.
+- **Quick filters in the row**: "Under ₹5,000", three property types and five amenities, in place of the recommended filters of the original (assignment O3).
+- **Where suggestions** come from our own listings, with the number of homes as the second line; the original shows curated places and recent searches.
+- **The pets row** shows the captured text "Bringing a service animal?" as plain text; the original links it to a help page we do not have.
+- **The results heading** reads "23 homes in Goa"; the original reads "Over 1,000 homes".
+- **The map** is Leaflet with OpenStreetMap tiles, not a Google map, and does not search as it moves (a placeholder, plan §3). The card opens above its marker.
+- **Cards** read "₹X night", and "· ₹Y total" after it when the search has dates (assignment O1).
+- The filter row of the home page sits under the header, above the grid; using it opens the search page.

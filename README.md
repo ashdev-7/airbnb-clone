@@ -71,6 +71,8 @@ scripts/        setup, dev and uv helpers behind the npm commands
 
 - Pages are rendered on the server and read their state from the URL; interactive parts (header, cards, modals) are client components.
 - The look is built from measurements of the original, recorded in `docs/parity-notes.md`; colours, radii and shadows are tokens in `frontend/app/globals.css`.
+- A search is its address: the place is in the path (`/s/Goa/homes`) and dates, guests, filters and page are query parameters. `frontend/lib/search-params.ts` is the one translator between that address and the API, so Back, reload and shared links all restore a search.
+- The results map is Leaflet with OpenStreetMap tiles; if the tiles cannot be loaded, the panel shows the place name instead.
 - Login is mocked: the "Log in or sign up" modal lists the seeded accounts. Choosing one sets a signed, HttpOnly session cookie; there is no password field anywhere.
 - The typeface (Instrument Sans) is fetched from Google Fonts when the frontend is built or first run in development, then served from our own origin. Listing photos are loaded from the Unsplash CDN through the Next.js image optimiser.
 
