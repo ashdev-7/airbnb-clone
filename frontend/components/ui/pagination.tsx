@@ -46,7 +46,7 @@ export function Pagination({ page, totalPages, hrefFor, label }: Props) {
             key={item}
             aria-current="page"
             aria-label={`Page ${item} of ${totalPages}`}
-            className={`${CELL} bg-ink text-white`}
+            className={`${CELL} bg-ink text-paper`}
           >
             {item}
           </span>

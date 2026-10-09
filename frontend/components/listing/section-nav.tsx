@@ -40,7 +40,7 @@ export function SectionNav({ listing }: Props) {
   return (
     <nav
       aria-label="Sections of this page"
-      className="fixed inset-x-0 top-0 z-[90] border-b border-line bg-white"
+      className="fixed inset-x-0 top-0 z-[90] border-b border-line bg-paper"
     >
       <div className="mx-auto flex h-20 w-[1120px] max-w-[calc(100vw-96px)] items-center justify-between">
         <ul className="flex gap-6">

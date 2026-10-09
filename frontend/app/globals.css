@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* `dark:` follows the switch in the account menu (data-theme on <html>), not the system setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /*
  * Design tokens. Every value is measured from the captures; docs/parity-notes.md names the
  * capture each one was read from.
@@ -9,6 +12,7 @@
 
   --font-wordmark: var(--font-wordmark-face), var(--font-brand), ui-rounded, sans-serif;
 
+  --color-paper: #ffffff;
   --color-ink: #222222;
   --color-muted: #6c6c6c;
   --color-faint: #c1c1c1;
@@ -52,8 +56,34 @@
   }
 }
 
+/*
+ * Dark mode (bonus B5): off by default, switched on from the account menu, which sets
+ * data-theme on <html> (hooks/use-theme.ts). The same tokens, darker. There is no capture
+ * of a dark original, so these values are ours.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: #121212;
+  --color-ink: #f1f1f1;
+  --color-muted: #b0b0b0;
+  --color-faint: #5c5c5c;
+  --color-line: #3d3d3d;
+  --color-line-soft: #2a2a2a;
+  --color-surface: #1b1b1b;
+  --color-control: #2b2b2b;
+  --color-scrim: rgb(0 0 0 / 0.65);
+  --color-avatar: #4a1d2a;
+  --color-avatar-ink: #ffc2d0;
+  --color-action: #e8336a;
+  --shadow-menu: 0 0 0 1px rgb(255 255 255 / 0.08), 0 2px 16px rgb(0 0 0 / 0.6);
+  --shadow-raised: 0 0 0 1px rgb(255 255 255 / 0.08), 0 8px 24px rgb(0 0 0 / 0.6);
+  --shadow-pill: 0 0 0 1px rgb(255 255 255 / 0.06), 0 4px 12px rgb(0 0 0 / 0.5);
+  --shadow-toast: 0 0 0 1px rgb(255 255 255 / 0.08), 0 6px 20px rgb(0 0 0 / 0.6);
+  --gradient-header: linear-gradient(to bottom, #121212 40%, #161616 100%);
+}
+
 body {
-  background: #ffffff;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -94,7 +124,7 @@ button:disabled {
   height: 32px;
   border-radius: 50%;
   border: 1px solid var(--color-line);
-  background: #ffffff;
+  background: var(--color-paper);
   box-shadow: var(--shadow-control);
   cursor: pointer;
   pointer-events: auto;
@@ -105,7 +135,7 @@ button:disabled {
   height: 32px;
   border-radius: 50%;
   border: 1px solid var(--color-line);
-  background: #ffffff;
+  background: var(--color-paper);
   box-shadow: var(--shadow-control);
   cursor: pointer;
   pointer-events: auto;
@@ -129,7 +159,7 @@ button:disabled {
   transform: translate(-50%, -50%);
   padding: 5px 10px;
   border-radius: 28px;
-  background: #ffffff;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-size: 14px;
   font-weight: 700;

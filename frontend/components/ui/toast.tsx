@@ -41,7 +41,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toast && (
           <div
             key={toast.id}
-            className="pointer-events-auto rounded-control border border-line bg-white px-4 py-3.5 text-sm leading-[18px] shadow-toast"
+            className="pointer-events-auto rounded-control border border-line bg-paper px-4 py-3.5 text-sm leading-[18px] shadow-toast"
           >
             {toast.message}
           </div>

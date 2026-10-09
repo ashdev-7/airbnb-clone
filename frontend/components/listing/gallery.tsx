@@ -55,7 +55,7 @@ export function Gallery({ listingId, photos, name }: Props) {
       <button
         type="button"
         onClick={() => openModal("photos")}
-        className="absolute right-6 bottom-6 inline-flex items-center gap-2 rounded-lg border border-ink bg-white px-3.5 py-2 text-xs leading-4 font-medium hover:bg-surface"
+        className="absolute right-6 bottom-6 inline-flex items-center gap-2 rounded-lg border border-[#222222] bg-white px-3.5 py-2 text-xs leading-4 font-medium text-[#222222] hover:bg-[#f7f7f7]"
       >
         <Grip size={14} aria-hidden />
         Show all photos

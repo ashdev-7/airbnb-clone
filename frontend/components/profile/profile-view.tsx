@@ -76,7 +76,7 @@ export function ProfileView() {
         </div>
 
         <div className="flex flex-col gap-10 pt-6 md:flex-row md:items-center">
-          <div className="flex w-full max-w-[345px] flex-col items-center rounded-3xl bg-white px-6 py-8 shadow-[0_0_0_1px_rgb(0_0_0/0.02),0_8px_24px_rgb(0_0_0/0.1)]">
+          <div className="flex w-full max-w-[345px] flex-col items-center rounded-3xl bg-paper px-6 py-8 shadow-[0_0_0_1px_rgb(0_0_0/0.02),0_8px_24px_rgb(0_0_0/0.1)]">
             <Avatar name={user.name} avatarUrl={user.avatar_url} size={104} />
             <p className={`${H1} pt-2`}>{user.name.split(" ")[0]}</p>
             <p className="text-xs leading-4 text-muted">{user.is_host ? "Host" : "Guest"}</p>

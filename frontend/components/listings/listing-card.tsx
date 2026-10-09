@@ -120,7 +120,7 @@ export function ListingCard({ listing, size, eager = false, href }: Props) {
           onChange={setPhoto}
           name={headline}
         />
-        {listing.guest_favourite && <span className={`absolute text-ink ${BADGE[size]}`}>Guest favourite</span>}
+        {listing.guest_favourite && <span className={`absolute text-[#222222] ${BADGE[size]}`}>Guest favourite</span>}
         <WishlistHeart
           listingId={listing.id}
           listingName={headline}

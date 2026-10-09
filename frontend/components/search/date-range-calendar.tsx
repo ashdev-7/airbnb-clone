@@ -42,8 +42,8 @@ const SHARED = {
   chevron: "size-3 fill-current",
   month_grid: "border-separate border-spacing-x-0 border-spacing-y-[2px]",
   hidden: "invisible",
-  range_start: "rounded-l-full bg-surface [&>button]:bg-ink [&>button]:text-white",
-  range_end: "rounded-r-full bg-surface [&>button]:bg-ink [&>button]:text-white",
+  range_start: "rounded-l-full bg-surface [&>button]:bg-ink [&>button]:text-paper",
+  range_end: "rounded-r-full bg-surface [&>button]:bg-ink [&>button]:text-paper",
   range_middle: "bg-surface",
   selected: "",
 };

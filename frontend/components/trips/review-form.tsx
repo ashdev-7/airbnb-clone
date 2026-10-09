@@ -109,7 +109,7 @@ export function TripReview({ trip }: { trip: Booking }) {
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           placeholder="What did you like? What should other guests know?"
-          className="h-28 rounded-control border border-line-strong px-3 py-2 text-base leading-6 font-normal"
+          className="h-28 rounded-control border border-line bg-paper px-3 py-2 text-base leading-6 font-normal"
         />
       </label>
       {save.isError && (

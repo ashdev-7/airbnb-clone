@@ -47,7 +47,7 @@ export function CardPhotoTrack({
 }
 
 const ARROW =
-  "pointer-events-auto flex size-8 items-center justify-center rounded-full border border-black/8 bg-white/90 opacity-0 shadow-control transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-white";
+  "pointer-events-auto flex size-8 items-center justify-center rounded-full border border-black/8 bg-white/90 opacity-0 shadow-control transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-paper";
 
 /**
  * The photo controls of captures B1 and B3: arrows that appear on hover, 12 px in from
@@ -100,7 +100,7 @@ export function CardPhotoControls({
         {dots.map((dot) => (
           <span
             key={dot}
-            className={`size-1.5 rounded-full ${dot === index ? "bg-white" : "bg-white/60"}`}
+            className={`size-1.5 rounded-full ${dot === index ? "bg-paper" : "bg-white/60"}`}
           />
         ))}
       </div>

@@ -28,7 +28,7 @@ export function Chip({ selected, onToggle, children, size = "sm", icon }: Props)
       className={`inline-flex shrink-0 items-center gap-2 border whitespace-nowrap transition-colors ${SIZES[size]} ${
         selected
           ? "border-ink bg-surface shadow-[inset_0_0_0_1px_var(--color-ink)]"
-          : "border-line bg-white hover:border-ink"
+          : "border-line bg-paper hover:border-ink"
       }`}
     >
       {icon}

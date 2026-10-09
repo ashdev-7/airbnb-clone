@@ -1,8 +1,9 @@
 "use client";
 
-import { CircleHelp, CircleUserRound, Globe, Heart, Luggage, MessageSquare } from "lucide-react";
+import { CircleHelp, CircleUserRound, Globe, Heart, Luggage, MessageSquare, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import type { User } from "@/types/api";
 
 const ROW =
@@ -60,11 +61,17 @@ export function AccountMenu({
     action();
   };
 
+  const { theme, setTheme } = useTheme();
   const general = (
     <>
       <Row onSelect={run(onLanguage)}>
         <Globe size={16} aria-hidden />
         Languages &amp; currency
+      </Row>
+      <Row onSelect={() => setTheme(theme === "dark" ? "light" : "dark")}>
+        {theme === "dark" ? <Sun size={16} aria-hidden /> : <Moon size={16} aria-hidden />}
+        <span className="flex-1">Dark mode</span>
+        <span className="text-xs leading-4 text-muted">{theme === "dark" ? "On" : "Off"}</span>
       </Row>
       {/* Inert: there is no help centre in this project (plan §6.2). */}
       <Row onSelect={onClose}>

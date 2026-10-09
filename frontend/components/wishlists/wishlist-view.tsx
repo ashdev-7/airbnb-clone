@@ -73,7 +73,7 @@ export function WishlistView() {
   if (items.length === 0) {
     return (
       <Message title="No saved homes yet" line="As you search, tap the heart on a home you like and it will be kept here.">
-        <Link href="/" className="inline-flex h-12 items-center rounded-control bg-ink px-6 text-base font-medium text-white">
+        <Link href="/" className="inline-flex h-12 items-center rounded-control bg-ink px-6 text-base font-medium text-paper">
           Start exploring
         </Link>
       </Message>

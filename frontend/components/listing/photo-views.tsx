@@ -43,9 +43,9 @@ export function PhotoViews({ listingId, photos, name }: Props) {
         <Dialog.Portal>
           <Dialog.Content
             aria-describedby={undefined}
-            className="fixed inset-0 z-[1500] overflow-y-auto bg-white focus:outline-none"
+            className="fixed inset-0 z-[1500] overflow-y-auto bg-paper focus:outline-none"
           >
-            <div className="sticky top-0 z-[1] flex h-16 items-center bg-white px-6">
+            <div className="sticky top-0 z-[1] flex h-16 items-center bg-paper px-6">
               <Dialog.Close aria-label="Close the photo tour" className={`${ROUND} hover:bg-control`}>
                 <ChevronLeft size={18} strokeWidth={2.5} aria-hidden />
               </Dialog.Close>

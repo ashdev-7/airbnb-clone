@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { SessionHandoff } from "@/components/layout/session-handoff";
 import { SessionProvider } from "@/components/layout/session-provider";
 import { ToastProvider } from "@/components/ui/toast";
+import { useTheme } from "@/hooks/use-theme";
 
 let browserQueryClient: QueryClient | undefined;
 
@@ -25,6 +26,12 @@ function getQueryClient() {
   return browserQueryClient;
 }
 
+/** Keeps <html data-theme> in step with the visitor's choice, on every page (bonus B5). */
+function ThemeApplier() {
+  useTheme();
+  return null;
+}
+
 /** The two contexts of the app (plan §7.4 rule 5): the current user and toasts. */
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -32,6 +39,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <ToastProvider>
         <SessionProvider>
           <SessionHandoff />
+          <ThemeApplier />
           {children}
         </SessionProvider>
       </ToastProvider>

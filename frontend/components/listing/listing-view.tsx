@@ -136,7 +136,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
           Meet your host
         </h2>
         <div className="grid gap-8 pt-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-16">
-          <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-[0_6px_20px_rgb(0_0_0/0.2)]">
+          <div className="flex items-center gap-6 rounded-3xl bg-paper p-8 shadow-[0_6px_20px_rgb(0_0_0/0.2)]">
             <Avatar name={listing.host.name} avatarUrl={listing.host.avatar_url} size={96} />
             <div>
               <p className="text-[26px] leading-[30px] font-bold tracking-[-0.52px]">{listing.host.name}</p>

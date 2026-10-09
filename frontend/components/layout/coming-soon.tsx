@@ -19,7 +19,7 @@ export function ComingSoon({ feature, note }: Props) {
       <p className="max-w-[440px] text-base leading-6 text-muted">
         {note ?? "This part of the site is not available yet."}
       </p>
-      <Link href="/" className="mt-3 rounded-control bg-ink px-6 py-3 text-base font-medium text-white">
+      <Link href="/" className="mt-3 rounded-control bg-ink px-6 py-3 text-base font-medium text-paper">
         Explore homes
       </Link>
     </main>

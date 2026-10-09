@@ -26,9 +26,9 @@ type Props = {
 /* On a phone the three parts stack, each a row of its own (bonus B6). */
 const SEGMENT =
   "relative z-[1] flex h-full flex-col justify-center rounded-full text-left max-md:h-14 max-md:!w-full max-md:flex-none";
-const LIFTED = "bg-white shadow-[0_3px_12px_rgb(0_0_0/0.1),0_1px_2px_rgb(0_0_0/0.08)]";
+const LIFTED = "bg-paper shadow-[0_3px_12px_rgb(0_0_0/0.1),0_1px_2px_rgb(0_0_0/0.08)]";
 const PANEL =
-  "absolute top-[78px] z-[2] rounded-[32px] bg-white shadow-raised max-md:static max-md:mt-2 max-md:w-full max-md:overflow-hidden";
+  "absolute top-[78px] z-[2] rounded-[32px] bg-paper shadow-raised max-md:static max-md:mt-2 max-md:w-full max-md:overflow-hidden";
 
 /**
  * The search bar of capture A1 (850 × 66), with its three panels (A3, A4, A5). While a
@@ -95,7 +95,7 @@ export function SearchBar({ initial, openField = null, onDismiss }: Props) {
           submit();
         }}
         className={`flex h-[66px] items-center rounded-full border border-line max-md:h-auto max-md:flex-col max-md:items-stretch max-md:rounded-[32px] ${
-          active ? "bg-line-soft" : "bg-white shadow-raised"
+          active ? "bg-line-soft" : "bg-paper shadow-raised"
         }`}
       >
         <label

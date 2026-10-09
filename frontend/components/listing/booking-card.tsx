@@ -54,7 +54,7 @@ export function BookingCard({ listing }: Props) {
       ref={root}
       id="booking"
       aria-label="Reserve this place"
-      className="sticky top-[104px] scroll-mt-28 rounded-xl border border-line bg-white p-6 shadow-[0_6px_16px_rgb(0_0_0/0.12)]"
+      className="sticky top-[104px] scroll-mt-28 rounded-xl border border-line bg-paper p-6 shadow-[0_6px_16px_rgb(0_0_0/0.12)]"
     >
       <p className="pb-6 text-base leading-5">
         <span className="text-[22px] leading-[normal] font-medium">{formatMoney(listing.price_per_night_minor)}</span>{" "}
@@ -70,13 +70,13 @@ export function BookingCard({ listing }: Props) {
         >
           <span className={FIELD}>
             <span className={LABEL}>Check-in</span>
-            <span className={`text-sm leading-[18px] ${stay.checkIn ? "text-black" : "text-muted"}`}>
+            <span className={`text-sm leading-[18px] ${stay.checkIn ? "text-black dark:text-ink" : "text-muted"}`}>
               {stay.checkIn ? formatFieldDate(stay.checkIn) : "Add date"}
             </span>
           </span>
           <span className={FIELD}>
             <span className={LABEL}>Checkout</span>
-            <span className={`text-sm leading-[18px] ${stay.checkOut ? "text-black" : "text-muted"}`}>
+            <span className={`text-sm leading-[18px] ${stay.checkOut ? "text-black dark:text-ink" : "text-muted"}`}>
               {stay.checkOut ? formatFieldDate(stay.checkOut) : "Add date"}
             </span>
           </span>
@@ -89,7 +89,7 @@ export function BookingCard({ listing }: Props) {
         >
           <span>
             <span className={LABEL}>Guests</span>
-            <span className="text-sm leading-[18px] text-black">{guestSummary(stay.guests)}</span>
+            <span className="text-sm leading-[18px] text-black dark:text-ink">{guestSummary(stay.guests)}</span>
           </span>
           <ChevronDown size={18} className={open === "guests" ? "rotate-180" : ""} aria-hidden />
         </button>

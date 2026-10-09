@@ -18,7 +18,7 @@ export function MapCard({ listing, href, onClose }: Props) {
   const headline = listingHeadline(listing.property_type.name, listing.city);
 
   return (
-    <div className="relative w-[327px] overflow-hidden rounded-card bg-white font-sans text-ink">
+    <div className="relative w-[327px] overflow-hidden rounded-card bg-paper font-sans text-ink">
       <Link href={href} target={listingTarget(listing.id)} className="block !text-ink">
         <div className="relative h-[209px] bg-line">
           {listing.photos[0] && <ImageWithFallback src={listing.photos[0]} alt={headline} sizes="327px" />}

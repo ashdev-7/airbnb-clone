@@ -30,7 +30,7 @@ export function CompactSearch({ search, onOpen }: Props) {
   return (
     <div
       role="search"
-      className="flex h-[46px] max-w-[min(560px,calc(100vw-560px))] items-center max-lg:max-w-[calc(100vw-340px)] max-md:w-full max-md:max-w-none rounded-full border border-line bg-white pr-[6px] shadow-pill"
+      className="flex h-[46px] max-w-[min(560px,calc(100vw-560px))] items-center max-lg:max-w-[calc(100vw-340px)] max-md:w-full max-md:max-w-none rounded-full border border-line bg-paper pr-[6px] shadow-pill"
     >
       {parts.map(({ field, name, text }, index) => (
         <div key={field} className="flex h-full min-w-0 items-center max-md:flex-1">

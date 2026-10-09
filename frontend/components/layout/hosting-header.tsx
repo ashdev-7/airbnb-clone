@@ -24,7 +24,7 @@ export function HostingHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-line-soft bg-white">
+    <header className="sticky top-0 z-[100] border-b border-line-soft bg-paper">
       <div className="grid h-header grid-cols-[1fr_auto_1fr] items-center px-gutter max-md:h-auto max-md:grid-cols-[1fr_auto]">
         <div>
           <BrandMark />

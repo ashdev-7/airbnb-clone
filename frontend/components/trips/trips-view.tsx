@@ -92,7 +92,7 @@ export function TripsView() {
         <p className="max-w-[480px] pb-6 text-base leading-6 text-muted">
           No trips booked yet. After you book a stay, it will be listed here.
         </p>
-        <Link href="/" className="inline-flex h-12 items-center rounded-control bg-ink px-6 text-base leading-5 font-medium text-white">
+        <Link href="/" className="inline-flex h-12 items-center rounded-control bg-ink px-6 text-base leading-5 font-medium text-paper">
           Start exploring
         </Link>
       </div>

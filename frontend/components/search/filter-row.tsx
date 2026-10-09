@@ -40,7 +40,7 @@ export function FilterRow() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className={`inline-flex h-[34px] shrink-0 items-center gap-2 rounded-3xl border bg-white px-3 text-xs leading-4 hover:border-ink ${
+          className={`inline-flex h-[34px] shrink-0 items-center gap-2 rounded-3xl border bg-paper px-3 text-xs leading-4 hover:border-ink ${
             active > 0 ? "border-ink shadow-[inset_0_0_0_1px_var(--color-ink)]" : "border-line"
           }`}
         >
@@ -49,7 +49,7 @@ export function FilterRow() {
           {active > 0 && (
             <span
               aria-label={`${active} active`}
-              className="flex size-[18px] items-center justify-center rounded-full bg-ink text-[10px] font-medium text-white"
+              className="flex size-[18px] items-center justify-center rounded-full bg-ink text-[10px] font-medium text-paper"
             >
               {active}
             </span>

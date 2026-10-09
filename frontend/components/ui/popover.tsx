@@ -37,7 +37,7 @@ export function Popover({
         <RadixPopover.Content
           align={align}
           sideOffset={offset}
-          className={`z-[200] rounded-control bg-white shadow-menu focus:outline-none ${className}`}
+          className={`z-[200] rounded-control bg-paper shadow-menu focus:outline-none ${className}`}
         >
           {children}
         </RadixPopover.Content>

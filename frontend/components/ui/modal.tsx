@@ -46,7 +46,7 @@ export function Modal({
         <Dialog.Content
           // Radix asks for an explicit "no description" when there is none.
           {...(description ? {} : { "aria-describedby": undefined })}
-          className={`fixed top-1/2 left-1/2 z-[2001] flex max-h-[calc(100vh-40px)] ${WIDTHS[size]} max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-modal bg-white shadow-raised focus:outline-none`}
+          className={`fixed top-1/2 left-1/2 z-[2001] flex max-h-[calc(100vh-40px)] ${WIDTHS[size]} max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-modal bg-paper shadow-raised focus:outline-none`}
         >
           <header className="flex h-16 shrink-0 items-center justify-between px-6">
             <span className="w-8" />

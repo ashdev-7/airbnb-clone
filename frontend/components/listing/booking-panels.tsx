@@ -80,7 +80,7 @@ export function DatesPanel({ dates, booked, onChange, onClose }: DatesProps) {
     <div
       role="dialog"
       aria-label="Choose dates"
-      className="absolute -top-6 -right-8 z-[5] w-[661px] rounded-2xl bg-white px-8 pt-6 pb-4 shadow-[0_2px_16px_rgb(0_0_0/0.15)] max-lg:right-0 max-md:-inset-x-3 max-md:w-auto max-md:px-3"
+      className="absolute -top-6 -right-8 z-[5] w-[661px] rounded-2xl bg-paper px-8 pt-6 pb-4 shadow-[0_2px_16px_rgb(0_0_0/0.15)] max-lg:right-0 max-md:-inset-x-3 max-md:w-auto max-md:px-3"
     >
       <div className="flex items-start justify-between gap-6 max-md:flex-col max-md:gap-2">
         <div>
@@ -114,7 +114,7 @@ export function DatesPanel({ dates, booked, onChange, onClose }: DatesProps) {
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white"
+          className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper"
         >
           Close
         </button>
@@ -141,7 +141,7 @@ export function GuestsPanel({ guests, limits, petsAllowed, onChange, onClose }: 
     <div
       role="dialog"
       aria-label="Choose guests"
-      className="absolute inset-x-0 top-full z-[5] rounded-b-lg bg-white p-4 shadow-[0_2px_6px_rgb(0_0_0/0.15)]"
+      className="absolute inset-x-0 top-full z-[5] rounded-b-lg bg-paper p-4 shadow-[0_2px_6px_rgb(0_0_0/0.15)]"
     >
       <ul>
         {GUEST_ROWS.map(({ kind, label }) => (
