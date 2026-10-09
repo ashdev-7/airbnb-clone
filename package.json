@@ -1,0 +1,21 @@
+{
+  "name": "airstay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AirStay: a home-rental marketplace. Next.js frontend, FastAPI backend, SQLite.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "seed": "node scripts/not-yet.mjs seed 2",
+    "e2e": "node scripts/not-yet.mjs e2e 11",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "node scripts/uv.mjs run pytest",
+    "test:frontend": "npm --prefix frontend run test",
+    "check": "npm run check:backend && npm run check:frontend",
+    "check:backend": "node scripts/uv.mjs run ruff check . && node scripts/uv.mjs run ruff format --check . && node scripts/uv.mjs run mypy && node scripts/uv.mjs run pytest",
+    "check:frontend": "npm --prefix frontend run lint && npm --prefix frontend run typecheck && npm --prefix frontend run test && npm --prefix frontend run build"
+  }
+}
