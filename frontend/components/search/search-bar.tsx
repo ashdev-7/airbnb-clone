@@ -23,9 +23,12 @@ type Props = {
   onDismiss?: () => void;
 };
 
-const SEGMENT = "relative z-[1] flex h-full flex-col justify-center rounded-full text-left";
+/* On a phone the three parts stack, each a row of its own (bonus B6). */
+const SEGMENT =
+  "relative z-[1] flex h-full flex-col justify-center rounded-full text-left max-md:h-14 max-md:!w-full max-md:flex-none";
 const LIFTED = "bg-white shadow-[0_3px_12px_rgb(0_0_0/0.1),0_1px_2px_rgb(0_0_0/0.08)]";
-const PANEL = "absolute top-[78px] z-[2] rounded-[32px] bg-white shadow-raised";
+const PANEL =
+  "absolute top-[78px] z-[2] rounded-[32px] bg-white shadow-raised max-md:static max-md:mt-2 max-md:w-full max-md:overflow-hidden";
 
 /**
  * The search bar of capture A1 (850 × 66), with its three panels (A3, A4, A5). While a
@@ -75,7 +78,7 @@ export function SearchBar({ initial, openField = null, onDismiss }: Props) {
   const dates = checkIn ? (checkOut ? formatDateRange(checkIn, checkOut) : formatDay(checkIn)) : null;
   const guests = guestSummary(draft.guests);
   const rule = (hidden: boolean) => (
-    <span aria-hidden className={`h-8 w-px shrink-0 ${hidden ? "bg-transparent" : "bg-line"}`} />
+    <span aria-hidden className={`h-8 w-px shrink-0 max-md:hidden ${hidden ? "bg-transparent" : "bg-line"}`} />
   );
   const value = (text: string | null, placeholder: string): ReactNode => (
     <span className={`truncate text-sm leading-[18px] ${text ? "font-medium" : "text-muted"}`}>
@@ -91,7 +94,7 @@ export function SearchBar({ initial, openField = null, onDismiss }: Props) {
           event.preventDefault();
           submit();
         }}
-        className={`flex h-[66px] items-center rounded-full border border-line ${
+        className={`flex h-[66px] items-center rounded-full border border-line max-md:h-auto max-md:flex-col max-md:items-stretch max-md:rounded-[32px] ${
           active ? "bg-line-soft" : "bg-white shadow-raised"
         }`}
       >
@@ -168,7 +171,7 @@ export function SearchBar({ initial, openField = null, onDismiss }: Props) {
         </div>
       )}
       {active === "when" && (
-        <div className={`${PANEL} inset-x-0 px-[29px] pt-4 pb-8`}>
+        <div className={`${PANEL} inset-x-0 px-[29px] pt-4 pb-8 max-md:px-2`}>
           <DateRangeCalendar
             value={{ checkIn, checkOut }}
             onChange={(next) => {

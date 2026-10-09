@@ -111,7 +111,7 @@ function Fields({ listingId, initial, onDone }: Props & { initial: ListingFormVa
           ))}
         </select>
       </label>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <label className={LABEL}>
           City
           <input className={INPUT} required value={values.city} onChange={(e) => set("city", e.target.value)} />
@@ -125,7 +125,7 @@ function Fields({ listingId, initial, onDone }: Props & { initial: ListingFormVa
           <input className={INPUT} required value={values.country} onChange={(e) => set("country", e.target.value)} />
         </label>
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         {NUMBERS.map(([key, label, min]) => (
           <label key={key} className={LABEL}>
             {label}
@@ -139,7 +139,7 @@ function Fields({ listingId, initial, onDone }: Props & { initial: ListingFormVa
       </label>
       <fieldset>
         <legend className="pb-2 text-sm font-medium">Amenities</legend>
-        <div className="grid grid-cols-3 gap-2 text-sm">
+        <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
           {meta?.amenities.map((amenity) => (
             <label key={amenity.slug} className="flex items-center gap-2">
               <input

@@ -45,7 +45,7 @@ export function Amenities({ listingId, amenities, petsAllowed }: Props) {
       <h2 id="amenities-heading" className="pb-6 text-[22px] leading-[26px] font-medium tracking-[-0.44px]">
         What this place offers
       </h2>
-      <ul className="grid grid-cols-2 gap-x-4">
+      <ul className="grid gap-x-4 sm:grid-cols-2">
         {all.slice(0, SHOWN).map((amenity) => (
           <li key={amenity.slug} className="flex items-center gap-4 pb-4 text-base leading-5">
             <Row amenity={amenity} />

@@ -27,7 +27,7 @@ const ROW_SIZE = 14;
  */
 export default function HomePage() {
   return (
-    <main className="px-[88px] pb-16">
+    <main className="px-[88px] pb-16 max-lg:px-gutter">
       <h1 className="sr-only">Explore homes</h1>
       <Suspense fallback={<RowsSkeleton />}>
         <Rows />
@@ -65,7 +65,7 @@ function RowsSkeleton() {
       {Array.from({ length: 3 }, (_, row) => (
         <div key={row} className="pt-10">
           <Skeleton className="h-6 w-64" />
-          <div className="mt-6 grid grid-cols-7 gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
             {Array.from({ length: 7 }, (_, card) => (
               <div key={card}>
                 <Skeleton className="aspect-[20/19] !rounded-card" />

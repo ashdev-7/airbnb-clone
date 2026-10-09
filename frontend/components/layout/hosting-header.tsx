@@ -25,11 +25,14 @@ export function HostingHeader() {
 
   return (
     <header className="sticky top-0 z-[100] border-b border-line-soft bg-white">
-      <div className="grid h-header grid-cols-[1fr_auto_1fr] items-center px-gutter">
+      <div className="grid h-header grid-cols-[1fr_auto_1fr] items-center px-gutter max-md:h-auto max-md:grid-cols-[1fr_auto]">
         <div>
           <BrandMark />
         </div>
-        <nav aria-label="Primary" className="flex items-center gap-2">
+        <nav
+          aria-label="Primary"
+          className="flex items-center gap-2 max-md:order-3 max-md:col-span-2 max-md:-mx-3 max-md:overflow-x-auto max-md:pb-2"
+        >
           {LINKS.map(({ label, href }) => {
             const active = href === "/hosting" ? pathname === href : pathname.startsWith(href);
             return (

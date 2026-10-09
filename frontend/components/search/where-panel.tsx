@@ -28,7 +28,7 @@ export function WherePanel({ text, onChoose }: Props) {
   const items: LocationSuggestion[] = suggestions.data?.items ?? [];
 
   return (
-    <div className="max-h-[min(491px,calc(100vh-200px))] w-[425px] overflow-y-auto px-2 py-6">
+    <div className="max-h-[min(491px,calc(100vh-200px))] w-[425px] overflow-y-auto px-2 py-6 max-md:w-full">
       <p className="mb-1 px-6 text-xs leading-4">
         {query ? "Matching destinations" : "Suggested destinations"}
       </p>

@@ -41,7 +41,7 @@ export function TitleBar({ listingId, title, summary, cover }: Props) {
   }
 
   return (
-    <div className="flex items-start justify-between gap-6 pt-6 pb-6">
+    <div className="flex items-start justify-between gap-6 pt-6 pb-6 max-md:flex-col max-md:gap-3">
       <h1 className="text-[26px] leading-[30px] font-medium">{title}</h1>
       <div className="flex shrink-0 items-center gap-1 pt-0.5">
         <button type="button" onClick={() => setShareOpen(true)} className={ACTION}>

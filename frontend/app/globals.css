@@ -44,6 +44,14 @@
   --gradient-header: linear-gradient(to bottom, #ffffff 40%, #f8f8f8 100%);
 }
 
+/* Phones (below Tailwind's md): a narrower gutter. Responsive design is bonus B6; the
+   captures are of a 1536 px window, so these sizes are ours. */
+@media (max-width: 767px) {
+  :root {
+    --spacing-gutter: 24px;
+  }
+}
+
 body {
   background: #ffffff;
   color: var(--color-ink);

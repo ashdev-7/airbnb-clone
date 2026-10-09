@@ -84,13 +84,13 @@ function Listings() {
       {listings.isPending && <Skeleton className="mt-6 h-40 rounded-control" />}
       {listings.isError && <p role="alert" className="pt-6 text-action">Your listings could not be loaded.</p>}
       {listings.isSuccess && items.length === 0 && <p className="pt-6 text-muted">Create your first listing</p>}
-      <ul className="grid gap-4 pt-6">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 pt-6">
         {items.map((listing) => (
-          <li key={listing.id} className="flex items-center gap-4 rounded-control border border-line p-3">
+          <li key={listing.id} className="flex flex-wrap items-center gap-4 rounded-control border border-line p-3">
             <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-line">
               {listing.photos[0] && <ImageWithFallback src={listing.photos[0]} alt="" sizes="96px" />}
             </span>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 max-sm:basis-[calc(100%-7rem)]">
               <h2 className="truncate text-base font-medium">{listing.title}</h2>
               <p className="text-sm text-muted">
                 {listing.city} · {formatMoney(listing.price_per_night_minor)} per night · Listed
@@ -143,7 +143,7 @@ function Reservations() {
   if (items.length === 0) return <p className="pt-6 text-muted">No reservations yet</p>;
 
   return (
-    <ul aria-label="Reservations" className="grid gap-3 pt-6">
+    <ul aria-label="Reservations" className="grid grid-cols-[minmax(0,1fr)] gap-3 pt-6">
       {items.map((reservation) => (
         <li key={reservation.id} className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-line p-4">
           <div>

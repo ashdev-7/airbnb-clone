@@ -33,14 +33,14 @@ export function Gallery({ listingId, photos, name }: Props) {
 
   return (
     <div id="photos" className="relative scroll-mt-24">
-      <div className="grid h-[353px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl">
+      <div className="grid h-[353px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl max-md:h-[260px]">
         {tiles.map((photo, index) => (
           <button
             key={photo}
             type="button"
             aria-label={`Photo ${index + 1} of ${photos.length}: open the photo tour`}
             onClick={() => openModal("photos")}
-            className={`group relative bg-line ${layout[index]}`}
+            className={`group relative bg-line max-md:first:!col-span-4 max-md:first:!row-span-2 max-md:not-first:hidden ${layout[index]}`}
           >
             <ImageWithFallback
               src={photo}

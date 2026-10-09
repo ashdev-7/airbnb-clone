@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CompactSearch } from "@/components/search/compact-search";
 import { FilterRow } from "@/components/search/filter-row";
 import { SearchBar, type SearchField } from "@/components/search/search-bar";
+import { NARROW_QUERY, useNarrow } from "@/hooks/use-narrow";
 import { useSearchState } from "@/hooks/use-search-state";
 import { EMPTY_SEARCH, searchHref, type SearchState } from "@/lib/search-params";
 import { BrandMark } from "./brand-mark";
@@ -39,6 +40,9 @@ type Props = { variant: HeaderVariant; search?: SearchState };
  * The header of the travelling pages. It is fixed (except on a listing) and a spacer
  * holds its resting height, so the page under it does not jump when it changes.
  * Clicking the pill opens the full search bar again, on the part that was clicked.
+ *
+ * On a phone (bonus B6) the header is not fixed: the mark and the account controls make
+ * one row, the pill a second one across the page, and the open search bar stacks under it.
  */
 export function MainHeader({ variant, search = EMPTY_SEARCH }: Props) {
   const [scrolled, setScrolled] = useState(false);
@@ -48,7 +52,8 @@ export function MainHeader({ variant, search = EMPTY_SEARCH }: Props) {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > COMPACT_AFTER_PX);
-      setReopened(null); // scrolling on puts the bar away again
+      // Scrolling on puts the bar away again; not on a phone, where the open bar is part of the page.
+      if (!window.matchMedia(NARROW_QUERY).matches) setReopened(null);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -56,28 +61,31 @@ export function MainHeader({ variant, search = EMPTY_SEARCH }: Props) {
   }, []);
 
   const hasSearch = variant !== "plain";
-  const compact = (variant !== "home" || scrolled) && reopened === null;
+  const narrow = useNarrow();
+  const compact = (variant !== "home" || scrolled || narrow) && reopened === null;
   const row = variant === "listing" && compact ? "h-20" : "h-header";
   const barHeight = compact || !hasSearch ? row : "h-header-open";
 
   return (
-    <div className={SPACER[variant]}>
+    <div className={`${SPACER[variant]} max-md:h-auto`}>
       <header
-        className={`inset-x-0 top-0 z-[100] border-b border-line-soft [background:var(--gradient-header)] ${
+        className={`max-md:!static inset-x-0 top-0 z-[100] border-b border-line-soft [background:var(--gradient-header)] ${
           variant === "listing" ? "absolute" : "fixed"
         }`}
       >
-        <div className={`relative transition-[height] duration-200 ${barHeight}`}>
-          <div className={`relative flex items-center justify-between px-gutter ${row}`}>
+        <div className={`relative transition-[height] duration-200 max-md:!h-auto ${barHeight}`}>
+          <div className={`relative flex items-center justify-between px-gutter max-md:!h-auto max-md:flex-wrap ${row}`}>
             <BrandMark />
             {hasSearch && (
-              <div className={`absolute inset-x-0 top-0 flex justify-center ${row}`}>
+              <div
+                className={`absolute inset-x-0 top-0 flex justify-center max-md:static max-md:order-3 max-md:!h-auto max-md:w-full ${compact ? "max-md:pb-3" : ""} ${row}`}
+              >
                 {compact ? (
-                  <div className="flex items-center">
+                  <div className="flex items-center max-md:w-full">
                     <CompactSearch search={search} onOpen={(field) => setReopened({ field })} />
                   </div>
                 ) : (
-                  <div className="pt-[30px]">{variant === "home" && <HeaderTabs />}</div>
+                  <div className="pt-[30px] max-md:hidden">{variant === "home" && <HeaderTabs />}</div>
                 )}
               </div>
             )}
@@ -86,7 +94,7 @@ export function MainHeader({ variant, search = EMPTY_SEARCH }: Props) {
             </div>
           </div>
           {hasSearch && !compact && (
-            <div className="absolute inset-x-0 top-[102px] flex justify-center px-gutter">
+            <div className="absolute inset-x-0 top-[102px] flex justify-center px-gutter max-md:static max-md:pb-4">
               {/* The key starts the bar afresh whenever the search in the URL changes. */}
               <SearchBar
                 key={`${searchHref(search)}|${reopened?.field ?? ""}`}
@@ -111,8 +119,8 @@ export function ResultsHeader() {
 /** What stands in for the results header until the URL is known (a moment, per request). */
 export function ResultsHeaderFallback() {
   return (
-    <div className={SPACER.results}>
-      <header className="fixed inset-x-0 top-0 z-[100] h-[151px] border-b border-line-soft px-gutter [background:var(--gradient-header)]">
+    <div className={`${SPACER.results} max-md:h-auto`}>
+      <header className="fixed inset-x-0 top-0 z-[100] h-[151px] max-md:static max-md:h-auto border-b border-line-soft px-gutter [background:var(--gradient-header)]">
         <BrandMark />
       </header>
     </div>

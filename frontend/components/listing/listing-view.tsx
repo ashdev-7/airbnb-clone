@@ -17,7 +17,7 @@ import { StayCalendar } from "./stay-calendar";
 import { TitleBar } from "./title-bar";
 
 /** Capture C1: the page is 1120 px wide; the left column 653 px, the booking card 372 px. */
-const PAGE = "mx-auto w-[1120px] max-w-[calc(100vw-96px)]";
+const PAGE = "mx-auto w-[1120px] max-w-[calc(100vw-2*var(--spacing-gutter))]";
 const H2 = "text-[22px] leading-[26px] font-medium tracking-[-0.44px]";
 const FIRST_REVIEWS = 6;
 
@@ -68,7 +68,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
       <Gallery listingId={listing.id} photos={listing.photos} name={headline} />
       <PhotoViews listingId={listing.id} photos={listing.photos} name={headline} />
 
-      <div className="grid grid-cols-[minmax(0,653px)_372px] justify-between pt-8">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-y-8 pt-8 lg:grid-cols-[minmax(0,653px)_372px] lg:justify-between">
         <div>
           <section className="pb-8">
             <h2 className={H2}>
@@ -135,7 +135,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
         <h2 id="host-heading" className={H2}>
           Meet your host
         </h2>
-        <div className="grid grid-cols-[380px_minmax(0,1fr)] gap-16 pt-6">
+        <div className="grid gap-8 pt-6 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-16">
           <div className="flex items-center gap-6 rounded-3xl bg-white p-8 shadow-[0_6px_20px_rgb(0_0_0/0.2)]">
             <Avatar name={listing.host.name} avatarUrl={listing.host.avatar_url} size={96} />
             <div>
@@ -174,7 +174,7 @@ export async function ListingView({ id }: { id: Promise<string> }) {
         <h2 id="know-heading" className={H2}>
           Things to know
         </h2>
-        <div className="grid grid-cols-3 gap-6 pt-6 text-sm leading-[18px]">
+        <div className="grid gap-6 pt-6 text-sm leading-[18px] md:grid-cols-3">
           <div>
             <h3 className="pb-3 text-base leading-5 font-medium">House rules</h3>
             <ul className="grid gap-2 text-muted">
@@ -213,7 +213,7 @@ export function ListingSkeleton() {
     <main className={`${PAGE} pb-12`} role="status" aria-label="Loading the listing">
       <Skeleton className="mt-6 mb-6 h-[30px] w-1/2" />
       <Skeleton className="h-[353px] !rounded-xl" />
-      <div className="grid grid-cols-[minmax(0,653px)_372px] justify-between pt-8">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-y-8 pt-8 lg:grid-cols-[minmax(0,653px)_372px] lg:justify-between">
         <div className="grid gap-4">
           <Skeleton className="h-[26px] w-2/3" />
           <Skeleton className="h-5 w-1/2" />

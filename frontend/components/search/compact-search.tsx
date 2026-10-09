@@ -30,15 +30,15 @@ export function CompactSearch({ search, onOpen }: Props) {
   return (
     <div
       role="search"
-      className="flex h-[46px] max-w-[min(560px,calc(100vw-560px))] items-center rounded-full border border-line bg-white pr-[6px] shadow-pill"
+      className="flex h-[46px] max-w-[min(560px,calc(100vw-560px))] items-center max-lg:max-w-[calc(100vw-340px)] max-md:w-full max-md:max-w-none rounded-full border border-line bg-white pr-[6px] shadow-pill"
     >
       {parts.map(({ field, name, text }, index) => (
-        <div key={field} className="flex h-full min-w-0 items-center">
+        <div key={field} className="flex h-full min-w-0 items-center max-md:flex-1">
           {index > 0 && <span aria-hidden className="h-6 w-px shrink-0 bg-line" />}
           <button
             type="button"
             onClick={() => onOpen(field)}
-            className="flex h-full min-w-0 items-center gap-2 rounded-full px-4 text-sm leading-[22px] font-medium"
+            className="flex h-full min-w-0 items-center gap-2 rounded-full px-4 text-sm leading-[22px] font-medium max-md:flex-1 max-md:px-2.5"
           >
             {index === 0 && <Image src="/icons/house.png" alt="" width={28} height={28} className="-ml-1 shrink-0" />}
             <span className="sr-only">{name}: </span>

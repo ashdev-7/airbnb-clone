@@ -80,14 +80,14 @@ export function DatesPanel({ dates, booked, onChange, onClose }: DatesProps) {
     <div
       role="dialog"
       aria-label="Choose dates"
-      className="absolute -top-6 -right-8 z-[5] w-[661px] rounded-2xl bg-white px-8 pt-6 pb-4 shadow-[0_2px_16px_rgb(0_0_0/0.15)]"
+      className="absolute -top-6 -right-8 z-[5] w-[661px] rounded-2xl bg-white px-8 pt-6 pb-4 shadow-[0_2px_16px_rgb(0_0_0/0.15)] max-lg:right-0 max-md:-inset-x-3 max-md:w-auto max-md:px-3"
     >
-      <div className="flex items-start justify-between gap-6">
+      <div className="flex items-start justify-between gap-6 max-md:flex-col max-md:gap-2">
         <div>
           <h3 className="text-[22px] leading-[26px] font-medium">{title}</h3>
           <p className="pt-2 pb-2 text-sm leading-[18px] text-muted">{line}</p>
         </div>
-        <div className="flex w-[315px] shrink-0 divide-x divide-muted rounded-lg border border-muted">
+        <div className="flex w-[315px] shrink-0 divide-x divide-muted rounded-lg border border-muted max-md:w-full">
           <DateField
             label="Check-in"
             date={dates.checkIn}

@@ -87,7 +87,7 @@ export function Reviews({ listingId, first }: Props) {
       {first.total === 0 ? (
         <p className="pt-4 text-muted">This place has not been reviewed yet.</p>
       ) : (
-        <ul className="grid grid-cols-2 gap-x-24 gap-y-10 pt-8">
+        <ul className="grid gap-y-10 pt-8 md:grid-cols-2 md:gap-x-24">
           {first.items.slice(0, 6).map((review) => (
             <li key={review.id}>
               <ReviewCard review={review} clamp />

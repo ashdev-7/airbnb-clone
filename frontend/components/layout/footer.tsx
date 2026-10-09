@@ -84,7 +84,7 @@ export function Footer() {
   return (
     <footer className="bg-surface pb-20">
       <h2 className="sr-only">Site footer</h2>
-      <div className="grid grid-cols-3 gap-x-4 px-gutter py-12">
+      <div className="grid gap-x-4 gap-y-8 px-gutter py-12 sm:grid-cols-3">
         {COLUMNS.map(({ title, links }) => (
           <section key={title}>
             <h3 className="mb-4 text-sm leading-[18px] font-medium">{title}</h3>

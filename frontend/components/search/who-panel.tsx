@@ -16,7 +16,7 @@ export function WhoPanel({ value, onChange }: Props) {
   const { guestLimits } = useMeta();
 
   return (
-    <ul className="w-[425px] px-10 py-4">
+    <ul className="w-[425px] px-10 py-4 max-md:w-full max-md:px-5">
       {GUEST_ROWS.map(({ kind, label, hint }) => (
         <li
           key={kind}

@@ -1,6 +1,7 @@
 "use client";
 
 import { DayPicker } from "react-day-picker";
+import { useNarrow } from "@/hooks/use-narrow";
 import {
   fromLocalDate,
   isSelectableCheckIn,
@@ -75,6 +76,9 @@ const SIZES = {
  */
 export function DateRangeCalendar({ value, onChange, booked = [], months = 2, size = "search" }: Props) {
   const todayDate = today();
+  // A phone has room for one month, in the smaller of the two sizes (bonus B6).
+  const narrow = useNarrow();
+  const sizes = narrow ? { ...SIZES.listing, disabled: SIZES[size].disabled } : SIZES[size];
   const { checkIn, checkOut } = value;
   const choosingCheckOut = checkIn !== null && checkOut === null;
 
@@ -86,7 +90,7 @@ export function DateRangeCalendar({ value, onChange, booked = [], months = 2, si
   return (
     <DayPicker
       mode="range"
-      numberOfMonths={months}
+      numberOfMonths={narrow ? 1 : months}
       weekStartsOn={0}
       today={toLocalDate(todayDate)}
       defaultMonth={toLocalDate(checkIn ?? todayDate)}
@@ -102,7 +106,7 @@ export function DateRangeCalendar({ value, onChange, booked = [], months = 2, si
       formatters={{
         formatWeekdayName: (date) => date.toLocaleDateString("en-IN", { weekday: "narrow" }),
       }}
-      classNames={{ ...SHARED, ...SIZES[size] }}
+      classNames={{ ...SHARED, ...sizes }}
     />
   );
 }

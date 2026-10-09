@@ -16,7 +16,7 @@ const HOSTING_HOME = "/hosting";
 const CREATE_LISTING = "/become-a-host";
 
 const TEXT_LINK =
-  "inline-flex h-10 items-center rounded-full px-3 text-sm leading-[18px] font-medium hover:bg-control";
+  "inline-flex h-10 items-center rounded-full px-3 text-sm leading-[18px] font-medium hover:bg-control max-lg:hidden";
 const DISC = "flex size-10 items-center justify-center rounded-full bg-control";
 
 type Props = {
